@@ -11,14 +11,36 @@
 \usepackage{amsthm}
 \usepackage{subcaption}
 \usepackage{float}
-\usepackage{array}
+\usepackage{array,multirow}
 \usepackage{url}
 \usepackage{hyperref}
-
+\usepackage[table]{xcolor}
+\usepackage{array}
+\usepackage{booktabs}
+\definecolor{Gray}{gray}{0.85}
 %definitions and theorems
-\theoremstyle{definition}
-\newtheorem{myDef}{Definition}
-%
+%\theoremstyle{definition}
+%\newtheorem{myDef}{Definition}[section]
+
+\newcounter{example}[section]
+\newenvironment{example}[1][]{\refstepcounter{example}\par\medskip
+   \noindent \textit{Example~\theexample #1} \rmfamily}{\medskip}
+
+
+%\newtheoremstyle{definition}% name
+%  {}%         Space above, empty = `usual value'
+%  {}%         Space below
+%  {}% Body font
+%  {}%         Indent amount (empty = no indent, \parindent = para indent)
+%  {\bfseries}% Thm head font
+%  {.}%        Punctuation after thm head
+%  {\newline}% Space after thm head: \newline = linebreak
+%  {}%         Thm head spec
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}{Definition}
 
 \begin{document}
 \title{Investigations of Subgraph Query Processing}
@@ -40,8 +62,8 @@
 %==============================================================================
 \chapter{Introduction}
 \pagenumbering{arabic}
-
-    \section{Aims and motivation}
+	\section{Problem Statement}
+    \section{Aims and Motivations}
     
     Many substructure-searching problems call for repeatedly examining a large number of molecules (typically stored in a database), comparing each with a pattern. In such situations, it pays to spend some time "up front," storing the answers to specific questions for each structure in the database. Subsequent searches of the database use these pre-computed answers to vastly improve search time; the up-front computation time is paid back quickly as repeated searches are performed.
 
@@ -59,13 +81,11 @@
         \item genome sequencing: find mutations responsible for rare diseases -- nature vol 527 no 7576
         \item treating diseases like cancer: screen a patient's tumor for a set of biomarkers to choose the best treatment to fight the particular cancer -- nature vol 527 no 7578
         \end{itemize}
-\section{Background}
         
-        
-\section{Preliminaries}
+\section{Graph Theory, terminology and definitions}
         In this section, we introduce preliminary concepts and outline the main concepts and problems addressed in the document. In definition \ref{def:graphFormat} we explain the format of all graphs used in the document.
-        
-    \subsection{Naming conventions}
+    \subsection{Graph Theory}
+    \subsection{Terminology}
     \label{naming}
     - The set of target graphs: T
     - Each graph in t: $t^{}_i$, for i from 1 to the number of graphs in T
@@ -76,72 +96,158 @@
         
 	\subsection{Definitions}
     \label{subsec:definitions}
-        \begin{myDef}[Graph]
+        \begin{definition}[Graph]
         
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Sub-graph]
+        \begin{definition}[Sub-graph]
         \label{def:subgraph}
         
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Induced Sub-graph]
+        \begin{definition}[Induced Sub-graph]
         \label{def:induced-subgraph}
         
-        \end{myDef}
+        \end{definition}
     
-        \begin{myDef}[Graph Format]
+        \begin{definition}[Graph Format]
         \label{def:graphFormat}
         A graph G = (V, E, L, $\lambda$) is defined as an undirected labeled graph where V is the set of vertices, E is the set of edges(unordered pair of vertices), L is the set of labels, and $\lambda$ is a labeling function, $\lambda$ : V $\cup$ E $\rightarrow$ L, that assigns labels to vertices and edges.
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Graph Isomorphism]
+        \begin{definition}[Graph Isomorphism]
         
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Induced Graph Isomorphism]
+        \begin{definition}[Induced Graph Isomorphism]
         \label{def:inducedGraphIsomorphism}
         
-        \end{myDef}
+        \end{definition}
 
-        \begin{myDef}[Subgraph Isomorphism]
+        \begin{definition}[Subgraph Isomorphism]
         \label{def:subgraphIsomorphism}
         Given a graph database T of target graphs $t^{}_0$, $t^{}_1$, $t^{}_2$ \ldots $t^{}_i$, where \textit{i} is the number of target graphs in T, and a pattern graph P, find all targets in T that have P as a subgraph.
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Induced Subgraph Isomorphism]
+        \begin{definition}[Induced Subgraph Isomorphism]
         \label{def:inducedSubgraphIsomorphism}
         
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Graph Density]
+        \begin{definition}[Graph Density]
         
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Subgraph]
+        \begin{definition}[Subgraph]
         \label{def:subgraph}
         A graph whose vertices and edges are a subset of another graph.
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[Graph Query Processing]
+        \begin{definition}[Graph Query Processing]
         \label{def:graphQueryProcessing}
         Given a graph database D = $\{$ $g^{}_0$, $g^{}_1$, $g^{}_2$ \ldots $g^{}_n$ $\}$ and a pattern graph p, it returns the query answer set $D^{}_p$ = $\{$ $g^{}_i$$\vert$p $\subseteq$ $g^{}_i$, $g^{}_i$ $\in$ D $\}$
         
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef}[In-memory computing]
+        \begin{definition}[In-memory computing]
         The storage of information in the main random access memory (RAM) of dedicated servers rather than in relational databases operating on comparatively slow disk drives.In-memory computing gives ability to cache countless amounts of data constantly. This ensures extremely fast response times for searches.
-        \end{myDef}
+        \end{definition}
         
-        \begin{myDef} [Graph Index]
+        \begin{definition} [Graph Index]
 		
-		\end{myDef}
-           
-    \section{Data}
+		\end{definition}
+
+	\section{Subgraph Isomorphism}
+    \section{Report Organization}
+
+\chapter{Review of existing work}
+\section{The nature of the problem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Datasets %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Datasets}
+\label{sec:datasets}
+
     In this work we consider undirected graphs. We assume that, in each graph, each vertex has a unique identifier and in the graph database each graph has a unique identifier. 
 
-        
-\chapter{Graph Indexing}
+This section gives more information about the datasets that were used to check the correctness and performance of the algorithm implementations. All graphs in these datasets are undirected.\par
+\textbf{AIDS} is the standard database of the Antiviral Screen dataset of the National Cancer Insitute \cite{datasets}. The database has 40 000 molecules, represented as graphs. 
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}% Spread rows out...
+\begin{tabular}{ >{\bfseries}m{1.5in} >{\centering}m{0.5in} >{\centering}m{0.5in} >{\centering}m{0.5in} >{\centering\arraybackslash}m{0.5in}  } 
+\toprule
+   						   & aids   & pcms  & pdbs  & ppigo \\
+\midrule
+ \# graphs 				   & 40 000 & 200	& 600   & 50 \\
+ \# disconnected graphs$*$ & 3 157  &		&		&  \\ 
+ \# distinct node labels   & 62	    &		& 		&  \\ 
+ \# distinct edge labels   & 0 		& 0		& 0		& 0 \\ 
+ avg \# edges			   & 46.95  & 		&		&  \\ 
+ median \# edges		   & 	    &		&		&  \\ 
+ avg \# nodes			   & 45		&		&		&  \\ 
+ avg degree				   & 2.09	&		&		&  \\ 
+ median \# nodes	       &		&		&		&  \\ 
+ avg \# node labels		   & 4.4	&		&		&  \\ 
+ median \# node labels     &		&		&		&  \\
+ \bottomrule
+\end{tabular}
+\caption{Statistics about the datasets}
+\label{table:datasets}
+\end{table}    
+
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}% Spread rows out...
+\begin{tabular}{ |>{\bfseries}m{0.5in} |>{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering\arraybackslash}m{0.8in}|} 
+\hline
+ dataset & number of graphs & unique vertex labels & average node degree  & min node degree & max node degree\\
+\hline
+AIDS & 40 000 & 62 & 2.09 & ne znam & ne znam \\
+\hline
+PCMS & 200 & 21 & 23.01 & ne znam & ne znam \\
+\hline
+PDBS & 600 & 10 & 2.06 & ne znam & ne znam \\
+\hline
+PPIGO & 20 & 46 & 10.87 & ne znam & ne znam\\
+\hline
+\end{tabular}
+\caption{Characteristics of the datasets}
+\label{table:datasets}
+\end{table}    
+
+
+\small{$*$ A graph G is said to be disconnected if there exist two nodes in G such that no path in G has those nodes as endpoints.}
+
+    The input we are working with is a file with the following format:\newline
+    
+    - put a table with the datasets and more information about them \\ 
+    - average, median, etc. \\
+    - say we work only with undirected graphs \\
+    - say whether we consider induced/ non-induced subgraph isomorphism \\
+
+\subsection{Subgraph Isomorphism Answers}
+Each query in each query set matches at least one graph in the target set. Some queries match more than one graph. Below we give some statistics on number of target graphs matched.
+\begin{table}[H]
+\caption{Solvable instances per dataset}
+\label{table:dataSAT}
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|>{\centering}m{1.5in}|c|c|c|c|c|}\hline
+
+satisfiable instances & AIDS   & PCM  & PDBS  & PPIGO \\ 
+ \hline
+ average \%           & 8.590  & 26.5 & 69.42 & 24.4  \\
+ median \%            & 0.673  & 19   & 83.3  & 26    \\
+ minimum \%           & 0.0075 & 2    & 22.67 & 14    \\
+ maximum \%           & 29.89  & 72   & 96.7  & 34    \\
+ \hline
+\end{tabular}
+\end{table}
+
+
+\section{Filtering-verification paradigm}
 - smaller $C$, less time spent on subgraph isomorphism check, but more tie spent on indexing process
 
 	\section{Motivation for usage}
@@ -165,81 +271,9 @@
             \item Path is too simple: structural information is lost
             \item There are too many paths: the set of paths in a graph database usually is huge.
         \end{enumerate}
-        
-        
         \subsection{Tree-based indexing approach}
-   \section{Existing work}
         
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%---------------------IMPLEMENTATION CHAPTER--------------------------%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Implementation}
-
-The order of a graph is the cardinality of its
-vertex set. We write V(G) for the vertex set of a graph G.
-
-A non-induced subgraph isomorphism from a graph P
-(called the pattern) to a graph T (called the target) is an injective
-mapping from V(P)to V(T) which preserves adjacency—
-that is, for every adjacent v and w in V(P), the vertices i(v)
-and i(w) are adjacent in T. An induced subgraph isomorphism
-additionally preserves non-adjacency—that is, if v and
-w are not adjacent in P, then i(v) and i(w) must not be adjacent
-in T. We use the notation i : P  T for a non-induced
-isomorphism, and i : P ,→ T for an induced isomorphism.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Datasets %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Datasets}
-\label{sec:datasets}
-This section gives more information about the datasets that were used to check the correctness and performance of the algorithm implementations. All graphs in these datasets are undirected.\par
-\textbf{AIDS} is the standard database of the Antiviral Screen dataset of the National Cancer Insitute \cite{datasets}. The database has 40 000 molecules, represented as graphs. 
-
-\begin{center}
-\begin{tabular}{ |l|l|l|l|l| } 
- \hline
-   & AIDS & PDBS & PCM  & PPI \\
- \hline
- \# graphs & 40 000 & 600 &   &  \\ 
- \hline
- \# disconnected graphs$*$ & 3 157 &  &   &  \\ 
- \hline
- \# distinct node labels & 62 &  &   &  \\ 
- \hline
-  \# distinct edge labels & 0 &  &   &  \\ 
- \hline
- avg \# edges & 46.95 &  &   &  \\ 
- \hline
- median \# edges & 0 &  &   &  \\ 
- \hline
- avg \# nodes & 45 &  &   &  \\ 
- \hline
-  avg \# degree & 2.09 &  &   &  \\ 
- \hline
- median \# nodes &  &  &   &  \\ 
- \hline
- avg \# node labels & 4.4 &  &   &  \\ 
- \hline
- median \# node labels &  &  &   &  \\ 
- \hline
- avg \# edge labels & 0 &  &   &  \\ 
- \hline
- median \# edge labels & 0 &  &   &  \\ 
- \hline
-\end{tabular}
-\end{center}
-
-\small{$*$ A graph G is said to be disconnected if there exist two nodes in G such that no path in G has those nodes as endpoints.}
-
-    The input we are working with is a file with the following format:\newline
-    
-    - put a table with the datasets and more information about them \\ 
-    - average, median, etc. \\
-    - say we work only with undirected graphs \\
-    - say whether we consider induced/ non-induced subgraph isomorphism \\
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Benchmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Benchmarks} %% not sure this is the best name for this 
-This section includes more information about the already existing indexing algorithm implementations that were used as a standard point of reference against our graph indexing implementations. 
+\subsection{CT-Index}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                               CT-Index                               %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -254,8 +288,6 @@ This section includes more information about the already existing indexing algor
 % What I have done (and you might state) is that we assume nodes are in trees constructed from a pattern or target
 % graph composed of vertices and that you do this to distinguish between the two
 %
-
-\subsection{CT-Index}
 CT-Index \cite{ctindex} is divided into two main parts, filtering and verification, both described below. Also presented is a complexity analysis of the algorithms used by CT-Index and an empirical study of its performance (using an open-source Java implementation).
 CT-Index supports data sets with edge and vertex labels and also wild card patterns. Although not explicitly stated in \cite{ctindex}, CT-Index addresses the non-induced subgraph isomorphism problem  ( definition \ref{def:subgraphIsomorphism}).
 
@@ -267,20 +299,20 @@ During the filtering step, the features of all graphs in the target data set are
 % Note simple way to use maths
 %
 Although the time complexity of computing all features of a graph is not reported, it can be derived as follows. To extract a subtree of graph $G$ with $maxT$ number of edges, one starts with initially empty tree and repeatedly adds edges to extend the vertices that are in the current tree via the recursive function $ExtendTree$. We write $F$ for the set of every edge $(u,v)$ in $G$ and vertices $u$ and $v$ that belong to $G$, such that one vertex (say, $u$) is part of the current tree and the other (say, $v$) is not. If we have $n$ number of vertices in the current tree, each with degree $d$, then the size of $F$ is at most $n(d-1)$. $ExtendTree$ extends the current tree with a specified edge as parameter, generates $F$ and makes a recursive call for every edge in $F$, until the tree reaches size $maxT$.
-
-In the start of the tree extraction when adding the first edge to the empty tree, the vertices on both ends of the edge are also added as part of the tree. Therefore, the size of $F$ initially is $2.(d-1)$. After every recursive call, one more vertex is added to the tree, which introduces $(d-1)$ new edges. That makes a total of $maxT+1$ vertices that will be added to the tree and $(maxT+1).(d-1)$ visited edges. Consequently, the complexity of extracting tree features is $O(|E|.(maxT+1).(d-1))$. From this formula one can see that the number of edges in the graph has significant impact on the performance of the algorithm. When increasing the graph density, the algorithm will have slower performance, caused by the degree of each vertex and the total number of edges, which both will increase.
+%%% todo for the big O
+In the start of the tree extraction when adding the first edge to the empty tree, the vertices on both ends of the edge are also added as part of the tree. Therefore, the size of $F$ initially is $2.(d-1)$. After every recursive call, one more vertex is added to the tree, which introduces $(d-1)$ new edges. That makes a total of $maxT+1$ vertices that will be added to the tree and $(maxT+1).(d-1)$ visited edges. Consequently, the complexity of extracting tree features is $\mathcal{O}(|E|.(maxT+1).(d-1))$. From this formula one can see that the number of edges in the graph has significant impact on the performance of the algorithm. When increasing the graph density, the algorithm will have slower performance, caused by the degree of each vertex and the total number of edges, which both will increase.
 
 CT-Index computes a unique representation of each distinct feature, its \emph{canonical form}, and stores its string encoding in the index file. Thus, the equality of two features can be checked by testing the equality of their canonical forms. The canonical label of a tree feature is computed as follows: (1) find the root node $r$ of the tree, (2) impose a unique ordering of the children of each node. Step (1) is computed by repeatedly removing all leaf nodes of a tree until a single node or two adjacent nodes remain. In the first case, root $r$ is the last node left. In the second case the edge connecting the two remaining nodes are removed to obtain two trees, each with one of the remaining nodes as a root. 
 Step (2) is based on the ordering of edge and vertex labels. For each node $p$ that is a parent of nodes $u$ and $v$, deciding whether $u$ is before $v$ depends first on the labels of the edges $(p,u)$ and $(p,v)$, then on the labels of $u$ and $v$ and finally on the subtrees of $u$ and $v$. A bottom-up approach is used (i.e. start with the nodes in the lowest level and move up towards the root) to compute this.
 
 %%%% complexity of canonical label algorithm %%%%
-Although not stated in \cite{ctindex} the complexity of their canonical labeling can be derived as follows. Step (1) is $O(n)$, where $n$ is the number of nodes in the tree, as one needs to visit each node before removing it. The complexity of step (2) is as follows. We write $|p|$ for the number of interior nodes in the trees, which is equal to $n$ minus the number of leaf nodes. Step (2) visits a node, then visits its parent, and for every child of the parent node checks whether it should be first or second in the canonical label, using the vertex and edge labels conditions described above. This is repeated for every node in the tree up to the root. Therefore, the complexity of step (2) is $O(|p|.|c|^{2})$, where $|c|$ denotes the number of children of a parent.
+Although not stated in \cite{ctindex} the complexity of their canonical labeling can be derived as follows. Step (1) is $\mathcal{O}(n)$, where $n$ is the number of nodes in the tree, as one needs to visit each node before removing it. The complexity of step (2) is as follows. We write $|p|$ for the number of interior nodes in the trees, which is equal to $n$ minus the number of leaf nodes. Step (2) visits a node, then visits its parent, and for every child of the parent node checks whether it should be first or second in the canonical label, using the vertex and edge labels conditions described above. This is repeated for every node in the tree up to the root. Therefore, the complexity of step (2) is $\mathcal{O}(|p|.|c|^{2})$, where $|c|$ denotes the number of children of a parent.
 
 %%% 
 In \cite{ctindex} it is claimed that step (2) is not linear time but is tolerable because ``... the trees occurring as features usually are small and vertex and edge labels are diverse and hence the order can be solved quickly". Therefore, we might assume that CT-Index is designed to support only specific types of data sets and that there exists data sets with less label diversity and with big trees as features that would result in poor performance. More specifically, as $maxT$ increases, or average degree increases, so too does the cost of step (2), and performance suffers (and we conduct experiments to test this hypothesis in section \ref{sec:ct-index-performance}).
 
 
-\subsection{Fingerprints}
+\subsubsection{Fingerprints}
 %%%% hash-key fingerprints %%%%
 CT-Index uses a storage technique called \emph{hash-key fingerprint} to capture the features in the graph. A separate fingerprint is computed from the canonical labels for each graph in the database. A fingerprint is an array of bits and denotes whether a particular feature occurs in the graph or not. As there is no predefined set of possible features for each graph, reserving one bit for each feature in the feature set is considered infeasible\footnote{However, due to the restricted alphabet of labels it may be possible to enumerate all possible features thus avoiding some of the pitfalls of hashing, such as collisions and sensitivity to hash table size.}. A hash function maps extracted features to bit positions.
 CT-Index is not the first indexing algorithm to employ fingerprints as a storage technique. The chemical information system called Thor and developed by Daylight \cite{fingerprints} is an example of an information processing system that uses bit arrays to store the features of the graphs.
@@ -354,51 +386,46 @@ As it can be seen that the rows with the smallest number of candidates are the o
 As it can be seen in column 5 of table \ref{table:runningTime}, the total running time of CT-Index varies from 49 seconds to 114 seconds depending on the specified input parameters. If we look at rows 4 and 5, the only difference of the input parameter values is the fingerprint size. As it can be seen from the table, the time difference to build the index in 4 and 5 is only around 200 miliseconds. However, the time taken to compute the answers from the set of candidates is more than 6 seconds slower in row 5 compared to row 4, although the number of candidates for the two rows are almost the same for every query except query 3. Similar difference can be observed when comparing row 1 with row 6. The reason for these results could be that fingerprint of size 2048 is too small for the particular dataset and this leads to more collisions.\par
 %%%
 To conclude, in CT-Index, when using only paths as features leads to smaller running time for building index, however it significantly bigger number of candidates and therefore bigger amount of time to find all targets containing the query from the set of candidates. Using trees as features results to an index with much better filtering power, but slower to compute. Hashing features constructed from paths and trees does not give any benefit, moreover, it it slower and results to slightly bigger number of candidate graphs.\par
-%%%% table with query answers %%%%
-\begin{table}[H]
-\caption{AIDS dataset queries: answers}
-\label{table:answers}
-\begin{center}
-\begin{tabular}{ |c|l| } 
- \hline
- query\# & answers\\
-\hline
- \textbf{0} &  8 042  \\ 
- \hline
- \textbf{1} & 11 957 \\ 
- \hline
- \textbf{2} & 78  \\ 
- \hline
- \textbf{3} & 461  \\ 
- \hline
- \textbf{4} & 77\\ 
- \hline
- \textbf{5} & 3\\ 
- \hline
-\end{tabular}
-\end{center}        
-\end{table}        
-%%%%
+
+%%%% TODO write about the experiments with other data sets
+%When running the implementation of \cite{ctindex}, we observed that the algorithm never terminated for some instances of pdbs and ppigo. A similar question arises here: it this because the indexing technique is insufficient to eliminate incompatible targets 
+% TODO: write the answer of these questions:
+% is it because of SIP of ct-index being really bad?
+% is it the case that both SIP of ct-index is really bad and the indexing pat also takes a lot of time and is useless? Need to do ct-index data analyzing to be able to answer these questions.
+%%% TODO add some plots 
+\subsection{gIndex, gCoding .... mention them}
+\section{Subgraph Isomorphism Algorithms}
+\subsection{Partick and Ciaran's paper}
+\subsection{Christine's paper}
+
+\chapter{Path-based query processing algorithms based on filtering-verification }
+
+The order of a graph is the cardinality of its
+vertex set. We write V(G) for the vertex set of a graph G.
+
+A non-induced subgraph isomorphism from a graph P
+(called the pattern) to a graph T (called the target) is an injective
+mapping from V(P)to V(T) which preserves adjacency—
+that is, for every adjacent v and w in V(P), the vertices i(v)
+and i(w) are adjacent in T. An induced subgraph isomorphism
+additionally preserves non-adjacency—that is, if v and
+w are not adjacent in P, then i(v) and i(w) must not be adjacent
+in T. We use the notation i : P  T for a non-induced
+isomorphism, and i : P ,→ T for an induced isomorphism.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Benchmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Benchmarks} %% not sure this is the best name for this 
+This section includes more information about the already existing indexing algorithm implementations that were used as a standard point of reference against our graph indexing implementations. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GRAPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Grapes}
-%- this is where I got the datasets from \\
-%- there is a software for indexing and verification of queries which we used as another benchmark to verify the results. \\
 
-%This is an open-source implementation of the indexing algorithm from *this paper* which I haven't done myself. I use CT-Index to analyze its implementation details and use it to compare the performance of my indexing implementation and to verify the correctness of my results. CT-Index is used as a benchmark ... 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %   \subsubsection{Main idea}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-  %  \subsubsection{Implementation}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % \subsubsection{Performance, compared to other indexing techniques}
-    
-    %Strengths and weaknesses of this approach ...
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Index algorithms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% todo move this to where I explain the filter-verification paradigm
 \section{Index algorithms}
 
     All algorithms described in this section generate the candidate set of graphs in the following steps:
@@ -414,6 +441,7 @@ To conclude, in CT-Index, when using only paths as features leads to smaller run
     In this work, we consider only induced subgraphs (definition \ref{def:induced-subgraph} in section \ref{subsec:definitions}) and the induced version of the subgraph isomorphism problem (definition \ref{def:inducedSubgraphIsomorphism} in section \ref{subsec:definitions})
     
     The correctness of the results is checked comparing the answers obtained from CT-Index. We implemented a class called $Verify.java$ that checks whether the resulting candidate set after each query execution contains the answers of subgraph isomorphism. $Verify.java$ was very useful for discovering a lot of bugs during the software development process.
+    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%------------------------- Path Index --------------------------%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -435,25 +463,25 @@ As mentioned before, each path is a sequence of vertices of maximum size $maxL$,
 To avoid redundancy and make the index search faster, only one unique path-string is written to the file for each path and its equivalent path-string variants, derived using the properties mentioned above. We chose to add to the index the lexicographically smaller path-string between a path and its reverse. \par
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % example for both previous paragraphs%
-Let the graph on figure \ref{C5H12} be a target graph in $T$ and the graph on figure \ref{CH4} be a pattern graph in $P$, where the number in red next to each node on the two figures denotes the id number of the corresponding vertex. Let $maxL$ be equal to 3. In order to check whether \ref{C5H12} is a candidate for subgraph isomorphism with \ref{CH4}, we first compute the indexes of \ref{C5H12} and \ref{CH4} for the specified maximum path length. The target index consists of the paths on figure \ref{C5H12-paths} and the pattern index contains the paths on figure \ref{CH4-paths}. There is a lexicographically smaller variant of the path-string \textrm{H-C-H}, namely \textrm{C-H-H}. However, no path in the the graph \ref{C5H12} can form such path-string and adding \textrm{C-H-H} to the index file could lead to wrong results.\par
+Let the graph on figure \ref{B2Y5G} be a target graph in $T$ and the graph on figure \ref{CH4} be a pattern graph in $P$, where the number in red next to each node on the two figures denotes the id number of the corresponding vertex. Let $maxL$ be equal to 3. In order to check whether \ref{C5H12} is a candidate for subgraph isomorphism with \ref{CH4}, we first compute the indexes of \ref{C5H12} and \ref{CH4} for the specified maximum path length. The target index consists of the paths on figure \ref{C5H12-paths} and the pattern index contains the paths on figure \ref{CH4-paths}. There is a lexicographically smaller variant of the path-string \textrm{H-C-H}, namely \textrm{C-H-H}. However, no path in the the graph \ref{C5H12} can form such path-string and adding \textrm{C-H-H} to the index file could lead to wrong results.\par
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[H]
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
-  \includegraphics[height=4cm,width=9cm]{images/graphs/C5H12.png}
-  \caption{Target Graph}
-  \label{C5H12}
+  \includegraphics[height=3cm,width=3.3cm]{images/graphs/CH4.png}
+  \caption{Pattern graph P}
+  \label{CH4}
 \end{minipage}%
 \begin{minipage}[t]{.5\textwidth}
   \centering
-  \includegraphics[height=3cm,width=3.3cm]{images/graphs/CH4.png}
-  \caption{Pattern graph}
-  \label{CH4}
+  \includegraphics[height=3cm,width=4.2cm]{images/graphs/B2Y5G.png}
+  \caption{Target Graph T}
+  \label{B2Y5G}
 \end{minipage}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-After candidate extraction, $Path$-$index$ returns target graph \ref{C5H12} as candidate for subgraph isomorphism with pattern graph \ref{CH4}, as all paths in \ref{CH4}, shown on figure \ref{CH4-paths} are contained in \ref{C5H12}, as it can be seen on figure \ref{C5H12-paths}.\par
+After candidate extraction, Path-Index returns target graph \ref{B2Y5G} as candidate for subgraph isomorphism with pattern graph \ref{CH4}, as all paths in \ref{CH4}, shown on figure \ref{CH4-paths} are contained in \ref{C5H12}, as it can be seen on figure \ref{C5H12-paths}.\par
 %When the set of targets is the same for multiple patterns, the target index is still computed only once and reused. The 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[H]
@@ -602,56 +630,29 @@ As mentioned in section \ref{path-index:advantages-limitations}, $Path$ index ca
 Let \texttt{n} be a node with neighbors \texttt{N} = $\{$ $n^{}_1$, $n^{}_2$ \ldots $n^{}_i$ $\}$, where \texttt{i} is the size of \texttt{N}. Let us define a labeling function \textit{l} that maps the node \texttt{n} and each node in \texttt{N} to a character, also called the node label. We refer to the label of \texttt{n} as \texttt{$L^{}_n$} and the label of each node $n^{}_j$ in \texttt{N}, where $j$ is between $1$ and $i$ inclusive, as \texttt{$L^{}_j$}. It is important to note that using this notation we do not mean that each node has unique label, i.e. there may exist nodes $n^{}_g$ and $n^{}_h$, where $g$ and $h$ are between $1$ and $i$ inclusive, and \texttt{$L^{}_g$} is the same as \texttt{$L^{}_h$}.\par %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 The term \texttt{neighborhood label} is a specific label that is computed for each node in the graph using the label of each node and its neighbors: all nodes, connected with an edge with it. The label derived is then stored in the index file as part of the string representation of the nodes in the paths, similarly to the node labels that are part of the string representations of paths in the previous index algorithm in section \ref{path-index}.\par
 The \textit{neighborhood label} of \texttt{n} is derived in the following way. Let the label of \texttt{n} and the labels of all members of \texttt{N} form the set of labels \texttt{S}. The \textit{neighborhood label} of \texttt{n} is constructed using the labels in \texttt{S}, ordered lexicographically from the smallest to the largest label in \texttt{S}. For instance, we take each member of \texttt{S} and derive the sequence \texttt{S$'$} = $s^{}_1$$s^{}_2$$s^{}_3$ \ldots $s^{}_i$, where $i$ is the number of the neighbors of \texttt{n} and consequently the number of members of the set of labels \texttt{S}. \texttt{S$'$} is the resulting \textit{neighborhood label} of \texttt{n}. For example, the \textit{neighborhood label} of each node of the graph on figure \ref{CH4} is shown on figure \ref{CH4-subtree-label-graph}, where the red number on the left side of each node is its id. From figure \ref{CH4} it can be seen that node with id 4 has neighbors nodes 0, 1, 2, 3 each of them with label \texttt{H}. The label of node 4 is \texttt{C} and after appending the labels of its neighborhood, the resulting \textit{neighborhood label} is \texttt{CHHHH}. Similarly, the label of node 4 is part of the \textit{neighborhood label} of the other nodes.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h]
-  \begin{minipage}[t]{.5\textwidth}
-  \centering
-  \includegraphics[height=3.8cm,width=4.2cm]{images/graphs/CH4-isomer.png}
-  \caption{Subtree-label graph of \ref{CH4}}
-  \label{CH4-subtree-label-graph}
-  \end{minipage}%
-  \begin{minipage}[t]{.5\textwidth}
-  \centering
-  \includegraphics[height=2.2cm,width=2.9cm]{images/paths/CH4-isomer.png}
-  \caption{Paths derived from neighborhood labels}
-  \label{CH4-subtree-label-paths}
-  \end{minipage}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%write an example of the paths derived using this method
+%%%
 The resulting path-strings from path extraction of \ref{CH4-subtree-label-graph} for $maxL$ equal to 3 are shown on figure \ref{CH4-subtree-label-paths}, where the the character $"-"$ denotes an edge. It is important to note that although the path representation stored in the index file is changed, the original node labels of the graph are not removed so that the structure and labeling remains unchanged. Also, the paths on figure \ref{CH4-subtree-label-paths} are composed from the same nodes as the paths of figure \ref{CH4-paths}. The difference of the representation comes only from the alternative labeling model. The method of extracting the paths remains the same as the one used for $Path$ index and described in section \ref{path-index}. Similarly, computing the set of graphs possibly subgraph isomorphic to a pattern graph \texttt{p}, also called the \textit{candidate set}, is done using the same method as $Path$ index.\par
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Like $Path$ index, $Path$-$Subtree$ index supports graphs that have labels on edges and nodes. When deriving the representation of each path that is later stored in the index, we include the label of the edge that connects every two nodes \texttt{a} and \texttt{b} that are part of the path. If we take the graph on figure \ref{CH4-subtree-label-graph}, we notice that there are no labels of its edges. Consequently, the paths stored in the target index, also shown on figure \ref{CH4-subtree-label-paths} have the character $"-"$ between the \textit{neighborhood label} of each two nodes. If graph \ref{CH4-subtree-label-graph} had edge labels, we would include the corresponding label instead of $"-"$. \par  
 %%%%%%%%%%%%%%%%% WHY IS NEIGHBORHOOD METHOD BETTER? %%%%%%%%%%%%%%%%%%%
-Mathematical proof that the second indexing method is better than the first one. \\
+\begin{theorem}
+The set of target graphs filtered by path index is always a subset of the targets filtered by path-subtree index.
+\end{theorem}
+
+\begin{proof}
+Prove this
+
+\end{proof}
 
 
 - the path extraction is done in the same way only labels are changed
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
 With the following example we show that $Path$-$Subtree$ index discriminates graphs that $Path$ index can not. Let us consider the graphs on figure \ref{C2H6} and \ref{CH4}. Let \ref{C2H6} be the target graph and \ref{CH4} to be the pattern. Before running the subgraph isomorphism test on the two graphs, we will index them and see whether we can filter out \ref{C2H6}. As we can see, \ref{C2H6} does not contain \ref{CH4} and we are going to check whether Index-2 will return the target graph as a false-positive candidate for subgraph isomorphism with our pattern. After computing the indexes of the two graphs, we get the results for \ref{C2H6} shown on figure \ref{C2H6-subtree-label-paths} and the results for \ref{CH4} on figure \ref{CH4-subtree-label-paths}. As we can see from the figures, the index of our pattern graph has paths that the target does not contain, for example \texttt{CHHHH, CH-CHHHH, CH-CHHHH-CH}. The target graph is not returned as a candidate for subgraph isomorphism. Computing the index using $Path$ index results in getting the paths, displayed on figure \ref{C2H6-paths} for our target graph \ref{C2H6} and the paths on figure \ref{CH4-paths} for the pattern. As all paths of \ref{CH4} are contained in the index of \ref{C2H6}, $Path$ index returns \ref{C2H6} as candidate for subgraph isomorphism.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h]
-  \begin{minipage}[t]{.3\textwidth}
-    \centering
-    \includegraphics[height=2.6cm,width=3.6cm]{images/graphs/C2H6.png}
-    \caption{Target graph}
-    \label{C2H6}
-  \end{minipage}
-  \begin{minipage}[t]{.3\textwidth}
-  \centering
-  \includegraphics[height=3.3cm,width=4.3cm]{images/paths/C2H6-isomer-paths.png}
-  \caption{Subtree-label paths}
-  \label{C2H6-subtree-label-paths} %%%this figure is wrong!!! it is not HC, it is CH here
-  \end{minipage}
-  \begin{minipage}[t]{.3\textwidth}
-  \centering
-  \includegraphics[height=3.3cm,width=1.6cm]{images/paths/C2H6-paths.png}
-  \caption{Paths}
-  \label{C2H6-paths}
-  \end{minipage}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
 \subsection{Problems with Path-Subtree index}
 \label{path-subtree index problems}
 After we implemented $Path$-$Subtree$ index based on the principles described in the previous subsection, we discovered that our algorithm is wrong. Apart from the expected false positives, it had false negatives. False negatives in this case are target graphs that contain the pattern, but are wrongly filtered out after the graph indexing step and are never included in the candidate set. The existence of false negatives is strongly undesired, as it is an indication that the indexing algorithm is wrong and therefore useless. We discovered what the reason for discarding targets wrongly is. In the following paragraphs we explain in more details the problem using a worked example and propose a modification of the algorithm that has the potential to solve the issue.\par
@@ -682,20 +683,20 @@ Using the refinement described above, we removed the problem with false negative
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
-  \includegraphics[height=3cm,width=4.5cm]{images/graphs/C2H4-1.png}
+  \includegraphics[height=3.3cm,width=4.4cm]{images/graphs/C2H4-1.png}
   \caption{Graph A}
   \label{C2H4-1}
 \end{minipage}%
 \begin{minipage}[t]{.5\textwidth}
   \centering
-  \includegraphics[height=1.2cm,width=3cm]{images/graphs/C2H.png}
+  \includegraphics[height=1cm,width=3cm]{images/graphs/C2H.png}
   \caption{Graph B}
   \label{C2H}
 \end{minipage}%
 
 \begin{minipage}[t]{.5\textwidth}
   \centering
-  \includegraphics[height=4.4cm,width=3.9cm]{images/paths/C2H4-1-isomer-paths.png}
+  \includegraphics[height=4.4cm,width=3.9cm]{images/paths/C2H-isomer-paths.png}
   \caption{Neighborhood label paths of A}
   \label{C2H4-1-subtree-label-paths}
 \end{minipage}%
@@ -711,25 +712,7 @@ Let us examine in more detail the only path of length 3 in the pattern graph. It
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TODO
   - we changed the string representation of the isomer label. First letter is always the original label, the others are from the neighbors, sorted in lexicographic order\\
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\begin{figure}[h]
-\centering
-\begin{minipage}[t]{.5\textwidth}
-  \centering
-  \includegraphics[height=8cm,width=4cm]{images/paths/C5H12-isomer.png}
-  \caption{Target graph path enumeration}
-  \label{C5H12-isomer-paths}
-\end{minipage}%
-\begin{minipage}[t]{.5\textwidth}
-  \centering
-  \includegraphics[height=2.3cm,width=3.3cm]{images/paths/CH4-isomer.png}
-  \caption{Pattern graph path enumeration}
-  \label{CH3-isomer-paths}
-\end{minipage}
-\caption{All paths up to maximum length 3}
-\label{isomer-paths-enumeration}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{Implementation}
        
        - extend IB-Index 1 and put an option to extract paths using isomer labels.\\
@@ -756,25 +739,346 @@ TODO \\
 TODO \\
  - very easy to implement, especially when we have index-1 implementation ready\\
  %- the index file is even bigger --- this is  bad\\
+ 
+ 
+ 
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%------------------------------IB-Index 3------------------------------%%%
+%%%------------------------------SIP Algorithms--------------------------%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{IB-Index 3}
-TODO and to implement
-isomers + different graph representation (array, bitset, hashing)
-maximal paths
-        
-\section{Test harness}
-TODO \\
-- junit tests for each method ...\\
-- what tests we did and why\\
+
+%% todo
+%% remove sip0 and make sip1 be sip 0
+%% make the graphs be in log scale
+\chapter{Light Filters}   
+This section describes the study of a simple subgraph isomorphism problem algorithm with a fast filter implemented on top of it. The algorithm is called SIP1 and it is explained below. We present the experimental evaluation conducted to find out more about the effectiveness of light filtering, the notion of search effort and how it is affected depending on the nature of the datasets and the yes/no answer of the SIP. Finally, the results of the experiments are reported.
+
+\subsection{SIP1}
+SIP1 is based on the simplest of the Glasgow algorithms \cite{CP2015}. Given a pattern and a target graph $P$ and $T$ respectively, SIP1 has a variable for each vertex in $P$, each with domain that is the set of compatible vertices in $T$. Compatible vertices have the same labels and the degree of the target vertex is greater than or equal to the degree of the pattern vertex. Bit sets are used to represent the domains and the adjacency matrices of the graphs. When a pattern variable $u$ is instantiated with a target value $i$, all variables have $i$ removed from their domains. Also, if a future variable $v$ is adjacent to $u$ in P then the domain of $v$ is the intersection of the current domain of $v$ with the neighborhood of vertex $i$ in $T$. This constraint is enforced by applying a logical $and$ operation between the two bit sets. SIP1 uses fail-first heuristic. For all instantiated variables representing pattern vertices, it selects to explore the one that has the smallest domain before the others.
+
+At the top of the search, 5 naive tests are performed to determine whether the two graphs are compatible. If the conditions of the tests are not met, search does not proceed and we consider this to be a $trivial$ $fail$. These tests are presented on table \ref{table:failures}. The neighborhood degree sequence (NDS) of a graph and a label degree sequence (LDS) is used for most of the tests. In the next section, we define and explain the notion of NDS and LDS and their implementation.
+
+\subsubsection{Neighborhood Degree Sequence}
+NDS and LDS are defined as follows.
+
+\begin{definition}[Label Degree Sequence]
+Given a graph $G(V,E,L)$ with $V$ the set of vertices, $E$ the set of edges and $L$ the set of labels, the LDS of $l$ $\in$ $L$ is a non-increasingly ordered list of the degrees of all vertices in $V$ that have $l$ assigned as their label.    
+\end{definition}
+
+\begin{definition}[Graph Neighborhood Degree Sequence]
+Given a graph $G(V,E,L)$ with $V$ the set of vertices, $E$ the set of edges and $L$ the set of labels, the GNDS of $G$,  also written as NDS(G), is the list of tuples (l,LDS(l)) for every label l $\in$ $L$.
+\end{definition}
+
+\begin{example}
+Let us consider again the graph on figure \ref{B2Y5G}. There are three distinct labels: yellow (Y) blue (B) and green(Gr). Nodes 1, 2, 3, 4 and 6 are Y and each of them has deg 1. Nodes 7 and 8 are B, both of degree 4. 5 is the only Gr node. Therefore, the LDS of the labels are as follows.
+\begin{itemize}
+\item LDS(Y) = $<$1, 1, 1, 1, 1$>$
+\item LDS(B) = $<$4, 4$>$
+\item LDS(Gr) = $<$1$>$
+\end{itemize}
+The NDS(graph \ref{B2Y5G}) consists of the tuples $<$Y, LDS(Y)$>$, $<$B, LDS(B)$>$ and $<$Gr, LDS(Gr)$>$. 
+\end{example}
+
+The notion of graph neighborhood degree sequence is used to filter out targets that are incompatible with the pattern. A target graph T is compatible with a pattern graph P if the following two conditions are true:
+\begin{itemize}
+\item The set of labels in P is a subset of the set of labels in T
+\item NDS(P) is a subset of NDS(T)
+\end{itemize}
+
+The second condition can be formally defined as follows.
+
+\begin{definition}[NDS(P) is a subset of NDS(T)]
+\label{ndsPsubsetndsT}
+Let us write DS($l_P$) for the DS(l) $\in$ P and LDS($l_T$) for the LDS(l) $\in$ T, where l is a label both in T and in P. For every such l, every element on position $i$ in LDS($l_P$) is $\leq$ to the element in position $i$ on LDS($l_T$) for 1$\geq$i$\leq|$LDS($l_P$)$|$.
+\end{definition}
+
+\begin{example}
+Let us consider the subgraph isomorphism problem with T the graph on figure \ref{B2Y5G} and P the graph on figure \ref{CH4}. The set of labels in P, denoted as $l_P$, is composed of B and Y; and the set of labels in T, denoted as $l_T$, consists of B, Y and Gr. Clearly, $l_P$ $\subseteq$ $l_T$. Therefore, the first compatibility condition for this example is true.\\
+Looking at the LDS of each l $\in$ $l_P$, it satisfies definition \ref{ndsPsubsetndsT}. For example, for l=B, LDS($l_P$) has only 1 element, which is 4 at position 1, and looking at LDS($l_T$), the element at position 1 is also 4.
+\end{example}
+
+The defined compatibility conditions are the two new tests added to SIP1. In the next subsection, we explain the implementation details of NDS.  
+
+\subsubsection{NDS and LDS Implementation}
+To accommodate the notion of NDS in the SIP algorithm, we added a class called Label to represent every label in the graph and its LDS. We made slight changes to the class representing the graphs, called Graph, and finally we created a class called SIP1 which implements the same subgraph isomorphism algorithm like the easiest SIP algorithm used in \cite{CP2015}. It has additional trivial failures added on the top of the search to check the NDS compatibility between the target and the pattern. Below, we explain the changes for each of the three stated classes.
+
+\begin{itemize}
+\item Class Label\\
+Every label object has a name of type String and a DS which is an array of integers, sorted in non-increasing order. The degree sequence array is built by inserting the degree of each node with the corresponding label, i.e. building the sorted list incrementally.
+\item Class Graph\\
+A new field of type array of Labels is introduced to keep a record of all unique labels in the graph. While reading in the graph, we build the array of Labels, creating a new object for each unique label and building its degree sequence as explained above.
+\item Class SIP1\\
+This is the class that is called for every (p,t) pair of the dataset to check whether t contains p, i.e. this is the part of the code that solves the subgraph isomorphism problem for every such (p,t) pair.
+
+We have added 5 trivial failures on top of the search, which can be seen in table \ref{table:failures}. They are added into the code as if statements in the same hierarchical order as shown in the table. If any of these failures is true, the algorithm terminates returning false (i.e. the corresponding (p,t) instance is not satisfiable, because it is impossible for t to contain p). For example, if the order of t is smaller than the order of the p (trivial fail 1 \ref{table:failures}), SIP1 terminates without going into the search and without taking any other trivial failure tests into an account. 
+\end{itemize}
+
+%% TODO: COMPLEXITY!!!!!!!
+
+\subsubsection{Trivial failures hierarchy}
+In this subsection, we discuss on the choice of the trivial failures hierarchical structure.
+
+\begin{itemize}
+\item Filter 2 and 3 filter differently. Ex: p = \{A,B,B,C\} and t=\{A,B,C\}. Test 2 passes, but test 3 fails
+\item There is no need to check whether the length of all labels in T is bigger of equal to the length of all labels in t, because test 2 and 3 would fail if this was not the case.
+\item test 4 contains tests 2 and 3.$Explain why$ Furthermore, the notion of NDS introduced those 3 tests. We decided to have them instead of 1 big test to check the effectiveness of each part of the NDS filtering. 
+\end{itemize}
 
 
-\chapter{Experimental Evaluation}
-    \section{Experimental Data and Methodology}
-    \section{Results Summary}
+%%% todo: make a discussion about the dependency between these failures, i.e. what happens if we switch off one failure or not. Write an informal proof about it?
+
+%%%% table about failures %%%%
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.5}% Spread rows out...
+\begin{tabular}{ >{\centering\bfseries}m{1in} >{\centering\arraybackslash}m{2.3in}} 
+\toprule
+  Trivial Fail & Meaning\\
+\midrule
+ \textbf{1} & T.order $\geq$ P.order\\
+ \rowcolor{Gray}
+ \textbf{2} & T unique labels $\geq$ P unique labels\\
+ \textbf{3} & P labels $\subseteq$ T labels\\
+ \rowcolor{Gray}
+ \textbf{4} & NDS(P) $\subseteq$ NDS(T)\\
+ \textbf{5} & initial domain cardinality $>$ 0\\
+ \bottomrule
+\end{tabular}
+\caption{Specification of the measured failure types}
+\label{table:failures}
+\end{table}        
+%%%%
+
+\subsection{SIP Algorithms evaluation}
+%%% TODO make graphs with the running time in milliseconds
+%%% maybe add tables for each dataset how long it took to solve it in total, how long it took to solve the hardest instance, how long it took to solve the easiset instance, avg time per instance, median time 
+%%% do the same table for search nodes?
+
+This section reports on the observed performance of SIP0 and SIP1 when used with the four Big Data datasets.
+
+The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, also used by \cite{foteini}. The datasets as the same as described in section \ref{sec:datasets}. All of them are used for evaluation on indexing performance by \cite{foteini, graphgrepsx, GRAPES} and only the dataset called ``aids" is used by \cite{graphgrepsx, ctindex, gcode, tree+delta>=graph}.
+
+When given a set of targets T and a set of pattern P, the program reads in every t $\in$ T and every p $\in$ P and performs a SIP algorithm for each (pattern,target) pair. Run time is measured in miliseconds from when the process starts until it completes, including the time to read in all the graphs, performing all SIP tests and write out all results to a file. As stated previously, both SIP0 and SIP1 implementations are written in Java.
+
+%%%% Analysis of the plots:
+\subsubsection{Trivial Failures}
+This subsection reports on the total filtering strength of the measured trivial failures with SIP0 and SIP1 algorithms. Table \ref{table:failures} shows in which order they are executed (from 1 to 5) for each SIP algorithm.
+
+While running the SIP for each dataset, every time a trivial failure was observed, we recorded its number using the scale on table \ref{table:failures}. Then, we computed the number of occurrences of each failure for each dataset. These numbers were then used to derive the percentage of the targets that each trivial failure eliminated when executed in the stated hierarchical order. Figure \ref{averageFailures} shows the results with SIP0 (on the left) and SIP1 (on the right). Here, average percent of filtering for each failure is plotted. Additional plots that present the median, maximum and minimum percent of trivial failure filtering can be viewed from the appendix section.
+
+It is important to note that as the failures are executed in hierarchical order, the number of graphs filtered by trivial fail $x$ can depend on the order of execution of $x$ with regards to the other trivial failures. With the results presented, we do not aim to make conclusions on individual performance of trivial failures. In order to study this, alternative set of experiments needs to be conducted.
+
+%%% 
+\begin{figure}[h]
+\centering
+\includegraphics[height=14cm,width=13cm]{images/plots/sip1avgFails.png}
+\caption{Average filtering percentage of each method in table \ref{table:failures} for each of the datasets}
+\label{averageFailures}
+\end{figure}
+%%%
+
+While running the experiments, the following observations were made:
+\begin{itemize}
+\item The trivial failures studied perform best on the aids dataset.\\
+In particular, almost 70\% of the targets are removed without making a call to SIP. Only on checking the order of the graphs (trivial fail \#1) and the number of different labels (trivial fail \#2), one is able to prove almost 14\% of all targets as not satisfiable.   
+\item All trivial failures measured do not work well on all graphs in pdbs. Similarly, only 3.75\% of the targets were filtered in ppigo.\\
+In other words, SIP call was made for every pattern and target graph in the dataset, because they were compatible with respect to every condition on table \ref{table:failures}. There are two possible reasons for this. First, most of the instances of pdbs and ppigo might be satisfiable. If this is the case, there is nothing that can be filtered out. A second reason for these results could be that the trivial fails are not strong enough to eliminate targets from these datasets. Further investigations of the results need to be conducted to find out the reason for the obtained results and identify possible strategies to make SIP algorithms perform better.
+\item For some datasets (aids), NDS compatibility tests manage to filter some targets that are otherwise not filtered by the tests 1,2 and 5. For other datasets (pcms), NDS filter out part of the targets that are otherwise removed by a next trivial failure.
+\item NDS compatibility does not help eliminating targets before the search for pdbs and ppigo datasets.
+\item The dataset that shows best filtering improvement after adding failures 3 and 4 is aids.
+\item There are duplicate target graphs in the pcms and pdbs datasets.\\
+The pcms database is supposed to contain 200 targets \cite{datasets}. In practice, there are only 50 unique graphs and each of them is added 4 times. The pdbs dataset is composed of 600 targets \cite{datasets}, but out of them only 30 are unique, each of them duplicated 20 times.
+\end{itemize}
+
+\subsubsection{Hardness of SIP in terms of search nodes}
+
+%%% todo: what does number of search nodes mean? What is search nodes?
+
+We report on the cost of call to SIP in terms of the number of nodes (a measure of search effort) taken to solve an SIP instance. For every dataset T, for every (P,T) pair, we find every graph t $\in$ T that was not filtered by any of the trivial failures (i.e. all target graphs for which a call to SIP had to be made to check whether the pattern is contained in the target). We compute the number of graphs $|T_i|$ that are solved in given number of nodes $i$ for $0$ $<$ $i$ $<$ $maxN$, where $maxN$ is the maximum number of nodes taken to solve an instance for a given dataset. Figures \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes} present our results. Here, $|T_i|$ is represented as percentile of all targets (the x-axis). The search effort is plotted, starting from the easiest percentile (the leftmost part of the x-axis) and finishing with the last percentile representing the hardest instances in terms of search effort (on the rightmost part of the x-axis). The y-axis shows the cumulative difficulty of SIP calls in terms of search nodes for each percentile of the targets in a log scale. For example, looking at figure \ref{aidsNodes}, 24\% of the targets are solved by using at most 2 nodes, 50\% of all targets are solved in less than 10 nodes. The hardest instances take at most 600 nodes.
+
+The value on the y-axis for each percentile of T represents the number of nodes taken to solve the hardest instance that belongs to the percentile. In other words, the graphs below show the hardest instance observed for each percentile of T. For example, if we had 3 graphs that belong to the i$^{th}$ percentile of T and they were solved in 1, 2 and 10 nodes respectively, the y-axis value of i would be 10. Therefore, the datasets are in practice easier than what is shown on figures \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}, which present the hardest instance for each percentile in the dataset.
+
+We derived the number of members of 1 percent of all target graphs in T by dividing |T| by 100. In cases with aids and pcms, the number of targets in the dataset was not divisible by 100. This is why for these datasets, the last percentile is slightly bigger with respect to the number of targets that form each of the rest 99\% of the graphs.
+
+The plots below help us to make the following observations:
+\begin{itemize}
+\item The easiest dataset is ppigo. Looking at figure \ref{ppigoNodes}, 88\% of all targets are solved by using at most 4 nodes, 28\% are solved by using at most 1 node of search effort. The hardest problem (the right-most bar) takes 65 nodes to solve and it is between pattern ``8\_1.6" and target ``\#MUS$/$Mus\_musculus.sif$>$0.5.sif". The time taken to solve this is 4 milliseconds and the instance is unsatisfiable.
+
+\item The dataset called pdbs is the harder compared to ppigo and and aids and the most versatile one in terms of search effort. It is on average harder than pcms, however, the hardest instance in pcms takes more search effort than the hardest instance in pdbs. Figure \ref{pdbsNodes} shows that 20\% of the targets in pdbs are solved by using at most 100 nodes, which is significantly higher than ppigo, where even the hardest instance was solved in less than 70 nodes. The hardest instance here is between pattern ``32$\_$1ARO" and target ``\#g" and it is solved in 7152 nodes for 95 milliseconds. This instance is not satisfiable. 
+
+\item The dataset with the hardest instance is pcms. The hardest SIP takes 10470 nodes to solve and it is between pattern ``16\_1C5G.cm.A" and target ``1CY2.cm.A.cmap". It was solved in 12 milliseconds and it is unsatisfiable. Looking at the other 99\% of pcms targets, we can see that they are mostly easy. For example, 43\% of the SIP instances are solved by using at most 10 nodes of search effort.
+
+\item The aids dataset is comparably easy. The maximum nodes taken to solve a SIP instance took 619 nodes of search effort. Namely, it is the SIP call between pattern \#1 and target \#629591 and it took 0 milliseconds of time. SIP(\#1,\#629591) is not satisfiable.
+
+\item Looking at aids, pcms and pdbs, the number of nodes taken to solve SIP grows exponentially with the percentile of the population.
+
+\item The hardest instance of each dataset is not satisfiable.
+
+\item Even the hardest instance of each dataset is solved very quickly.
+\end{itemize}
+
+%%%
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/aidsPercentileLog.png}
+  \caption{SIP on aids dataset}
+  \label{aidsNodes}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/pcmsPercentileLog.png}
+  \caption{SIP on pcms dataset}
+  \label{pcmsNodes}
+\end{minipage}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/pdbsPercentileLog.png}
+  \caption{SIP on pdbs dataset}
+  \label{pdbsNodes}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/ppigoPercentileLog.png}
+  \caption{SIP on ppigo dataset}
+  \label{ppigoNodes}
+\end{minipage}
+\end{figure}
+%%%%
+
+\subsubsection{Hardness of SAT vs UNSAT SIP instances}
+
+The observation that the hardest instance of each dataset is not satisfiable arises the following question: is UNSAT SIP generally harder than SAT SIP or are our observations due to pure chance? The experiments described in this section are again conducted in terms of number of search nodes and they are intended to further investigate this observation.
+
+The following eight graphs below break each of the graphs discussed in the previous section (namely \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}) further down in terms of whether the SIP instances are satisfiable or not. The blue plots represent all satisfiable SIP pairs (p,t) for every t $\in$ T and every p $\in$ P, where T and P are the sets of targets and patterns for a given dataset D. Similarly, the red plots represent all unsatisfiable SIP (p,t) instances of a dataset D. For each D (namely, for aids, pcms, pdbs and ppigo), the union of the blue plot (satisfiable instances, left-hand side below) and the red plot (unsatisfiable instances, right-hand side below) gives the plot for the corresponding dataset discussed in the previous section. For example, figure \ref{aids:SAT} $\cup$ figure \ref{aids:UNSAT} = figure \ref{aidsNodes}.
+
+Note that figures \ref{ppigo:SAT} and \ref{ppigo:UNSAT} contain only 4 bars each of them, i.e. the data is divided into quartiles instead of percentile. Here, each bar represents 25\% of all instances for the corresponding category (SAT/UNSAT). For example, figure \ref{ppigo:SAT} that represents all satisfiable SIP instances shows that the lowest quartile of the SAT SIP calls takes no more than 4 nodes to solve, as it is also true for the second quartile. We changed the percentile representation for this dataset, because the number of SAT and UNSAT SIP instances is too small to be scaled to percentiles.
+
+%%% todo: maybe make null hypothesis about SAT/UNSAT hardness and try to reject it (or not)?
+
+%%% SAT vs UNSAT in terms of search nodes
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/aidsSAT.png}
+  \caption{Search effort for SAT aids targets}
+  \label{aids:SAT}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/aidsUNSAT.png}
+  \caption{Search effort for UNSAT aids targets}
+  \label{aids:UNSAT}
+\end{minipage}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/pcmsSAT.png}
+  \caption{Search effort for SAT pcms targets}
+  \label{pcms:SAT}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/pcmsUNSAT.png}
+  \caption{Search effort for UNSAT pcms targets}
+  \label{pcms:UNSAT}
+\end{minipage}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/pdbsSAT.png}
+  \caption{Search effort for SAT pdbs targets}
+  \label{pdbs:SAT}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/pdbsUNSAT.png}
+  \caption{Search effort for UNSAT pdbs targets}
+  \label{pdbs:UNSAT}
+\end{minipage}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/ppigoSAT.png}
+  \caption{Search effort for SAT ppigo targets}
+  \label{ppigo:SAT}
+\end{minipage}%
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=11cm,width=9cm]{images/plots/ppigoUNSAT.png}
+  \caption{Search effort for UNSAT ppigo targets}
+  \label{ppigo:UNSAT}
+\end{minipage}
+\end{figure}
+%%%%
+
+Table \ref{table:SATUNSATnodes} presents statistics in terms of the search effort for satisfiable (blue columns) and unsatisfiable (red columns) instances. We calculated the total number of nodes taken to solve all SIP instances for every dataset, the average, median, maximum and minimum number of nodes taken per instance. For instance, the table shows that the total number of nodes taken to solve all satisfiable SIP instances for the aids dataset is 437 108, whereas the total number of nodes taken to solve all unsatisfiable SIP instances is 2 295 724 nodes, which is almost 5 times more. Using these figures, we derive that the total number of nodes taken to solve all SIP instances for the aids dataset is the sum of those two numbers, which is equal to 2 732 832 nodes.
+
+Looking at the SAT and UNSAT figures and the table, we notice that:
+\begin{itemize}
+\item For three of the datasets, namely aids, pcms and ppigo, the easiest and hardest instances tend to be UNSAT.
+\item For pdbs, there is a big difference in terms of search effort between SAT and UNSAT problems. For example, the satisfiable instances are easier for every percentile of the targets than the unsatisfiable instances (\ref{pdbs:SAT}, \ref{pdbs:UNSAT}). The tabulated results on figure \ref{table:SATUNSATnodes} show that on average, SAT instances are 3 times easier than UNSAT, the SAT median is more than 4 times smaller than the UNSAT instances median and the number of nodes taken to solve the hardest SAT instance is 2 845 which is 4307 nodes less than UNSAT.
+\item Table \ref{table:SATUNSATnodes} shows that the total search effort taken to solve unsatisfiable problems is bigger (894 260 nodes taken in total for SAT and 854 720 nodes in total taken for UNSAT problems) contrary to what we observed on the figures. The reason for these results is that pdbs contains large number of solvable instances. In particular, the figures on table \ref{table:dataSAT} show us that the average percent of satisfiable (p,T) SIP instances, where p $\in$ P, is 69.42 (i.e, for each set of (p,T) SIP problems, for 69.42\% of all (p,t) pairs, where t $\in$ T, t contains p as subgraph). Similarly, the median, minimum and maximum number of SAT instances for a set of (p,T) SIP problems are respectively 83.3\%, 22.67\% and 96.7\%. Therefore, the large search effort of SAT SIP problems for pdbs is due to their substantially larger number compared to UNSAT problems. 
+\item There is a substantial difference in terms of search effort between the hardest SAT and the hardest UNSAT instances of the pcms dataset. In particular, this difference is 10 092 nodes, where the hardest SAT problem takes 378 nodes (\ref{table:SATUNSATnodes}) and it is between pattern \#32\_1CY1.cm.A.out and target \#1CY0.cm.A.cmap, solved for 4 milliseconds.
+\item For aids and pcms datasets, all unsatisfiable instances in total are about 5 times harder than the total number of all satisfiable instances (\ref{table:SATUNSATnodes}).
+\item For datasets pdbs and ppigo, the total search effort for unsatisfiable instances is smaller than the search effort for satisfiable SIPs. In particular, for ppigo, it is twice smaller.
+\item As noted before, the maximum search effort is always bigger for unsatisfiable instances. For some datasets, the difference is substantial (pcms). For all four datasets, the search effort for the hardest SAT instance is at least twice easier than the search effort taken for the hardest UNSAT instance. 
+\end{itemize}
+
+
+\newcolumntype{g}{>{\columncolor{red!15}}r}
+\newcolumntype{b}{>{\columncolor{blue!15}}r}
+\begin{table}[H]
+\centering
+        \renewcommand{\arraystretch}{1.5}% Spread rows out...
+        \begin{tabular}{c|bg|bg|bg|bg|bg|}
+            \cline{2-11}
+            &
+             \multicolumn{2}{c}{\textbf{Total}} & 
+             \multicolumn{2}{|c}{\textbf{Average}} & 
+             \multicolumn{2}{|c|}{\textbf{Median}} & 
+             \multicolumn{2}{c}{\textbf{Minimum}} & 
+             \multicolumn{2}{|c|}{\textbf{Maximum}} \\
+              \hline
+            \cline{2-11}
+             \hline
+            % & SAT & UNSAT & SAT & UNSAT & SAT & UNSAT & SAT & UNSAT & SAT & UNSAT\\
+            \multicolumn{1}{|c|}{\textbf{aids}}  &437 108  &2 295 724 &20.998 &10.473   &13  &0   &9  &0  &279   &619 \\
+            \multicolumn{1}{|c|}{\textbf{pcms}}  &13 644   &133 276   &23.047 &110.327  &17  &9   &9  &0  &378   &10 470 \\
+            \multicolumn{1}{|c|}{\textbf{pdbs}}  &894 260  &854 720   &321.67 &1042.341 &123 &544 &18 &17 &2 845 &7 152 \\
+            \multicolumn{1}{|c|}{\textbf{ppigo}} &714      &312       &6.932  &5.473    &6   &2   &5  &0  &30    &65 \\
+            \hline
+        \end{tabular}
+        \caption{Number of nodes of search effort for each dataset. Blue for solvable and red for unsolvable SIP instances}
+        \label{table:SATUNSATnodes}
+    \end{table}
+
+
+\subsubsection{Hardness of SIP in terms of running time}
+
+
+
+\chapter{Empirical Study}
+    \section{Filter-Verification methods}
+    	\subsection{CT-Index}
+        - my evaluation
+        \subsection{Path-based indexing implementations}
+    \section{Light Filters}
     
 \chapter{Conclusion and Future work}
+	\section{What did we do? What does it suggest?}
+    \section{Suggestions for Future work}
 
 %%%%%%%%%%%%%%%%
 %              %
@@ -783,7 +1087,32 @@ TODO \\
 %%%%%%%%%%%%%%%%
 \begin{appendices}
 
-\chapter{Running the Programs}
+\chapter{Implementation}
+
+%%%% table with query answers %%%%
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}% Spread rows out...
+\begin{tabular}{ >{\centering\bfseries}m{1in} >{\centering\arraybackslash}m{1.3in}  } 
+\toprule
+  Query Number & Answers Number\\
+\midrule
+ \textbf{0} &  8 042\\
+ \rowcolor{Gray}
+ \textbf{1} & 11 957\\
+ \textbf{2} & 78\\
+ \rowcolor{Gray}
+ \textbf{3} & 461\\
+ \textbf{4} & 77\\
+  \rowcolor{Gray}
+ \textbf{5} & 3\\ 
+ \bottomrule
+\end{tabular}
+\caption{The number of answers for each query for aids dataset}
+\label{table:answers}
+\end{table}        
+%%%%
+
 An example of running from the command line is as follows:
 \begin{verbatim}
       > java MaxClique BBMC1 brock200_1.clq 14400
