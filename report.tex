@@ -17,30 +17,106 @@
 \usepackage[table]{xcolor}
 \usepackage{array}
 \usepackage{booktabs}
+\usepackage[toc,page]{appendix}
+\usepackage[utf8]{inputenc}
+\usepackage[acronym]{glossaries}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+%\PassOptionsToPackage{noend}{algpseudocode}% comment out if want end's to show
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+%\makeatother
+
+% start with some helper code
+% This is the vertical rule that is inserted
+\newcommand*{\algrule}[1][\algorithmicindent]{\makebox[#1][l]{\hspace*{.5em}\vrule height .75\baselineskip depth .25\baselineskip}}%
+
+\newcount\ALG@printindent@tempcnta
+\def\ALG@printindent{%
+    \ifnum \theALG@nested>0% is there anything to print
+        \ifx\ALG@text\ALG@x@notext% is this an end group without any text?
+            % do nothing
+            \addvspace{-3pt}% FUDGE for cases where no text is shown, to make the rules line up
+        \else
+            \unskip
+            % draw a rule for each indent level
+            \ALG@printindent@tempcnta=1
+            \loop
+                \algrule[\csname ALG@ind@\the\ALG@printindent@tempcnta\endcsname]%
+                \advance \ALG@printindent@tempcnta 1
+            \ifnum \ALG@printindent@tempcnta<\numexpr\theALG@nested+1\relax% can't do <=, so add one to RHS and use < instead
+            \repeat
+        \fi
+    \fi
+    }%
+\usepackage{etoolbox}
+% the following line injects our new indent handling code in place of the default spacing
+\patchcmd{\ALG@doentity}{\noindent\hskip\ALG@tlm}{\ALG@printindent}{}{\errmessage{failed to patch}}
+\makeatother
+
+
+
+\makeglossaries
+\glstoctrue
 \definecolor{Gray}{gray}{0.85}
-%definitions and theorems
-%\theoremstyle{definition}
-%\newtheorem{myDef}{Definition}[section]
 
 \newcounter{example}[section]
 \newenvironment{example}[1][]{\refstepcounter{example}\par\medskip
    \noindent \textit{Example~\theexample #1} \rmfamily}{\medskip}
-
-
-%\newtheoremstyle{definition}% name
-%  {}%         Space above, empty = `usual value'
-%  {}%         Space below
-%  {}% Body font
-%  {}%         Indent amount (empty = no indent, \parindent = para indent)
-%  {\bfseries}% Thm head font
-%  {.}%        Punctuation after thm head
-%  {\newline}% Space after thm head: \newline = linebreak
-%  {}%         Thm head spec
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}{Definition}
+
+\newcommand{\Lagr}{\mathcal{L}}
+\newcommand{\fancyA}{\mathcal{A}}
+\newcommand{\fancyI}{\mathcal{I}}
+\newcommand{\fancyC}{\mathcal{C}}
+\newcommand{\fancyP}{\mathcal{P}}
+%%%%%%%%% glossary entries and acronyms %%%%%%%%%%%%%%%%%%%%
+
+%%% The glossary entry the acronym links to   
+\newglossaryentry{apig}{name={API},
+    description={An Application Programming Interface (API) is a particular set
+of rules and specifications that a software program can follow to access and
+make use of the services and resources provided by another particular software
+program that implements that API}}
+%%%%%%%%%%%
+%%% define the acronym and use the see= option
+\newglossaryentry{api}{name={API}, description={Application
+Programming Interface}, first={Application
+Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
+%
+\newglossaryentry{sip}{type=\acronymtype, name={SIP}, description={subgraph isomorphism problem}, first={Subgraph Isomorphism Problem (SIP)}}
+%
+\newglossaryentry{sat}{type=\acronymtype, name={SAT}, description={Satisfiable}, first={satisfiable (SAT)}}
+%
+\newglossaryentry{unsat}{type=\acronymtype, name={UNSAT}, description={Unsatisfiable}, first={unsatisfiable (UNSAT)}}
+%
+\newglossaryentry{graph}{type=\acronymtype, name={G}, description={graph}, first={graph (G)}}
+%
+\newglossaryentry{target}{type=\acronymtype, name={G$_{t}$}, description={target graph}, first={target (G$_{t}$)}}
+%
+\newglossaryentry{pattern}{type=\acronymtype, name={G$_{p}$}, description={pattern graph aka query}, first={pattern (G$_{p}$)}}
+%
+\newglossaryentry{patterns}{type=\acronymtype, name={P}, description={a set of pattern graphs aka queries}, first={pattern graphs (P)}}
+%
+\newglossaryentry{targets}{type=\acronymtype, name={T}, description={a set of target graphs aka database}, first={database (T)}}
+%
+\newglossaryentry{forwcheck}{type=\acronymtype, name={FC}, description={forward checking}, first={forward checking (FC)}}
+%
+\newglossaryentry{lds}{type=\acronymtype, name={lds}, description={label degree sequence}, first={label degree sequence ($lds$)}}
+%
+\newglossaryentry{nds}{type=\acronymtype, name={nds}, description={neighbourhood degree sequence}, first={neighbourhood degree sequence ($nds$)}}
+%
+\newglossaryentry{index}{name={index}, description={todo}}
+
+\newglossaryentry{sn}{name={search node}, description={A search node denotes the number of recursive calls to the SIP algorithm taken to find a solution}}
+
+\newglossaryentry{c}{name={candidate set ($\fancyC)$}, first={candidate set ($\fancyC$)}, description={todo}}
+%%%%%%%%%%%%%%%% end of glossary and acronym entries %%%%%%%%%
 
 \begin{document}
 \title{Investigations of Subgraph Query Processing}
@@ -61,14 +137,13 @@
 \tableofcontents
 %==============================================================================
 \chapter{Introduction}
+\label{ch:introduction}
 \pagenumbering{arabic}
-	\section{Problem Statement}
-    \section{Aims and Motivations}
-    
+This chapter starts by introducing the problem statement and the aims and motivations to solve it. We then give important definitions and concepts that are used throughout the report.
+
+\section{Problem Statement}
+\section{Aims and Motivations}  
     Many substructure-searching problems call for repeatedly examining a large number of molecules (typically stored in a database), comparing each with a pattern. In such situations, it pays to spend some time "up front," storing the answers to specific questions for each structure in the database. Subsequent searches of the database use these pre-computed answers to vastly improve search time; the up-front computation time is paid back quickly as repeated searches are performed.
-
-
-    
         \begin{itemize}
             \item graphs are widely used nowadays to represent data
             \item the graph containment problem is widely addressed in many areas of science: genetics, chemistry, XML documents, images, fraud detection and prevention (there was an article in nature about this)
@@ -81,89 +156,91 @@
         \item genome sequencing: find mutations responsible for rare diseases -- nature vol 527 no 7576
         \item treating diseases like cancer: screen a patient's tumor for a set of biomarkers to choose the best treatment to fight the particular cancer -- nature vol 527 no 7578
         \end{itemize}
-        
-\section{Graph Theory, terminology and definitions}
-        In this section, we introduce preliminary concepts and outline the main concepts and problems addressed in the document. In definition \ref{def:graphFormat} we explain the format of all graphs used in the document.
-    \subsection{Graph Theory}
-    \subsection{Terminology}
-    \label{naming}
-    - The set of target graphs: T
-    - Each graph in t: $t^{}_i$, for i from 1 to the number of graphs in T
-    - The set of pattern graphs: P
-    - Each pattern graph in P: $p^{}_j$, for i from 1 to the number of graphs in P
-    - The candidate set of graphs: C. It is important to not that C is contained in T
-    - There is a trade off between the size of C and the time it takes to be computed.
-        
-	\subsection{Definitions}
-    \label{subsec:definitions}
-        \begin{definition}[Graph]
-        
-        \end{definition}
-        
-        \begin{definition}[Sub-graph]
-        \label{def:subgraph}
-        
-        \end{definition}
-        
-        \begin{definition}[Induced Sub-graph]
-        \label{def:induced-subgraph}
-        
-        \end{definition}
-    
-        \begin{definition}[Graph Format]
-        \label{def:graphFormat}
-        A graph G = (V, E, L, $\lambda$) is defined as an undirected labeled graph where V is the set of vertices, E is the set of edges(unordered pair of vertices), L is the set of labels, and $\lambda$ is a labeling function, $\lambda$ : V $\cup$ E $\rightarrow$ L, that assigns labels to vertices and edges.
-        \end{definition}
-        
-        \begin{definition}[Graph Isomorphism]
-        
-        \end{definition}
-        
-        \begin{definition}[Induced Graph Isomorphism]
-        \label{def:inducedGraphIsomorphism}
-        
-        \end{definition}
 
-        \begin{definition}[Subgraph Isomorphism]
-        \label{def:subgraphIsomorphism}
-        Given a graph database T of target graphs $t^{}_0$, $t^{}_1$, $t^{}_2$ \ldots $t^{}_i$, where \textit{i} is the number of target graphs in T, and a pattern graph P, find all targets in T that have P as a subgraph.
-        \end{definition}
-        
-        \begin{definition}[Induced Subgraph Isomorphism]
-        \label{def:inducedSubgraphIsomorphism}
-        
-        \end{definition}
-        
-        \begin{definition}[Graph Density]
-        
-        \end{definition}
-        
-        \begin{definition}[Subgraph]
-        \label{def:subgraph}
-        A graph whose vertices and edges are a subset of another graph.
-        \end{definition}
-        
-        \begin{definition}[Graph Query Processing]
-        \label{def:graphQueryProcessing}
-        Given a graph database D = $\{$ $g^{}_0$, $g^{}_1$, $g^{}_2$ \ldots $g^{}_n$ $\}$ and a pattern graph p, it returns the query answer set $D^{}_p$ = $\{$ $g^{}_i$$\vert$p $\subseteq$ $g^{}_i$, $g^{}_i$ $\in$ D $\}$
-        
-        \end{definition}
-        
-        \begin{definition}[In-memory computing]
-        The storage of information in the main random access memory (RAM) of dedicated servers rather than in relational databases operating on comparatively slow disk drives.In-memory computing gives ability to cache countless amounts of data constantly. This ensures extremely fast response times for searches.
-        \end{definition}
-        
-        \begin{definition} [Graph Index]
-		
-		\end{definition}
+\section{Terminology, Definitions and Notations}
+\label{sec:theory}
+In this section, we introduce all preliminary terminology and definition used throughout the document. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
 
-	\section{Subgraph Isomorphism}
-    \section{Report Organization}
+\subsection{Graph Theory}
+\label{sec:graphTheory}
+%% todo: check the label def part, might seem a bit dodggy
+A \textit{graph G} = (V$_{G}$, E$_{G}$, L$_{G}$) consists of set of vertices V$_{G}$ = \{u$_i$\}, 1 $\leq$ i $\leq$ $|V_{G}|$, set of edges E$_{G}$ = \{(u$_k$, u$_m$) $|$ u$_k$ $\in$ V$_{G}$, u$_m$ $\in$ V$_{G}$\}, and  function  L$_{G}$: V$_{G}$ $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each v $\in$ V$_{G}$, where $\Lagr$ is the set of all possible labels. A graph is \textit{undirected}, if for every (u, v) $\in$ E$_{G}$ $\Rightarrow$ (v, u) $\in$ E$_{G}$. In this work, only undirected graphs are considered. The \textit{size} of G is equal to the number of edges in the graph (i.e the cardinality of E$_{G}$ denoted as $|E_{G}|$). The \textit{order} of G is equal to the number of vertices in G, that is $|V_{G}|$.
 
+A \textit{path} in a graph is a sequence of distinct edges which connect a sequence of distinct vertices. A path from vertex \textit{u} to vertex \textit{v} has \textit{u} as the first and \textit{v} as the last vertex in the sequence. A \textit{cycle} is a path where the first vertex in the sequence is also the last. In a given graph G, there may be zero, one or more than one path from \textit{u} to \textit{v} (and similarly for cycles).
+
+The \textit{degree} of \textit{v} $\in$ V$_{G}$ is the number of vertices adjacent to \textit{v}, which are referred to as the neighbours of \textit{v}. By \textit{v} $\sim_{G}$ \textit{w} we mean that \textit{w} is a neighbour of \textit{v} in graph G.
+ 
+\begin{example}
+Figure \ref{fig:exampleGraph} shows an undirected labeled graph G$_{t}$, where each different color represents a vertex label. For instance, vertex 1 is labeled in yellow (Y) and vertex 2 is labeled in red (R). The degree of vertex 1 is 1, because it has only one vertex as a neighbour, namely 1 $\sim_{G_{t}}$ 2. 
+
+An example of a path from vertex 2 to vertex 6 is the one that goes through vertices 2, 3, 4 and 6. Graph G$_{t}$ has multiple cycles. For instance the path 2, 3, 8 is also a cycle.
+\end{example}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.4\textwidth}
+  \centering
+  \includegraphics[height=2.1cm,width=2.3cm]{images/graphs/exampleGraph2.png}
+  \caption{graph G$_{p}$}
+  \label{fig:exampleGraph2}
+\end{minipage}%
+\begin{minipage}[t]{.6\textwidth}
+  \centering
+  \includegraphics[height=3.4cm,width=5cm]{images/graphs/exampleGraph.png}
+  \caption{graph G$_{t}$}
+  \label{fig:exampleGraph}
+\end{minipage}%
+\caption{Instance of subgraph isomorphism problem (SIP)}
+\label{fig:SIP}
+\end{figure}
+
+%% induced : if edge in p, then edge in t, but if edge not in p then edge not in t
+%% non-induced: if edge in p, then edge in t
+\subsection{The Subgraph Isomorphism Problem}
+
+A graph G$^{\prime}$(V$_{G^{\prime}}$, E$_{G^{\prime}}$, L$_{G^{\prime}}$) is a \textit{subgraph} of G if and only if the vertices, edges and labels of G$^{\prime}$ are subsets of the vertices, edges and labels of G, that is V$_{G^{\prime}}$ $\subseteq$ V$_{G}$ and E$_{G^{\prime}}$ $\subseteq$ E$_{G}$ and L$_{G^{\prime}}$ $\subseteq$ L$_{G}$.
+
+The \textit{\gls{sip}} between a graph G$_{p}$(V$_{p}$, E$_{p}$, L$_{p}$), called pattern and graph G$_{t}$(V$_{t}$, E$_{t}$, L$_{t}$), called target, is to find a function $f$ that maps a different vertex of the target to every vertex in the pattern such that for every v $\in$ V$_{p}$, v = $f$(v) and L$_{p}$(v) = L$_{t}$($f$(v)), where $f$(v) $\in$ V$_{t}$; and for all pairs of vertices u,v $\in$ V$_{p}$, (u, v) $\in$ E$_{p}$ $\Leftrightarrow$ (f(u), f(v)) $\in$ E$_{t}$. In other words, a valid mapping of G$_{p}$ to a subgraph in G$_{t}$ preserves the labeling and the set of neighbours (and therefore the degree) of each vertex in G$_{p}$. If $f$ exists, we say that the \gls{sip} instance is \textit{\gls{sat}}, i.e. it has at least one solution, otherwise it is \textit{\gls{unsat}}, i.e. there are no solutions.
+
+\gls{sip} can be \textit{induced} or \textit{non-induced}. The induced version also requires that if \textit{v} $\nsim_{G_{p}}$ \textit{w}, then \textit{$f$(v)} $\nsim_{G_{t}}$ \textit{$f$(w)}. In this work, we discuss only the non-induced \gls{sip} that does not have this requirement.
+
+When a valid matching function $f$ exists that maps vertex \textit{v} $\in$ G$_{p}$ to vertex \textit{w} $\in$ G$_{t}$, we write \textit{v} $\rightarrow_{f}$ \textit{w}. 
+
+\begin{example}
+Lest us consider the \gls{sip} instance (G$_{p}$, G$_{t}$) displayed in Figure \ref{fig:SIP}. This instance is \gls{sat}, because a function $f$ exists that produces a valid mapping of each vertex $\in$ G$_{p}$ to a vertex $\in$ G$_{t}$. For instance, 1 $\rightarrow_{f}$ 8, 2 $\rightarrow_{f}$ 3, 3 $\rightarrow_{f}$ 4 and 4 $\rightarrow_{f}$ 6. However, if 4 $\in$ G$_{t}$ was labeled in Y, then the \gls{sip} instance (G$_{p}$, G$_{t}$) would be \gls{unsat}, because no valid mapping that associates each vertex in G$_{p}$ to different vertex in G$_{t}$ would exist.
+\end{example}
+
+% \gls{sip} is NP-complete, however there exist a number of different approaches to solve it, some of which are ... 
+There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sipalgos}.
+
+\subsection{The Filter-Verification Paradigm}
+A set of target graphs is called a \textit{database} and it is denoted by \textit{T}. A set of pattern graphs, also known as \textit{query set} or \textit{queries}, is denoted by \textit{P}. A \textit{dataset D} is composed of \textit{T} and \textit{P}. 
+
+\textit{Subgraph query processing} is, when given a set of query graphs, for each query return all graphs from the database that contain the query. These graphs form the \textit{answer set} $\fancyA_{q}$ of the corresponding query \textit{q}. A way to perform subgraph query processing is to run a \gls{sip} algorithm for every instance (G$_{p}$, G$_{t}$) $\in$ P$\times$T, where G$_{p}$ $\in$ P and G$_{t}$ $\in$ T.
+
+\begin{example}
+Let us consider again Figure \ref{fig:SIP} and assume that it represents a dataset \textit{T}, where Figure \ref{fig:exampleGraph2} is the query set, which contains only G$_{p}$, and Figure \ref{fig:exampleGraph} represents the graph database, which contains G$_{t}$. Then, subgraph query processing would solve the \gls{sip} (G$_{p}$, G$_{t}$), because \textit{P}$\times$\textit{T} = (G$_{p}$, G$_{t}$), returning $\fancyA_{G_{p}}$ = \{G$_{t}$\}, as \gls{sip} (G$_{p}$, G$_{t}$) is \gls{sat}.
+\end{example}
+
+%% todo: cite the np-complete part
+Another way of processing queries is the \textit{filter-verification framework}, which consists of two steps. The \textit{filter} step tries to prune targets that can not be matched to a given query. The set of targets left after this step formes the set of \textit{candidates}, denoted as $\fancyC_{p}$, where $\fancyC_{p}$ $\subseteq$ T. The following \textit{verification} step then performs \gls{sip} for every pair (G$_{p}$,$\fancyC_{G_{p}}$) $\in$ P $\times$ $\fancyC_p$. The usage of the filter-verification paradigm is motivated by the fact that subgraph isomorphism is NP-complete and reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern during the filtering step and performing \gls{sip} using the limited set of candidates would yield to significant performance improvement \cite{ctindex,foteini}.
+
+There are number of subgraph query processing algorithms based on the filter-verification framework \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. This approach is discussed in more detail in Chapter \ref{ch:existingWork}, where more definitions and annotations are introduced in Section \ref{sec:filterVerificationParadigm} followed by analysis of related work in Section \ref{sec:ctindex} and Section \ref{sec:otherindexes}.
+
+% how do we build the database index?
+% using a pre-built index of the database, denoted as $\fancyI_{T}$
+
+% what is a candidate set?
+% graph index, features, ...
+% what is false-positive? what is false-negative, why it can't exist?
+\section{Report Organization}
+
+%%%%%%%%%%%%%%%%%%%%%%%%% CHAPTER 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Review of existing work}
+\label{ch:existingWork}
 \section{The nature of the problem}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Datasets %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% datasets
 \section{Datasets}
 \label{sec:datasets}
 
@@ -172,7 +249,7 @@
 This section gives more information about the datasets that were used to check the correctness and performance of the algorithm implementations. All graphs in these datasets are undirected.\par
 \textbf{AIDS} is the standard database of the Antiviral Screen dataset of the National Cancer Insitute \cite{datasets}. The database has 40 000 molecules, represented as graphs. 
 
-\begin{table}[H]
+\begin{table}
 \centering
 \renewcommand{\arraystretch}{1.4}% Spread rows out...
 \begin{tabular}{ >{\bfseries}m{1.5in} >{\centering}m{0.5in} >{\centering}m{0.5in} >{\centering}m{0.5in} >{\centering\arraybackslash}m{0.5in}  } 
@@ -197,7 +274,7 @@ This section gives more information about the datasets that were used to check t
 \end{table}    
 
 
-\begin{table}[H]
+\begin{table}
 \centering
 \renewcommand{\arraystretch}{1.3}% Spread rows out...
 \begin{tabular}{ |>{\bfseries}m{0.5in} |>{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering\arraybackslash}m{0.8in}|} 
@@ -229,25 +306,32 @@ PPIGO & 20 & 46 & 10.87 & ne znam & ne znam\\
 
 \subsection{Subgraph Isomorphism Answers}
 Each query in each query set matches at least one graph in the target set. Some queries match more than one graph. Below we give some statistics on number of target graphs matched.
-\begin{table}[H]
-\caption{Solvable instances per dataset}
-\label{table:dataSAT}
-\centering
-\renewcommand{\arraystretch}{1.4}
-\begin{tabular}{|>{\centering}m{1.5in}|c|c|c|c|c|}\hline
 
-satisfiable instances & AIDS   & PCM  & PDBS  & PPIGO \\ 
- \hline
- average \%           & 8.590  & 26.5 & 69.42 & 24.4  \\
- median \%            & 0.673  & 19   & 83.3  & 26    \\
- minimum \%           & 0.0075 & 2    & 22.67 & 14    \\
- maximum \%           & 29.89  & 72   & 96.7  & 34    \\
- \hline
-\end{tabular}
-\end{table}
+\begin{table}
+\centering
+        \renewcommand{\arraystretch}{1.5}% Spread rows out...
+        \begin{tabular}{l|r|r|r|r|r|r|r|r|}
+            \cline{2-9}
+            &
+             \multicolumn{2}{c}{\textbf{AIDS}} & 
+             \multicolumn{2}{|c}{\textbf{PCMS}} & 
+             \multicolumn{2}{|c|}{\textbf{PDBS}} & 
+             \multicolumn{2}{c|}{\textbf{PPIGO}} \\
+            \cline{2-9}
+              & number  & percent & number & percent & number & percent & number & percent \\
+              \hline
+            \multicolumn{1}{|l|}{\textbf{all SIP calls}}  &240,000   &100 &1,800 &100 &3,600 &100 &100 &100 \\
+            \multicolumn{1}{|l|}{\textbf{SAT SIP calls}}  &20,816 &8.67 &592 &32.8 &2,780 &77.22 &61 &61 \\
+            \multicolumn{1}{|l|}{\textbf{UNSAT SIP calls}} &219,184 &91.33 &1,208 &67.2 &820 &22.78 &39 &39 \\
+            \hline
+        \end{tabular}
+        \caption{Number of SIP instances for each dataset and how many of them are SAT and UNSAT}
+        \label{table:dataSAT}
+    \end{table}
 
 
 \section{Filtering-verification paradigm}
+\label{sec:filterVerificationParadigm}
 - smaller $C$, less time spent on subgraph isomorphism check, but more tie spent on indexing process
 
 	\section{Motivation for usage}
@@ -274,6 +358,7 @@ satisfiable instances & AIDS   & PCM  & PDBS  & PPIGO \\
         \subsection{Tree-based indexing approach}
         
 \subsection{CT-Index}
+\label{sec:ctindex}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                               CT-Index                               %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -394,24 +479,20 @@ To conclude, in CT-Index, when using only paths as features leads to smaller run
 % is it the case that both SIP of ct-index is really bad and the indexing pat also takes a lot of time and is useless? Need to do ct-index data analyzing to be able to answer these questions.
 %%% TODO add some plots 
 \subsection{gIndex, gCoding .... mention them}
+\label{sec:otherindexes}
 \section{Subgraph Isomorphism Algorithms}
+\label{sec:sipalgos}
 \subsection{Partick and Ciaran's paper}
+\label{sec:sippatrick}
 \subsection{Christine's paper}
+\label{sec:sipchristine}
 
 \chapter{Path-based query processing algorithms based on filtering-verification }
 
 The order of a graph is the cardinality of its
 vertex set. We write V(G) for the vertex set of a graph G.
 
-A non-induced subgraph isomorphism from a graph P
-(called the pattern) to a graph T (called the target) is an injective
-mapping from V(P)to V(T) which preserves adjacency—
-that is, for every adjacent v and w in V(P), the vertices i(v)
-and i(w) are adjacent in T. An induced subgraph isomorphism
-additionally preserves non-adjacency—that is, if v and
-w are not adjacent in P, then i(v) and i(w) must not be adjacent
-in T. We use the notation i : P  T for a non-induced
-isomorphism, and i : P ,→ T for an induced isomorphism.
+%A non-induced subgraph isomorphism from a graph P (called the pattern) to a graph T (called the target) is an injective mapping from V(P)to V(T) which preserves adjacency— that is, for every adjacent v and w in V(P), the vertices i(v) and i(w) are adjacent in T. An induced subgraph isomorphism additionally preserves non-adjacency—that is, if v and w are not adjacent in P, then i(v) and i(w) must not be adjacent in T. We use the notation i : P  T for a non-induced isomorphism, and i : P ,\→ T for an induced isomorphism.
 
 
 
@@ -511,33 +592,53 @@ After candidate extraction, Path-Index returns target graph \ref{B2Y5G} as candi
 \subsubsection{Path Extraction}
 \label{path-index:path-extraction}
 A class, called \textrm{PathExtractor}, contains all functionality for computing the paths and path-strings that are stored in the index. To compute the index of a given graph dataset, we use the functionality of \textrm{PathExtractor} to extract all paths of every graph in the dataset. The path extraction algorithm is recursive depth-first-search based and is called on every node of the graph. Algorithm 1 describes our approach. Before we call function \textrm{generatePath}, we initialize an empty stack that is used in the algorithm to store visited nodes. \textrm{Algorithm 1} generates all paths in the graph of size $maxL$ , where $maxL$ is the number of nodes in a path, using two functions: \textrm{generatePath} and \textrm{generatePathInner}. The function \textrm{generatePath} in \textrm{Algorithm 1} takes a list of all nodes in the graph and path length $maxL$ as parameters and calls \textrm{generatePathInner} for every node in the list as starting node (line 4). The start node is also pushed on the stack (line 3), as it is part of the path that is to be generated. \par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}[h]
- \centering
- \label{Algorithm 1.}
- \begin{tabular}{l l}
-	\textbf{Algorithm 1.} Paths extraction \\\hline
-    \small\textbf{1}  \,\small{generatePath(nodes, maxL) $\rightarrow$ void}\\
-    \small\textbf{2}  \,\,\,\,\,\,\,\,\small{\textbf{for every} start-node in nodes \textbf{do}:}\\
-    \small\textbf{3}  \,\,\,\,\,\,\,\,\,\,\,\,\,\small{push start-node on top of stack}\\
-    \small\textbf{4}  \,\,\,\,\,\,\,\,\,\,\,\,\,\small{generatePathInner(node, maxL)}\\
-    \small\textbf{5}  \\
-    \small\textbf{6}  \,\small{generatePathInner(node, maxL) $\rightarrow$ void}\\
-    \small\textbf{7}  \,\,\,\,\,\,\,\,\small{\textbf{if} stack is \textbf{ less or equal to} maxL \textbf{then:}}\\
-    \small\textbf{8}  \,\,\,\,\,\,\,\,\,\,\,\,\,\,\small{outputPath(stack)}\\
-    \small\textbf{9}  \,\,\,\,\,\,\,\,\small{\textbf{if} stack is \textbf{equal to} maxL \textbf{then:}}\\
-    \small\textbf{10} \,\,\,\,\,\,\,\,\,\,\,\,\,\small{remove the topmost element from the stack}\\
-    \small\textbf{11} \,\,\,\,\,\,\,\,\,\,\,\,\small{\textbf{exit}}\\
-    \small\textbf{12} \,\,\,\,\,\,\,\small{\textbf{for every} neighbor of node:}\\
-    \small\textbf{13} \,\,\,\,\,\,\,\,\,\,\,\,\,\small{\textbf{if} neighbor not on stack \textbf{then:}}\\
-    \small\textbf{14} \,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\small{push neighbor on top of stack}\\
-    \small\textbf{15} \,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\small{\textbf{generatePathInner}(neighbor, maxL)}\\
-    \small\textbf{16} \,\,\,\,\,\,\,\small{\textbf{if} all neighbors are on stack \textbf{and} stack is not empty \textbf{then:}}\\
-    \small\textbf{17} \,\,\,\,\,\,\,\,\,\,\,\,\,\small{remove the topmost element from the stack}\\
-    \hline
- \end{tabular}%
-\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% proper path extraction algorithm
+\begin{algorithm}
+\centering
+\caption{Paths extraction}
+\label{alg:generatePath}
+\begin{algorithmic}[1]
+\Procedure{generatePath }{nodes, l$_{max}$, s}
+\For{node in nodes}
+	\State s $\gets$ init \Comment{\textit{initialize the stack}}
+	\State push node on top of s
+	\State \Call{generatePathInner}{node, l$_{max}$, s}
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of algorithm
+
+%%% generatepath inner algorithm
+\begin{algorithm}
+\centering
+\caption{Paths extraction}
+\label{alg:generatePathInner}
+\begin{algorithmic}[1]
+\Procedure{generatePathInner }{node, l$_{max}$, s}
+\If{s $\leq$ l$_{max}$}
+\State new path $\gets$ s \Comment{\textit{new path of size is found}}
+\EndIf
+\If{s == l$_{max}$}
+\State s.pop()
+\EndIf
+\For{neighbour of node}
+\If{neighbour not in s}
+\State s.push(neighbour)
+\State \Call{generatePathInner}{neighbour, l$_{max}$, s} \Comment{\textit{recursive call}}
+\EndIf
+\EndFor
+\If{s is full} \Comment{\textit{all neighbours of node are on the stack}}
+\State s.pop()
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of algorithm
+%%% end of path extraction algorithm
+
+
 %TODO explain lines 7 - 11 and check the correctness of line numbers
 The recursive function \textrm{generatePathInner} generates all paths is length $maxL$, where the length of a path is equal to the number of all nodes that are part of it, from a start node $node$. First, the size of the stack is checked. If it is less or equal to $maxL$, the contents of the stack are copied and passed to a function \textrm{putToIndex} that computes the string representation of the extracted path and puts it to the index. If the stack is equal to $maxL$, the last element from the stack is popped out and the function exits. If the size of the stack is less than $maxL$, we traverse the neighborhood of $node$ in the for loop, starting at line 12. Every unvisited neighbor of $node$ is pushed on the stack and then a recursive call to \textrm{generatePathInner} is made with the same neighbor node as $node$(lines 13 and 14).\par
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -546,25 +647,30 @@ The stack used in \textrm{Algorithm 1} follows the principles of the stack datas
 The function \textrm{outputPath} is called by \textrm{generatePathInner} every time the stack reaches a size equal to $maxL$ (line 8, Algorithm 1). Algorithm 2 derives the lexicographically smallest string representation of a path, following the principles described in section \ref{path-index-idea}. The resulting path-string is added to the index, if it does not exist there (line 8, Algorithm 2). \par 
 Algorithm 2 takes a sequence of nodes as a parameter, which are the contents of the stack when the stack size is $maxL$ (line 8, Algorithm 1). We derive the path-string of the sequence (line 2) that consists of the node label of every node in nodeSequence and the label of the edge it has with the previous node in the path. If the dataset does not have edge labels, a default character is used as label for every edge. In the previous examples, we use the character $"-"$ (figures \ref{C5H12-paths} and \ref{CH4-paths}). It is important to note that the node labels are ordered in exactly the same way as the nodes in the sequence, for example if a node A is on place \textit{i} in the sequence, the label of A will be at place \textit{i} in the string if the edge labels in the string are not counted (if they are counted, the label of A is at position \textit{i} x \textit{2}).\par
 Next steps are to compute the reversed sequence of the path (line 3), its string representation (line 4) and check whether the reversed string is lexicographically smaller then the path-string (line 5). If yes, we assign the path-string to be equal to the reversed string (line 6) and add it to the index, if it is not present there yet (line 8). We do not sort the path-string lexicographically, due to the reasons explained in section \ref{path-index-idea}. The complexity of Algorithm 2 is explained in section \ref{path-index:complexity}.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% output path
-\begin{table}[h]
- \centering
- \label{Algorithm 2.}
- \begin{tabular}{l l}
-	\textbf{Algorithm 2.} Output path \\\hline
-    \small\textbf{1} \,\,\small{outputPath(nodeSequence) $\rightarrow$ void}\\
-     \small\textbf{2} \,\,\,\,\,\,\,\,\small{pathStr = nodeSequence.toString()}\\
-    \small\textbf{3} \,\,\,\,\,\,\,\,\small{reversedSequence = nodeSequence.reverse()}\\
-     \small\textbf{4} \,\,\,\,\,\,\,\,\small{pathStrReversed = reversedSequence.toString()}\\
-    \small\textbf{5} \,\,\,\,\,\,\,\,\small{\textbf{if} pathStrReversed $<$ pathStr \textbf{then:}}\\
-    \small\textbf{6} \,\,\,\,\,\,\,\,\,\,\,\,\,\,\small{pathStr = pathStrReversed}\\
-    \small\textbf{7} \,\,\,\,\,\,\,\,\small{\textbf{if} pathStr \textbf{not in} index \textbf{then:}}\\
-    \small\textbf{8} \,\,\,\,\,\,\,\,\,\,\,\,\,\,\small{put pathStr to index}\\
-    \small\textbf{9}\,\,\,\,\,\,\,\,\small{\textbf{exit}}\\\hline
- \end{tabular}
-\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% proper output path algorithm
+%%% proper path extraction algorithm
+\begin{algorithm}
+\centering
+\caption{Output path procedure}
+\label{alg:generatePath}
+\begin{algorithmic}[1]
+\Procedure{getPath }{nseq}
+\State pathStr $\gets$ nseq.toString() \Comment{\textit{returns a string of the labels of the nodes in nseq}}
+\State rseq $\gets$ nseq.reverse() \Comment{\textit{reverse the order of nodes in nseq}}
+\State pathStrRev $\gets$ rseq.toString() \Comment{\textit{returns a string of the labels of the nodes in rseq}}
+\If {pathStrRev $<$ pathStr}
+\State pathStr $\gets$ pathStrRev \Comment{\textit{put to index the lexicographically smaller string}}
+\EndIf
+\If {pathStr not in index}
+\State add pathStr to index
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of algorithm
+
+
 %TODO the bug I had initially, how the stack was fixed
 % TODO reference Java stack below
 % TODO explain about the current maximum path length
@@ -575,23 +681,25 @@ Next steps are to compute the reversed sequence of the path (line 3), its string
 \label{path-index:candidates-extraction}
 Candidates extraction is the part of the implementation where the set of candidates $C$ from the dataset with target graphs is constructed. Algorithm 3 describes our approach in more detail. Function \textrm{candidatesExtractor} takes the index of one graph from the target dataset and the index of the pattern (or one of the set of pattern graphs, if there are more than one pattern) as parameters (line 1). For every path-string in the pattern, we check whether it is contained in the target index (line 3). If yes, the algorithm continues, because the target might be a candidate (line 6). Otherwise, if the pattern path-string does not exist in the target index, the program returns false and terminates (line 4). The program goes to line 7 iff all path-strings in the pattern are contained in the target index.\par
 The complexity of Algorithm 3 is explained in section \ref{path-index:complexity}. 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}[H]
- \centering
- \label{Algorithm 3.}
- \begin{tabular}{l l}
- \textbf{Algorithm 3.} Candidates extraction \\\hline
- \small\textbf{1} \small{candidatesExtractor(target-index, pattern-index) $\rightarrow$ \textbf{true} or \textbf{false}}\\
- \small\textbf{2} \,\,\,\,\small{\textbf{for every} pattern-path \textbf{in} pattern-index:}\\
- \small\textbf{3} \,\,\,\,\,\,\,\,\small{\textbf{if no} target-path \textbf{equals} pattern-path \textbf{then:}}\\
- \small\textbf{4} \,\,\,\,\,\,\,\,\,\,\,\,\small{\textbf{return false}}\\
- \small\textbf{5} \,\,\,\,\,\,\,\,\small{\textbf{else:}}\\
- \small\textbf{6} \,\,\,\,\,\,\,\,\,\,\,\,\small{\textbf{continue}}\\
- \small\textbf{7} \,\,\,\,\small{\textbf{return true}}\\
- \hline
- \end{tabular}
-\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% proper candidates extraction algorithm
+\begin{algorithm}
+\centering
+\caption{Candidates extraction}
+\label{alg:candidatesExtraction}
+\begin{algorithmic}[1]
+\Procedure{candidatesExtractor }{$\fancyI_{G_{p}}$, $\fancyI_{G_{t}}$}
+\For{path$_{p}$ in $\fancyI_{G_{p}}$}
+\For{path$_{t}$ in $\fancyI_{G_{t}}$}
+\If{no path$_{t}$ is equal to path$_{p}$} \Return false \Comment{\textit{path$_{p}$ is not in $\fancyI_{G_{t}}$, return false}}
+\EndIf
+\EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of algorithm
+
 \subsection{Performance}
 This section gives more details about the complexity of each of the algorithms in the implementation, explained in sections \ref{path-index:path-extraction} and \ref{path-index:candidates-extraction}, continued with statistics about the algorithm running time and performance after running it on various datasets. Following the results obtained, we make a conclusion about the observed performance of the algorithm and analyze its advantages and disadvantages.\par
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -721,25 +829,7 @@ TODO
        - additional field in Node class for isomer labels\\
        - we have a class Path to represent the paths. Each path is an array of nodes. There is a toString method that returns the desired string that we are to store in the index. Depending on the option, we can return path from the labels (ib-index 1), path from the isomer labels (ib-index 2) or a path from the id of each node, made for testing purposes There is a method to reverse the path and it is used when storing the paths in the index: we always store the lexicographically smaller path, comparing each path with its reversed equivalent.\\
        - re-written the candidates extraction part. We have to check for containment ... \\
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-\subsection{Performance}
-TODO \\
-       - the index file is bigger, but the candidate set is smaller\\
-       - put the table with results\\
-       - explain the results and why they are like this\\
-	   - complexity?\\
- 	   - what could be done better and how?\\
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Variants of Path-Subtree index}
-TODO \\
- %- use neighborhood of length 2, 3 ...
- %- this will result in bigger index, but even stronger filtering strength, which means
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Advantages and Limitations}
-TODO \\
- - very easy to implement, especially when we have index-1 implementation ready\\
- %- the index file is even bigger --- this is  bad\\
- 
+
  
  
  
@@ -750,98 +840,140 @@ TODO \\
 %% todo
 %% remove sip0 and make sip1 be sip 0
 %% make the graphs be in log scale
-\chapter{Light Filters}   
-This section describes the study of a simple subgraph isomorphism problem algorithm with a fast filter implemented on top of it. The algorithm is called SIP1 and it is explained below. We present the experimental evaluation conducted to find out more about the effectiveness of light filtering, the notion of search effort and how it is affected depending on the nature of the datasets and the yes/no answer of the SIP. Finally, the results of the experiments are reported.
+\chapter{Light Filters}
+\label{ch:sip1}
+This section describes the study of a simple \gls{sip} algorithm, called SIP1, that implements a fast filter that does not employ an index structure.
 
-\subsection{SIP1}
-SIP1 is based on the simplest of the Glasgow algorithms \cite{CP2015}. Given a pattern and a target graph $P$ and $T$ respectively, SIP1 has a variable for each vertex in $P$, each with domain that is the set of compatible vertices in $T$. Compatible vertices have the same labels and the degree of the target vertex is greater than or equal to the degree of the pattern vertex. Bit sets are used to represent the domains and the adjacency matrices of the graphs. When a pattern variable $u$ is instantiated with a target value $i$, all variables have $i$ removed from their domains. Also, if a future variable $v$ is adjacent to $u$ in P then the domain of $v$ is the intersection of the current domain of $v$ with the neighborhood of vertex $i$ in $T$. This constraint is enforced by applying a logical $and$ operation between the two bit sets. SIP1 uses fail-first heuristic. For all instantiated variables representing pattern vertices, it selects to explore the one that has the smallest domain before the others.
+Light Filters is an algorithm for subgraph query processing and it is based on a modified version of the filter-verification paradigm. Here, filtering and verification steps are applied separately for each \gls{sip} instance. This approach uses simple filtering tests that require much less computational effort (i.e. lighter filtering). More importance is placed on the quality of the \gls{sip} algorithm than on the filters, because the major computational effort goes for solving the non-filtered \gls{sip} instances. 
 
-At the top of the search, 5 naive tests are performed to determine whether the two graphs are compatible. If the conditions of the tests are not met, search does not proceed and we consider this to be a $trivial$ $fail$. These tests are presented on table \ref{table:failures}. The neighborhood degree sequence (NDS) of a graph and a label degree sequence (LDS) is used for most of the tests. In the next section, we define and explain the notion of NDS and LDS and their implementation.
+Algorithm \ref{algo:roughSIP} is a pseudocode of our method. Given a file with targets T and a file with patterns P, we first read in each graph (lines 2, 3). Filtering is performed for every (G$_{p}$, G$_{t}$) pair and if the instance is not rejected, a call to \gls{sip} algorithm is made (line 7). The filter step consists of 5 naive tests, performed before the call to SIP1. If the conditions of any of the tests are not met, search does not proceed and we consider this to be a \textit{trivial fail}. 
 
-\subsubsection{Neighborhood Degree Sequence}
-NDS and LDS are defined as follows.
+Each step of the Light Filters algorithm is explained thoroughly. First, we introduce the theory behind the trivial fails and their implementation in Section \ref{sec:trivialFails}. We then introduce the SIP algorithm called SIP1 and discuss its implementation in Section \ref{sec:sip1}. Evaluation of the light filters approach is described in Chapter \ref{ch:evaluation}.
 
+%%% light filters sip algorithm
+\begin{algorithm}
+\centering
+\caption{Light filters algorithm}
+\label{algo:roughSIP}
+\begin{algorithmic}[1]
+\Procedure{Process }{File p, File t} \Comment{\textit{file with patterns and file with targets}}
+\State T$_{list}$ $\gets$ read in all targets from file, initialize objects
+\State P$_{list}$ $\gets$ read in all patterns from file, initialize objects
+\For{G$_{p}$ in P$_{list}$}
+	\For{G$_{t}$ in T$_{list}$}
+		\If{!\Call{Filter }{G$_{p}$, G$_{t}$}} \Comment{\textit{If the instance is not rejected during filtering, perform verification}}
+    		\State{\Call{SIP1}{G$_{p}$, G$_{t}$}}
+    	\EndIf
+    \EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%%% end of algorithm
+
+\section{Trivial Failures}
+\label{sec:trivialFails}
+
+This Section introduces the five trivial failure tests, implemented as part of the filtering stage of SIP1.
+
+\subsection{Neighborhood Degree Sequence}
+\label{sec:nds}
+The neighbourhood degree sequence of G and the degree sequence of labels in G correspond to four of the trivial tests. Very similar approach of using the degree sequence of vertices to reject \gls{unsat} \gls{sip} instances is used in the filtering part of the algorithm presented in \cite{Solnon:2010}.
+ 
 \begin{definition}[Label Degree Sequence]
-Given a graph $G(V,E,L)$ with $V$ the set of vertices, $E$ the set of edges and $L$ the set of labels, the LDS of $l$ $\in$ $L$ is a non-increasingly ordered list of the degrees of all vertices in $V$ that have $l$ assigned as their label.    
+The \textit{\gls{lds}} of \textit{l} $\in$ L$_{G}$, denoted as $\gls{lds}$(G, \textit{l}) is the non-increasingly ordered list of the degrees of all vertices in V$_{G}$ that have \textit{l} assigned as their label.    
 \end{definition}
 
-\begin{definition}[Graph Neighborhood Degree Sequence]
-Given a graph $G(V,E,L)$ with $V$ the set of vertices, $E$ the set of edges and $L$ the set of labels, the GNDS of $G$,  also written as NDS(G), is the list of tuples (l,LDS(l)) for every label l $\in$ $L$.
-\end{definition}
-
-\begin{example}
-Let us consider again the graph on figure \ref{B2Y5G}. There are three distinct labels: yellow (Y) blue (B) and green(Gr). Nodes 1, 2, 3, 4 and 6 are Y and each of them has deg 1. Nodes 7 and 8 are B, both of degree 4. 5 is the only Gr node. Therefore, the LDS of the labels are as follows.
-\begin{itemize}
-\item LDS(Y) = $<$1, 1, 1, 1, 1$>$
-\item LDS(B) = $<$4, 4$>$
-\item LDS(Gr) = $<$1$>$
-\end{itemize}
-The NDS(graph \ref{B2Y5G}) consists of the tuples $<$Y, LDS(Y)$>$, $<$B, LDS(B)$>$ and $<$Gr, LDS(Gr)$>$. 
-\end{example}
-
-The notion of graph neighborhood degree sequence is used to filter out targets that are incompatible with the pattern. A target graph T is compatible with a pattern graph P if the following two conditions are true:
-\begin{itemize}
-\item The set of labels in P is a subset of the set of labels in T
-\item NDS(P) is a subset of NDS(T)
-\end{itemize}
-
-The second condition can be formally defined as follows.
-
-\begin{definition}[NDS(P) is a subset of NDS(T)]
-\label{ndsPsubsetndsT}
-Let us write DS($l_P$) for the DS(l) $\in$ P and LDS($l_T$) for the LDS(l) $\in$ T, where l is a label both in T and in P. For every such l, every element on position $i$ in LDS($l_P$) is $\leq$ to the element in position $i$ on LDS($l_T$) for 1$\geq$i$\leq|$LDS($l_P$)$|$.
+\begin{definition}[Neighborhood Degree Sequence]
+The \textit{\gls{nds}} of G, written as $\gls{nds}$(G), is the list of tuples (\textit{l}, $\gls{nds}$(\textit{l})) for every \textit{l} $\in$ L$_{G}$.
 \end{definition}
 
 \begin{example}
-Let us consider the subgraph isomorphism problem with T the graph on figure \ref{B2Y5G} and P the graph on figure \ref{CH4}. The set of labels in P, denoted as $l_P$, is composed of B and Y; and the set of labels in T, denoted as $l_T$, consists of B, Y and Gr. Clearly, $l_P$ $\subseteq$ $l_T$. Therefore, the first compatibility condition for this example is true.\\
-Looking at the LDS of each l $\in$ $l_P$, it satisfies definition \ref{ndsPsubsetndsT}. For example, for l=B, LDS($l_P$) has only 1 element, which is 4 at position 1, and looking at LDS($l_T$), the element at position 1 is also 4.
+Let us have a graph G with two labels: A and B, where \gls{lds}(A) = \{5, 4, 3, 2, 2\} and \gls{lds}(B) = \{4, 3, 3, 1\}. This shows us that the order of G is 9, where 4 vertices with degrees 4, 3, 3 and 1 are labeled as B and 5 vertices with degrees 5, 4, 3, 2 and 2 are labeled as A. Using \gls{lds}, we derive that \gls{nds}(G) = \{\{A, \{5, 4, 3, 2, 2\}\}, \{B, \{4, 3, 3, 1\}\}\}.
 \end{example}
 
-The defined compatibility conditions are the two new tests added to SIP1. In the next subsection, we explain the implementation details of NDS.  
+\begin{definition}[G$_{t}$ subsumes G$_{p}$]
+\label{def:subsumes}
+We say that G$_{t}$ subsumes G$_{p}$ if for each label l both in G$_{p}$ and G$_{t}$, the length of the \gls{lds}(l$\in G_{p}$) is smaller or equal to the length of \gls{lds}(l$\in G_{t}$), and the degree on i$^{th}$ position in \gls{lds}(l$\in G_{p}$) is less than or equal to \gls{lds}(l$\in G_{t}$) for each i between 0 and $|\gls{lds}(l\in G_{p})|$.
+\end{definition}
 
-\subsubsection{NDS and LDS Implementation}
-To accommodate the notion of NDS in the SIP algorithm, we added a class called Label to represent every label in the graph and its LDS. We made slight changes to the class representing the graphs, called Graph, and finally we created a class called SIP1 which implements the same subgraph isomorphism algorithm like the easiest SIP algorithm used in \cite{CP2015}. It has additional trivial failures added on the top of the search to check the NDS compatibility between the target and the pattern. Below, we explain the changes for each of the three stated classes.
+The notion of \gls{nds} lets us define several simple tests for incompatibility between \gls{pattern} and \gls{target}, based on checking whether \gls{nds}(G$_{p}$) is a subset of \gls{nds}(G$_{t}$). \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) if all following conditions are true:
+\begin{enumerate}
+\item the order of G$_{p}$ is less than or equal to the order of G$_{t}$
+\item the number of unique labels in G$_{p}$ is less than or equal to the number of unique labels in G$_{t}$
+\item every label in G$_{p}$ is also in G$_{t}$
+\item G$_{t}$ subsumes G$_{p}$
+\end{enumerate}
 
-\begin{itemize}
-\item Class Label\\
-Every label object has a name of type String and a DS which is an array of integers, sorted in non-increasing order. The degree sequence array is built by inserting the degree of each node with the corresponding label, i.e. building the sorted list incrementally.
-\item Class Graph\\
-A new field of type array of Labels is introduced to keep a record of all unique labels in the graph. While reading in the graph, we build the array of Labels, creating a new object for each unique label and building its degree sequence as explained above.
-\item Class SIP1\\
-This is the class that is called for every (p,t) pair of the dataset to check whether t contains p, i.e. this is the part of the code that solves the subgraph isomorphism problem for every such (p,t) pair.
+\begin{example}
+Let us have \gls{nds}(G$_{p}$) = \{\{A, \{3, 2, 1\}\}, \{B, \{4\}\}\} and
+\gls{nds}(G$_{t}$) = \{\{A, \{5, 4, 3, 2, 2\}\}, \{B, \{4, 3, 3, 1\}\}, \{C, \{5, 4, 2, 1\}\}\}.
 
-We have added 5 trivial failures on top of the search, which can be seen in table \ref{table:failures}. They are added into the code as if statements in the same hierarchical order as shown in the table. If any of these failures is true, the algorithm terminates returning false (i.e. the corresponding (p,t) instance is not satisfiable, because it is impossible for t to contain p). For example, if the order of t is smaller than the order of the p (trivial fail 1 \ref{table:failures}), SIP1 terminates without going into the search and without taking any other trivial failure tests into an account. 
-\end{itemize}
+In this example, \gls{nds}(G$_{p}$) is a subset of \gls{nds}(G$_{t}$), because each of the four conditions is true. In particular:
+\begin{enumerate}
+\item The order of G$_{p}$ (4) is less than the order of G$_{t}$ (13).
+\item The number of unique labels in G$_{p}$ = 2 and the number of unique labels in G$_{t}$ is 3. 3 is clearly bigger than 2.
+\item G$_{p}$ has labels A and B which are both in G$_{t}$.
+\item The \gls{lds} of every label in G$_{p}$ is clearly contained in the \gls{lds} of the same label in G$_{t}$.
+\end{enumerate}
+\end{example} 
 
-%% TODO: COMPLEXITY!!!!!!!
+\begin{theorem}
+\label{th:nds}
+If \gls{nds}(G$_{p}$) $\nsubseteq$ \gls{nds}(G$_{t}$), then \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat}.
+\end{theorem}
 
-\subsubsection{Trivial failures hierarchy}
-In this subsection, we discuss on the choice of the trivial failures hierarchical structure.
+\begin{proof}
+Suppose that \gls{sip} (G$_{p}$, G$_{t}$) is \gls{sat} and that \gls{nds}(G$_{p}$) $\nsubseteq$ \gls{nds}(G$_{t}$). Then, at least one of the conditions for \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) is not true.
+\begin{enumerate}
+\item Suppose that the first condition is false. Then, G$_{p}$ must have at least one vertex more than G$_{t}$, i.e. at least one vertex $\in$ G$_{p}$ will be unmatched. Therefore, \gls{sip} (G$_{p}$, G$_{t}$) is \gls{unsat} if the order of G$_{p}$ is bigger than the order of G$_{t}$ and we reach a contradiction. Therefore, this condition must always hold.
+\item Suppose that the second condition is false so that there exists a label l$^{\prime}$ $\in$ L$_{G_{p}}$ with l$^{\prime}$ $\notin$ L$_{G_{t}}$. Therefore, there exists a vertex \textit{v} $\in$ G$_{p}$ that is assigned the label l$^{\prime}$ and there is no vertex in G$_{t}$ with label l$^{\prime}$. From this follows that \textit{v} can not be matched to any vertex in G$_{t}$ and \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat}, which leads to a contradiction. Therefore, condition 2 must hold.
+\item Suppose that the third condition is false. Then, there exists a label l$^{\prime}$ $\in$ L$_{G_{p}}$ and l$^{\prime}$ $\notin$ L$_{G_{t}}$. As proved before, this is a contradiction, therefore condition 3 must hold.
+\item Suppose that previous three conditions hold and G$_{t}$ does not subsume G$_{p}$.
 
-\begin{itemize}
-\item Filter 2 and 3 filter differently. Ex: p = \{A,B,B,C\} and t=\{A,B,C\}. Test 2 passes, but test 3 fails
-\item There is no need to check whether the length of all labels in T is bigger of equal to the length of all labels in t, because test 2 and 3 would fail if this was not the case.
-\item test 4 contains tests 2 and 3.$Explain why$ Furthermore, the notion of NDS introduced those 3 tests. We decided to have them instead of 1 big test to check the effectiveness of each part of the NDS filtering. 
-\end{itemize}
+First, suppose that for each label l both in G$_{p}$ and G$_{t}$, the length of the \gls{lds}(l$\in G_{p}$) is smaller or equal to the length of \gls{lds}(l$\in G_{t}$). Then, there exists a degree value \textit{deg$_{pi}$} $\in$ \gls{lds}(l$\in G_{p}$) at position \textit{i} in the list for \textit{i} between 1 and $| \gls{lds}(l\in G_{p})|$ such that \textit{deg$_{pi}$} $>$ \textit{deg$_{ti}$}, where \textit{deg$_{ti}$} $\in$ \gls{lds}(l$\in G_{t}$). Then, there is a vertex \textit{v} $\in$ G$_{p}$ with label l and degree \textit{deg$_{pi}$} that will not be matched to any vertex in G$_{t}$. Therefore \gls{sip} (G$_{p}$, G$_{t}$) is \gls{unsat} which is a contradiction, therefore the degree of the \textit{i$^{th}$} element in \gls{lds} of each label in G$_{p}$ has to be smaller or equal to the degree of the \textit{i$^{th}$} element for the corresponding label in G$_{t}$ for every \textit{i} between 0 and the length of \gls{lds} of every label in G$_{p}$.
 
+Second, suppose that there exists a label l both in G$_{p}$ and G$_{t}$ such that the length of the \gls{lds}(l$\in G_{p}$) is bigger than the length of \gls{lds}(l$\in G_{t}$). Then, the number of vertices with label l in G$_{p}$ is bigger than the number of vertices with label l in G$_{t}$ and it is impossible to match each vertex in G$_{p}$ to a different vertex in G$_{t}$ which leads to contradiction.
+
+Therefore both conditions of subsumption must hold and G$_{t}$ subsumes G$_{p}$. This is a contradiction, therefore condition 4 must be true.
+\end{enumerate} 
+
+All four conditions must hold. It follows that \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) which is a contradiction. Therefore, if \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$), then \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat}.
+\end{proof}
+
+The four conditions for \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) are the first four of the trivial failures added to SIP1, also displayed on Table \ref{table:failures}. Their implementation is discussed in Section \ref{sec:trivialFailsImplementation}.
+
+\subsection{Domain wipe out}
+\label{sec:domainWipeout}
+This is the fifth of the trivial failures implemented as light filtering on top of the search. Every pattern vertex \textit{v} has a bitset domain \textit{dom$_{v}$}. The size of \textit{dom$_{v}$} is equal to the order of the target, where every bit corresponds to a vertex in the target. For every vertex \textit{w} $\in$ G$_{t}$, if L(\textit{w}) is equal to L(\textit{v}) and the degree of \textit{v} is smaller or equal to the degree of \textit{w}, we set the bit for \textit{w} in \textit{dom$_{v}$} to true, i.e. \textit{v} can be mapped to \textit{w}. Whenever no bit in \textit{dom$_{v}$} is set to 1, it means that no target vertex exists that can be mapped to \textit{v} i.e. no valid mapping from all vertices in G$_{p}$ to a different vertex in G$_{t}$ can exist and \gls{sip} (G$_{p}$, G$_{t}$) is \gls{unsat}. The algorithm returns false without proceeding to search.
+
+Table \ref{table:failures} shows the trivial failures discussed. They are executed as tests in the same hierarchy as shown in the Table. The first four failures are namely the conditions for \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$). If either of these tests fails, then \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat} (Theorem \ref{th:nds}).
+
+\subsection{Order of Tests}
+
+Tests follow a strict hierarchy, where test 1 performs the cheapest and most trivial task and test 5 is the most expensive and its filtering is based on the least trivial test. The cost of each test in terms of complexity is discussed in Section \ref{sec:trivialFailsImplementation}.
 
 %%% todo: make a discussion about the dependency between these failures, i.e. what happens if we switch off one failure or not. Write an informal proof about it?
 
+%\begin{itemize}
+%\item Filter 2 and 3 filter differently. Ex: p = \{A,B,B,C\} and t=\{A,B,C\}. Test 2 passes, but test 3 fails
+%\end{itemize}
+
 %%%% table about failures %%%%
-\begin{table}[H]
+\begin{table}
 \centering
 \renewcommand{\arraystretch}{1.5}% Spread rows out...
 \begin{tabular}{ >{\centering\bfseries}m{1in} >{\centering\arraybackslash}m{2.3in}} 
 \toprule
   Trivial Fail & Meaning\\
 \midrule
- \textbf{1} & T.order $\geq$ P.order\\
+ \textbf{1} & G$_{t}$.order $\geq$ G$_{p}$.order\\
  \rowcolor{Gray}
- \textbf{2} & T unique labels $\geq$ P unique labels\\
- \textbf{3} & P labels $\subseteq$ T labels\\
+ \textbf{2} & G$_{t}$ unique labels $\geq$ G$_{p}$ unique labels\\
+ \textbf{3} & G$_{p}$ labels $\subseteq$ G$_{t}$ labels\\
  \rowcolor{Gray}
- \textbf{4} & NDS(P) $\subseteq$ NDS(T)\\
- \textbf{5} & initial domain cardinality $>$ 0\\
+ \textbf{4} & G$_{t}$ subsumes G$_{p}$\\
+ \textbf{5} & \textit{dom$_{v}$}, \textit{v} $\in$ G$_{p}$ not empty\\
  \bottomrule
 \end{tabular}
 \caption{Specification of the measured failure types}
@@ -849,76 +981,191 @@ In this subsection, we discuss on the choice of the trivial failures hierarchica
 \end{table}        
 %%%%
 
-\subsection{SIP Algorithms evaluation}
+\subsection{Implementation}
+\label{sec:trivialFailsImplementation}
+Algorithm \ref{algo:filters} describes the implementation of the 5 trivial failures from Table \ref{table:failures} as part of the filtering stage. Procedure ``filter'' is executed for every \gls{sip} instance before the verification stage. If any of the if statements (lines 2, 4, 6, 8 and 17) is false, the procedure returns false and the verification for the corresponding instance is not executed. Otherwise, if all 5 tests are true, the procedure makes a call to SIP1, i.e proceeds to the verification step. Pseudocode for SIP1 is shown in Algorithm $say where$ and discussed in the next Section.
+
+%% comment on the expensiveness of each trivial failure
+Failures 1 and 2 are the fastest: each of them takes time $\mathcal{O}(1)$ to compute. For failure 1, one needs only to return the sizes of the number of vertices in G$_{p}$ and in G$_{t}$. For failure 2, for every graph G, we have an array that stores all unique labels that occur in G. The size of this array is known after the graph is read from the file. To check whether test 2 is true, one needs to compare the size of the labels array d$_{p}$ of G$_{p}$ with the size of the labels array d$_{t}$ of G$_{t}$. Finding the values of d$_{t}$ and d$_{p}$ takes time $\mathcal{O}(1)$.
+
+Failures 3 and 4 have slower running time. For every label l $\in$ G$_{p}$, failure 3 occurs if l is not a label in G$_{t}$. Checking whether l is a label in G$_{t}$ involves iterating over the labels in G$_{t}$, which is of time $\mathcal{O}(d_{t})$ worst case, if l is the last label in G$_{t}$ or it is not present. Therefore, the overall complexity of failure 3 is $\mathcal{O}(d_{p}.d_{t})$. Algorithm \ref{algo:subsumes} shows the pseudo code for the ``subsumes'' procedure. Its complexity is $\mathcal{O}(plds)$, where plds is the \gls{lds} of label \textit{l} $\in$ G$_{p}$. Therefore, the overall complexity of failure 4 is $\mathcal{O}(plds.d_{p})$.
+
+Failure 5 is the most expensive one. It takes time $\mathcal{O}(m.n)$, where n is the order of G$_{p}$ and m is the order of G$_{t}$. Algorithm \ref{algo:filters} has to visit each vertex \textit{v} $\in$ G$_{p}$, initialize dom$_{v}$ and for every \textit{w} $\in$ G$_{t}$, check whether \textit{w} can be mapped to \textit{v}. The two checks (line 13) take time $\mathcal{O}(1)$.
+
+%% failures algorithm
+\begin{algorithm}
+\centering
+\caption{Lights Filters}
+\label{algo:filters}
+\begin{algorithmic}[1]
+\Procedure{Filter }{G$_{p}$, G$_{t}$}
+\If {\textbf{not} G$_{t}$.order $\geq$ G$_{p}$.order} \Return false \Comment{\textit{trivial failure 1}}
+\EndIf
+\If {\textbf{not} G$_{t}$ unique labels $\geq$ G$_{p}$ unique labels} \Return false \Comment{\textit{trivial failure 2}}
+\EndIf
+\For {\textit{l} in L$_{G_{p}}$}
+%\State{
+	\If {\textbf{not} \textit{l} in L$_{G_{t}}$} \Return false \Comment{\textit{trivial failure 3}}
+	\EndIf
+	\If {\textbf{not}  \Call{subsumes }{G$_{p}$, G$_{t}$, \textit{l}}} \Return false \Comment{\textit{trivial failure 4}}
+	\EndIf
+%}
+\EndFor
+\State alldoms $\gets$ initialize \Comment{\textit{An array of size the order of G$_{p}$ that contains the domain of each vertex in G$_{p}$}}
+\For{every \textit{v} $\in$ G$_{p}$}
+\State{
+	dom$_{v}$ = new BitSet(G$_{t}$.order) \Comment{\textit{initialize dom$_{v}$ to bitset of size the order of the target}}
+	\For{every \textit{w} $\in$ G$_{t}$}
+    	\If {\textit{v}.label == \textit{w}.label \textbf{and} \textit{v}.degree $\leq$ \textit{w}.degree}
+        \State {set dom$_{v}$[\textit{w}] to 1}
+        \EndIf
+	\EndFor \\
+    alldoms[v] $\gets$ dom$_{v}$
+	\If {empty \textit{dom$_{v}$}} \Return false \Comment{\textit{trivial failure 5}}
+}
+\EndFor \\
+\Call{sip1}{alldoms} \Comment{\textit{if no failures occurred, call SIP1 algorithm}}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of algorithm
+
+%%% subsumes
+\begin{algorithm}
+\centering
+\caption{G$_{t}$ Subsumes G$_{p}$}
+\label{algo:subsumes}
+\begin{algorithmic}[1]
+\Procedure{subsumes }{G$_{p}$, G$_{t}$, \textit{l}}
+\State plds $\gets$ lds(l) in G$_{p}$ \Comment{\textit{the label degree sequence of l in G$_{p}$}}
+\State tlds $\gets$ lds(l) in G$_{t}$ \Comment{\textit{the label degree sequence of l in G$_{t}$}}
+\For{i between 0 and pSeq.length - 1}
+\If {plds[i] $>$ tlds[i]} \Return false \Comment{\textit{exists vertex in G$_{p}$ that can`t' be matched to any vertex G$_{t}$}}
+\EndIf
+\EndFor \\
+return true
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of subsumes
+For the implementation of the filtering, the following classes are introduced.
+
+\begin{itemize}
+\item Class Graph\\
+Creates \gls{graph} from a file. A Graph object has size, order, id, array of the degree of each vertex, bitset array of the neighbours of each vertex, where the i$^{th}$ element in the array contains the neighbours of vertex i in the graph and array of labels, where similarly, the element in position i contains the label of vertex i. While reading in the graph, we initialize each field, which takes time $\mathcal{O}(size+order)$. When the array of labels is built, a new object for each unique label \textit{l} is created and the \gls{nds} of the graph is computed.
+\item Class Label\\
+This class represents a label in a Graph object. A Label has a name and \gls{lds} which is an array of integers, sorted in non-increasing order. The degree sequence array is built using insertion sort algorithm which is of complexity $\mathcal{O}(n^{2})$, where n is the size of \gls{lds} \cite{Cormen:2001:IA:580470}.
+\item Class SIP1\\
+This class implements the light filtering procedure displayed in Algorithm \ref{algo:filters} as well as the \gls{sip} algorithm, which is explained in more detail in the next Section.
+\end{itemize}
+
+\section{SIP1 Implementation}
+\label{sec:sip1}
+SIP1 is based on the simplest of the Glasgow algorithms \cite{CP2015}. Given a \gls{pattern} and \gls{target}, SIP1 has a variable for each vertex in \gls{pattern}, each with domain that is the set of compatible vertices in \gls{target} (alldoms, Algorithm \ref{algo:sip1}, initialized in Algorithm \ref{algo:filters}). Compatible vertices have the same labels and the degree of the target vertex is greater than or equal to the degree of the pattern vertex. Bit sets are used to represent the domains and the adjacency matrices of the graphs. When a pattern variable $u$ is instantiated with a target value $i$ (Algorithm \ref{algo:sip1}, line 7), all uninstatiated (future) variables have $i$ removed from their domains (Algorithm \ref{algo:sip1}, line 12). If a future variable $v$ is adjacent to $u$ in \gls{pattern} then the domain of $v$ becomes the intersection of the current domain of $v$ with the neighborhood of vertex $i$ in \gls{target}. This constraint is enforced by applying a logical $and$ operation between the two bit sets (Algorithm \ref{algo:sip1}, line 14). SIP1 uses \gls{forwcheck} with fail first heuristic \cite{haralickElliot:1980}: for all uninstantiated variables representing pattern vertices, it selects to explore the one that has the smallest domain before the others (Algorithm \ref{algo:sip1}, line 4).
+
+Class SIP1 contains the implementation of the verification step. For every \gls{sip}(G$_{p}$, G$_{t}$) instance, if it is not discarded after filtering, it goes to the SIP1 procedure (line 21, Algorithm \ref{algo:filters}). Algorithm \ref{algo:sip1} is a pseudocode of the implementation.
+
+%%% SIP1 pseudocode
+\begin{algorithm}
+\centering
+\caption{SIP1 }
+\label{algo:sip1}
+\begin{algorithmic}[1]
+\Procedure{SIP1 }{alldoms}
+\If{alldoms is empty} \Return solution \Comment{\textit{true or false}}
+\EndIf
+\State dom$_{u}$ $\gets$ smallest(alldoms) \Comment{\textit{select vertex u with the smallest domain first}}
+\State newAlldoms $\gets$ initialize with size=(alldoms.size - 1)
+\For{i in dom$_{u}$.getNextSetBit} \Comment{\textit{for each entry in u with bit set to 1}}
+	\State assign i as a value of vertex u
+	\For{(dom$_{v}$ in alldoms) $\land$ (dom$_{v}$ != dom$_{u}$)} \Comment{\textit{the domain of each vertex}}
+		\If{!consistent} \Return consistent $\land$ \Call{SIP1}{newAlldoms} 
+        \EndIf
+        \State newdom$_{v}$ $\gets$ dom$_{v}$
+        \State set i$^{th}$ entry of newdom$_{v}$ to false \Comment{\textit{cannot take value assigned to u}}
+        \If{u is adjacent to v in G$_{p}$}
+        	\State (newdom$_{v}$)AND(neighbours of i in G$_{t}$) \Comment{\textit{v can only take vertices in G$_{t}$ adjacent to i}}
+        \EndIf
+        \State add newdom$_{v}$ to newAlldoms
+        \State consistent $\gets$ !(newdom$_{v}$ == 0) \Comment{\textit{if there is a domain wipe out, consistent becomes false}}
+	\EndFor
+    \State consistent $\land$ \Call{SIP1}{newAlldoms}
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%% end of SIP1 pseudocode
+In the worst case, SIP1 will assign all values from the domain of each pattern vertex, making recursive calls to SIP1 and failing late, therefore exploring very deep in the search tree before finding that there is no solution. In practice, due to the fail first heuristic used, the algorithm very rarely fails deep in the search tree, because the value that is most likely to fail is first explored, therefore failures occur mostly near the top of the search tree. 
+
+\chapter{Evaluation}
+\label{ch:evaluation}
+
+%\section{Empirical study of path-based filtering}
+%\subsection{Performance}
+%TODO \\
+%       - the index file is bigger, but the candidate set is smaller\\
+%       - put the table with results\\
+%       - explain the results and why they are like this\\
+%	   - complexity?\\
+% 	   - what could be done better and how?\\
+
+%\subsection{Variants of Path-Subtree index}
+%TODO \\
+ %- use neighborhood of length 2, 3 ...
+ %- this will result in bigger index, but even stronger filtering strength, which means
+
+%\subsection{Advantages and Limitations}
+%TODO \\
+% - very easy to implement, especially when we have index-1 implementation ready\\
+ %- the index file is even bigger --- this is  bad\\
+ 
+
 %%% TODO make graphs with the running time in milliseconds
-%%% maybe add tables for each dataset how long it took to solve it in total, how long it took to solve the hardest instance, how long it took to solve the easiset instance, avg time per instance, median time 
-%%% do the same table for search nodes?
+\section{Light Filters}
+\label{eval:sip1}
+This Section reports on the observed performance of the subgraph query processing algorithm described in Chapter \ref{ch:sip1}. SIP1 was run with each of the datasets discussed in Section \ref{sec:datasets}, some of which were also used for empirical study by \cite{foteini, graphgrepsx, GRAPES, graphgrepsx, ctindex, gcode, tree+delta>=graph}. The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, same machine used by \cite{foteini}. Run time is measured in milliseconds from when the process starts until it completes, including the time to read in all the graphs, to perform filtering and verification for each instance and to write out all results to a file.
 
-This section reports on the observed performance of SIP0 and SIP1 when used with the four Big Data datasets.
+For each rejected \gls{sip} instance during filtering, we recorded the test that rejected it using the scale on Table \ref{table:failures} and calculated the total number of instances that were eliminated by a particular test for each dataset. These numbers were then used to derive the percentage of \gls{sip} instances eliminated by each fail test. We also computed the percentage of \gls{sat} and \gls{unsat} \gls{sip} instances for each dataset. Figure \ref{averageFailures} shows our results. The brown part of each bar represents the percentage of \gls{sip} instances that are \gls{sat}, the rest of the bar for \gls{unsat} problems. All satisfiable instances had to go through the verification step, whereas for some of the \gls{unsat} problems were discarded during the filtering. For instance, the leftmost bar represents the aids dataset, where 8.67\% of all instances are \gls{sat}. Out of the \gls{unsat} problems, 24.211\% were discovered during the verification stage and the rest 32.881\% were filtered by either of the trivial failures. The number of \gls{sat} and \gls{unsat} problems are on Table \ref{table:dataSAT}. The following observations were made:
 
-The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, also used by \cite{foteini}. The datasets as the same as described in section \ref{sec:datasets}. All of them are used for evaluation on indexing performance by \cite{foteini, graphgrepsx, GRAPES} and only the dataset called ``aids" is used by \cite{graphgrepsx, ctindex, gcode, tree+delta>=graph}.
+\begin{itemize}
+\item Filtering gives best performance for the instances in the aids dataset. In particular, almost 70\% of the targets are rejected before verification. Aids also contains the largest number of \gls{unsat} instances. Also, this dataset tends to be the main one (and sometimes the only one) used for evaluation for some subgraph query processing algorithms like \cite{graphgrepsx, ctindex, gcode, tree+delta>=graph}.
 
-When given a set of targets T and a set of pattern P, the program reads in every t $\in$ T and every p $\in$ P and performs a SIP algorithm for each (pattern,target) pair. Run time is measured in miliseconds from when the process starts until it completes, including the time to read in all the graphs, performing all SIP tests and write out all results to a file. As stated previously, both SIP0 and SIP1 implementations are written in Java.
+\item Filtering is not successful for any instance in pdbs. Similarly, only 3.75\% of the targets were filtered in ppigo. In other words, \gls{sip} call was made for every pattern and target graph in the dataset, because they were compatible with respect to every condition on table \ref{table:failures}. The main reason is that most of the instances of pdbs and ppigo are \gls{sat} (77.22\% and 61\% respectively) and had to go through verification to be solved. Here, filtering can be effective for at most 22.78\% and 39\% of the instances. In such cases, query processing method that puts low amount of effort (or none) during filtering and implements an efficient verification algorithm will show much higher performance than method that employs heavy filtering approach and naive \gls{sip} algorithm for verification. This hypothesis was confirmed by the results of the study presented in \cite{foteini}, where each of the evaluated heavy indexing techniques, evaluated using the same datasets, demonstrated several times poorer performance than the light filtering technique discussed here.
 
-%%%% Analysis of the plots:
-\subsubsection{Trivial Failures}
-This subsection reports on the total filtering strength of the measured trivial failures with SIP0 and SIP1 algorithms. Table \ref{table:failures} shows in which order they are executed (from 1 to 5) for each SIP algorithm.
-
-While running the SIP for each dataset, every time a trivial failure was observed, we recorded its number using the scale on table \ref{table:failures}. Then, we computed the number of occurrences of each failure for each dataset. These numbers were then used to derive the percentage of the targets that each trivial failure eliminated when executed in the stated hierarchical order. Figure \ref{averageFailures} shows the results with SIP0 (on the left) and SIP1 (on the right). Here, average percent of filtering for each failure is plotted. Additional plots that present the median, maximum and minimum percent of trivial failure filtering can be viewed from the appendix section.
-
-It is important to note that as the failures are executed in hierarchical order, the number of graphs filtered by trivial fail $x$ can depend on the order of execution of $x$ with regards to the other trivial failures. With the results presented, we do not aim to make conclusions on individual performance of trivial failures. In order to study this, alternative set of experiments needs to be conducted.
+\item There are duplicate target graphs in the pcms and pdbs datasets. The pcms database is supposed to contain 200 targets \cite{datasets}. In practice, there are only 50 unique graphs and each of them is added 4 times. The pdbs dataset is composed of 600 targets \cite{datasets}, but out of them only 30 are unique, each of them duplicated 20 times.
+\end{itemize}
 
 %%% 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
-\includegraphics[height=14cm,width=13cm]{images/plots/sip1avgFails.png}
-\caption{Average filtering percentage of each method in table \ref{table:failures} for each of the datasets}
+\includegraphics[height=15cm,width=13.5cm]{images/plots/splittedSIP.png}
+\caption{Satisifability and average filtering percentage for each method in Table \ref{table:failures} for each of the datasets}
 \label{averageFailures}
 \end{figure}
 %%%
 
-While running the experiments, the following observations were made:
+\subsection{Hardness of \gls{sip} in terms of search nodes}
+We report on the cost of the verification step in terms of the number of \glspl{sn} taken to solve a \gls{sip} instance. A search node denotes the number of recursive \gls{sip} calls taken to find a solution if the problem is \gls{sat} or prove that the problem is \gls{unsat}. For every dataset T, we take all instances that were not rejected during filtering and we compute the number of search nodes taken to solve \gls{sip} for each instance. We then compute the number of instances $|T_i|$ solved in a given number of search nodes $i$ for $0$ $<$ $i$ $<$ $n_{max}$, where  $n_{max}$ is search nodes taken to solve the hardest \gls{sip} instance in T. Figures \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes} present our results. Here, $|T_i|$ is represented as percentile of all targets (the x-axis). The search effort is plotted, starting from the easiest percentile (the leftmost part of the x-axis) and finishing with the last percentile representing the hardest instances in terms of search effort (on the rightmost part of the x-axis). The y-axis shows the cumulative difficulty of SIP calls in terms of search nodes for each percentile of the targets in a log scale. For example, looking at Figure \ref{aidsNodes}, 24\% of the targets are solved by using at most 2 nodes of search and 50\% of all targets are solved in less than 10 nodes. The hardest instances take at most 600 nodes.
+
+The value on the y-axis for each percentile of T represents the number of search nodes taken to solve the hardest instance that belongs to the percentile. In other words, the graphs below show the hardest instance observed for each percentile of T. For example, if we had 3 graphs that belong to the i$^{th}$ percentile of T and they were solved in 1, 2 and 10 nodes respectively, the y-axis value of i would be 10. Therefore, the datasets are in practice easier than what is shown on Figures \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}, which present the hardest instance for each percentile in the dataset. These Figures help us to make the following observations:
 \begin{itemize}
-\item The trivial failures studied perform best on the aids dataset.\\
-In particular, almost 70\% of the targets are removed without making a call to SIP. Only on checking the order of the graphs (trivial fail \#1) and the number of different labels (trivial fail \#2), one is able to prove almost 14\% of all targets as not satisfiable.   
-\item All trivial failures measured do not work well on all graphs in pdbs. Similarly, only 3.75\% of the targets were filtered in ppigo.\\
-In other words, SIP call was made for every pattern and target graph in the dataset, because they were compatible with respect to every condition on table \ref{table:failures}. There are two possible reasons for this. First, most of the instances of pdbs and ppigo might be satisfiable. If this is the case, there is nothing that can be filtered out. A second reason for these results could be that the trivial fails are not strong enough to eliminate targets from these datasets. Further investigations of the results need to be conducted to find out the reason for the obtained results and identify possible strategies to make SIP algorithms perform better.
-\item For some datasets (aids), NDS compatibility tests manage to filter some targets that are otherwise not filtered by the tests 1,2 and 5. For other datasets (pcms), NDS filter out part of the targets that are otherwise removed by a next trivial failure.
-\item NDS compatibility does not help eliminating targets before the search for pdbs and ppigo datasets.
-\item The dataset that shows best filtering improvement after adding failures 3 and 4 is aids.
-\item There are duplicate target graphs in the pcms and pdbs datasets.\\
-The pcms database is supposed to contain 200 targets \cite{datasets}. In practice, there are only 50 unique graphs and each of them is added 4 times. The pdbs dataset is composed of 600 targets \cite{datasets}, but out of them only 30 are unique, each of them duplicated 20 times.
-\end{itemize}
+\item The easiest dataset is ppigo. Looking at Figure \ref{ppigoNodes}, 88\% of all targets are solved by using at most 4 search nodes, 28\% are solved by using at most 1 node of search effort. The hardest problem (the right-most bar) takes 65 nodes to solve and it is between pattern ``8\_1.6" and target ``\#MUS$/$Mus\_musculus.sif$>$0.5.sif". The time taken to solve this is 4 milliseconds and the instance is \gls{unsat}.
 
-\subsubsection{Hardness of SIP in terms of search nodes}
+\item pdbs is harder than ppigo and aids with most varied number of search nodes per instance. It is on average harder than pcms, however, the hardest instance in pcms takes more search effort than the hardest instance in pdbs. Figure \ref{pdbsNodes} shows that 20\% of the targets in pdbs are solved by using at most 100 nodes, which is significantly higher than ppigo, where even the hardest instance was solved in less than 70 nodes. The hardest instance here is between pattern ``32$\_$1ARO" and target ``\#g" and it is solved in 7,152 nodes for 95 milliseconds. This instance is \gls{unsat}. 
 
-%%% todo: what does number of search nodes mean? What is search nodes?
+\item The dataset with the hardest instance is pcms. The hardest SIP takes 10,470 nodes to solve and it is between pattern ``16\_1C5G.cm.A" and target ``1CY2.cm.A.cmap". It was solved in 12 milliseconds and it is unsatisfiable. Looking at the other 99\% of pcms targets, we can see that they are mostly easy. For example, 43\% of the SIP instances are solved by using at most 10 nodes of search effort.
 
-We report on the cost of call to SIP in terms of the number of nodes (a measure of search effort) taken to solve an SIP instance. For every dataset T, for every (P,T) pair, we find every graph t $\in$ T that was not filtered by any of the trivial failures (i.e. all target graphs for which a call to SIP had to be made to check whether the pattern is contained in the target). We compute the number of graphs $|T_i|$ that are solved in given number of nodes $i$ for $0$ $<$ $i$ $<$ $maxN$, where $maxN$ is the maximum number of nodes taken to solve an instance for a given dataset. Figures \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes} present our results. Here, $|T_i|$ is represented as percentile of all targets (the x-axis). The search effort is plotted, starting from the easiest percentile (the leftmost part of the x-axis) and finishing with the last percentile representing the hardest instances in terms of search effort (on the rightmost part of the x-axis). The y-axis shows the cumulative difficulty of SIP calls in terms of search nodes for each percentile of the targets in a log scale. For example, looking at figure \ref{aidsNodes}, 24\% of the targets are solved by using at most 2 nodes, 50\% of all targets are solved in less than 10 nodes. The hardest instances take at most 600 nodes.
-
-The value on the y-axis for each percentile of T represents the number of nodes taken to solve the hardest instance that belongs to the percentile. In other words, the graphs below show the hardest instance observed for each percentile of T. For example, if we had 3 graphs that belong to the i$^{th}$ percentile of T and they were solved in 1, 2 and 10 nodes respectively, the y-axis value of i would be 10. Therefore, the datasets are in practice easier than what is shown on figures \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}, which present the hardest instance for each percentile in the dataset.
-
-We derived the number of members of 1 percent of all target graphs in T by dividing |T| by 100. In cases with aids and pcms, the number of targets in the dataset was not divisible by 100. This is why for these datasets, the last percentile is slightly bigger with respect to the number of targets that form each of the rest 99\% of the graphs.
-
-The plots below help us to make the following observations:
-\begin{itemize}
-\item The easiest dataset is ppigo. Looking at figure \ref{ppigoNodes}, 88\% of all targets are solved by using at most 4 nodes, 28\% are solved by using at most 1 node of search effort. The hardest problem (the right-most bar) takes 65 nodes to solve and it is between pattern ``8\_1.6" and target ``\#MUS$/$Mus\_musculus.sif$>$0.5.sif". The time taken to solve this is 4 milliseconds and the instance is unsatisfiable.
-
-\item The dataset called pdbs is the harder compared to ppigo and and aids and the most versatile one in terms of search effort. It is on average harder than pcms, however, the hardest instance in pcms takes more search effort than the hardest instance in pdbs. Figure \ref{pdbsNodes} shows that 20\% of the targets in pdbs are solved by using at most 100 nodes, which is significantly higher than ppigo, where even the hardest instance was solved in less than 70 nodes. The hardest instance here is between pattern ``32$\_$1ARO" and target ``\#g" and it is solved in 7152 nodes for 95 milliseconds. This instance is not satisfiable. 
-
-\item The dataset with the hardest instance is pcms. The hardest SIP takes 10470 nodes to solve and it is between pattern ``16\_1C5G.cm.A" and target ``1CY2.cm.A.cmap". It was solved in 12 milliseconds and it is unsatisfiable. Looking at the other 99\% of pcms targets, we can see that they are mostly easy. For example, 43\% of the SIP instances are solved by using at most 10 nodes of search effort.
-
-\item The aids dataset is comparably easy. The maximum nodes taken to solve a SIP instance took 619 nodes of search effort. Namely, it is the SIP call between pattern \#1 and target \#629591 and it took 0 milliseconds of time. SIP(\#1,\#629591) is not satisfiable.
+\item The aids dataset is comparably easy. The maximum nodes taken to solve a SIP instance took 619 nodes of search effort. It is the SIP call between pattern \#1 and target \#629591, it took 0 milliseconds of time and it is \gls{unsat}.
 
 \item Looking at aids, pcms and pdbs, the number of nodes taken to solve SIP grows exponentially with the percentile of the population.
 
-\item The hardest instance of each dataset is not satisfiable.
+\item The hardest instance of each dataset is \gls{unsat}.
 
-\item Even the hardest instance of each dataset is solved very quickly.
+\item All four datasets are easy.
 \end{itemize}
 
 %%%
-\begin{figure}[h]
+\begin{figure}
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
@@ -933,7 +1180,7 @@ The plots below help us to make the following observations:
   \label{pcmsNodes}
 \end{minipage}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
@@ -950,96 +1197,85 @@ The plots below help us to make the following observations:
 \end{figure}
 %%%%
 
-\subsubsection{Hardness of SAT vs UNSAT SIP instances}
+\subsection{Hardness of SAT vs UNSAT SIP instances}
 
-The observation that the hardest instance of each dataset is not satisfiable arises the following question: is UNSAT SIP generally harder than SAT SIP or are our observations due to pure chance? The experiments described in this section are again conducted in terms of number of search nodes and they are intended to further investigate this observation.
+The observation that the hardest instance of each dataset is unsatisfiable raises the following question: is \gls{unsat} \gls{sip} generally harder than SAT SIP? The experiments described in this section are again conducted in terms of number of search nodes and they are intended to further investigate this observation.
 
-The following eight graphs below break each of the graphs discussed in the previous section (namely \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}) further down in terms of whether the SIP instances are satisfiable or not. The blue plots represent all satisfiable SIP pairs (p,t) for every t $\in$ T and every p $\in$ P, where T and P are the sets of targets and patterns for a given dataset D. Similarly, the red plots represent all unsatisfiable SIP (p,t) instances of a dataset D. For each D (namely, for aids, pcms, pdbs and ppigo), the union of the blue plot (satisfiable instances, left-hand side below) and the red plot (unsatisfiable instances, right-hand side below) gives the plot for the corresponding dataset discussed in the previous section. For example, figure \ref{aids:SAT} $\cup$ figure \ref{aids:UNSAT} = figure \ref{aidsNodes}.
+The following eight plots below break each of the plots discussed in the previous section (namely \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}) further down in terms of whether the SIP instances are \gls{sat} or \gls{unsat}. The blue plots represent all satisfiable SIP pairs for a dataset D. Similarly, the red plots represent all unsatisfiable SIP instances of D. For each D (namely, for aids, pcms, pdbs and ppigo), the union of the blue plot (\gls{sat} \gls{sip}, left-hand side) and the red plot (\gls{unsat} \gls{sip}, right-hand side) gives the plot for the corresponding dataset discussed in the previous Section.
 
-Note that figures \ref{ppigo:SAT} and \ref{ppigo:UNSAT} contain only 4 bars each of them, i.e. the data is divided into quartiles instead of percentile. Here, each bar represents 25\% of all instances for the corresponding category (SAT/UNSAT). For example, figure \ref{ppigo:SAT} that represents all satisfiable SIP instances shows that the lowest quartile of the SAT SIP calls takes no more than 4 nodes to solve, as it is also true for the second quartile. We changed the percentile representation for this dataset, because the number of SAT and UNSAT SIP instances is too small to be scaled to percentiles.
-
-%%% todo: maybe make null hypothesis about SAT/UNSAT hardness and try to reject it (or not)?
-
+Note that the plots on Figure \ref{fig:ppigoSatUnsat} contain only 4 bars each, i.e. the data is divided into quartiles instead of percentile. Here, each bar represents 25\% of all instances of a category (\gls{sat}/\gls{unsat}). For example, the left plot shows that the lowest quartile of the \gls{sat} \gls{sip} calls takes no more than 4 nodes to solve, as it is also true for the second quartile. We changed the percentile representation for this dataset, because the number of \gls{sat} and \gls{unsat} \gls{sip} (61 and 39 respectively, Table \ref{table:dataSAT}) instances is too small to be scaled to percentiles.
 %%% SAT vs UNSAT in terms of search nodes
-\begin{figure}[h]
+\begin{figure}
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/aidsSAT.png}
-  \caption{Search effort for SAT aids targets}
-  \label{aids:SAT}
 \end{minipage}%
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/aidsUNSAT.png}
-  \caption{Search effort for UNSAT aids targets}
-  \label{aids:UNSAT}
 \end{minipage}
+\caption{Search effort for \gls{sat}(blue, left) \gls{unsat}(red, right) \gls{sip} instances in aids}
+\label{fig:aidsSatUnsat}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/pcmsSAT.png}
-  \caption{Search effort for SAT pcms targets}
-  \label{pcms:SAT}
 \end{minipage}%
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/pcmsUNSAT.png}
-  \caption{Search effort for UNSAT pcms targets}
-  \label{pcms:UNSAT}
 \end{minipage}
+\caption{Search effort for \gls{sat}(blue, left) \gls{unsat}(red, right) \gls{sip} instances in pcms}
+\label{fig:pcmsSatUnsat}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/pdbsSAT.png}
-  \caption{Search effort for SAT pdbs targets}
-  \label{pdbs:SAT}
 \end{minipage}%
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/pdbsUNSAT.png}
-  \caption{Search effort for UNSAT pdbs targets}
-  \label{pdbs:UNSAT}
 \end{minipage}
+\caption{Search effort for \gls{sat}(blue, left) \gls{unsat}(red, right) \gls{sip} instances in pdbs}
+\label{fig:pdbsSatUnsat}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 \centering
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/ppigoSAT.png}
-  \caption{Search effort for SAT ppigo targets}
-  \label{ppigo:SAT}
 \end{minipage}%
 \begin{minipage}[t]{.5\textwidth}
   \centering
   \includegraphics[height=11cm,width=9cm]{images/plots/ppigoUNSAT.png}
-  \caption{Search effort for UNSAT ppigo targets}
-  \label{ppigo:UNSAT}
 \end{minipage}
+\caption{Search effort for \gls{sat}(blue, left) \gls{unsat}(red, right) \gls{sip} instances in ppigo}
+\label{fig:ppigoSatUnsat}
 \end{figure}
 %%%%
 
-Table \ref{table:SATUNSATnodes} presents statistics in terms of the search effort for satisfiable (blue columns) and unsatisfiable (red columns) instances. We calculated the total number of nodes taken to solve all SIP instances for every dataset, the average, median, maximum and minimum number of nodes taken per instance. For instance, the table shows that the total number of nodes taken to solve all satisfiable SIP instances for the aids dataset is 437 108, whereas the total number of nodes taken to solve all unsatisfiable SIP instances is 2 295 724 nodes, which is almost 5 times more. Using these figures, we derive that the total number of nodes taken to solve all SIP instances for the aids dataset is the sum of those two numbers, which is equal to 2 732 832 nodes.
-
-Looking at the SAT and UNSAT figures and the table, we notice that:
+Table \ref{table:SATUNSATnodes} presents statistics in terms of search effort for \gls{sat} (blue columns) and \gls{unsat} (red columns) instances. For instance, the Table shows that the total number of search nodes taken to solve all \gls{sat} \gls{sip} instances for the aids dataset is 437,108 and the total number of search nodes taken to solve all \gls{unsat} \gls{sip} instances in aids is 2,295,724. Using these Figures, we derive that the total number of search nodes taken to solve all \gls{sip} instances for the aids dataset is the sum of those two numbers, which is equal to 2,732,832. Figure \ref{table:dataSAT} shows the number of instances and percent from each category(SAT/UNSAT). The Table tells us that the reason for the large difference in terms of search effort between SAT and UNSAT instances is that 91\% of all instances are UNSAT (almost ten times more than SAT). Using the Tables and Figures, the following observations can be made:
 \begin{itemize}
-\item For three of the datasets, namely aids, pcms and ppigo, the easiest and hardest instances tend to be UNSAT.
-\item For pdbs, there is a big difference in terms of search effort between SAT and UNSAT problems. For example, the satisfiable instances are easier for every percentile of the targets than the unsatisfiable instances (\ref{pdbs:SAT}, \ref{pdbs:UNSAT}). The tabulated results on figure \ref{table:SATUNSATnodes} show that on average, SAT instances are 3 times easier than UNSAT, the SAT median is more than 4 times smaller than the UNSAT instances median and the number of nodes taken to solve the hardest SAT instance is 2 845 which is 4307 nodes less than UNSAT.
-\item Table \ref{table:SATUNSATnodes} shows that the total search effort taken to solve unsatisfiable problems is bigger (894 260 nodes taken in total for SAT and 854 720 nodes in total taken for UNSAT problems) contrary to what we observed on the figures. The reason for these results is that pdbs contains large number of solvable instances. In particular, the figures on table \ref{table:dataSAT} show us that the average percent of satisfiable (p,T) SIP instances, where p $\in$ P, is 69.42 (i.e, for each set of (p,T) SIP problems, for 69.42\% of all (p,t) pairs, where t $\in$ T, t contains p as subgraph). Similarly, the median, minimum and maximum number of SAT instances for a set of (p,T) SIP problems are respectively 83.3\%, 22.67\% and 96.7\%. Therefore, the large search effort of SAT SIP problems for pdbs is due to their substantially larger number compared to UNSAT problems. 
-\item There is a substantial difference in terms of search effort between the hardest SAT and the hardest UNSAT instances of the pcms dataset. In particular, this difference is 10 092 nodes, where the hardest SAT problem takes 378 nodes (\ref{table:SATUNSATnodes}) and it is between pattern \#32\_1CY1.cm.A.out and target \#1CY0.cm.A.cmap, solved for 4 milliseconds.
-\item For aids and pcms datasets, all unsatisfiable instances in total are about 5 times harder than the total number of all satisfiable instances (\ref{table:SATUNSATnodes}).
-\item For datasets pdbs and ppigo, the total search effort for unsatisfiable instances is smaller than the search effort for satisfiable SIPs. In particular, for ppigo, it is twice smaller.
-\item As noted before, the maximum search effort is always bigger for unsatisfiable instances. For some datasets, the difference is substantial (pcms). For all four datasets, the search effort for the hardest SAT instance is at least twice easier than the search effort taken for the hardest UNSAT instance. 
+\item For aids, pcms and ppigo, the easiest percentile of \gls{unsat} \gls{sip} instances require less number of search nodes to be solved than the easiest \gls{sat} \gls{sip} instances. The hardest percentile of \gls{unsat} \gls{sip} take more search effort than the hardest percentile of \gls{sat} \gls{sip} instances.
+
+\item For pdbs, there is a big difference in terms of search effort between SAT and UNSAT problems. For example, \gls{sat} instances are easier for every percentile of the targets (\ref{fig:pdbsSatUnsat}). The tabulated results on Figure \ref{table:SATUNSATnodes} confirm this observation. On average, SAT instances are 3 times easier than UNSAT, the SAT instances median is more than 4 times smaller than the UNSAT instances median and the number of search nodes taken to solve the hardest SAT instance (2,845) is much less than the number of nodes taken to solve the hardest UNSAT instance (7,152).
+
+\item Table \ref{table:SATUNSATnodes} shows that for the pdbs dataset, the total search effort taken to solve unsatisfiable problems is bigger (894,260 nodes taken in total for SAT and 854,720 nodes in total taken for UNSAT problems) contrary to what we observed on the Figures. However, Table \ref{table:dataSAT} shows that \gls{sat} \gls{sip} consists of 77.22\% of all instances in pdbs. Therefore, the large search effort of SAT SIP problems for pdbs is due to their substantially larger number compared to UNSAT problems and in practice, \gls{unsat} \gls{sip} was much more difficult to solve than \gls{sat} \gls{sip} for this dataset. This is confirmed by the average search nodes figures (the second row in Table \ref{table:SATUNSATnodes}), where a SAT instance is on average 3 times easier to solve than an UNSAT instance.
+
+\item The pcms dataset is composed of mostly \gls{unsat} \gls{sip} instances (\ref{table:dataSAT}, \ref{averageFailures}). Similarly to aids, this is the reason why the total number of search nodes for all \gls{unsat} problems is considerably larger than the number of search nodes for all \gls{sat} problems (\ref{table:SATUNSATnodes}). However, the hardest \gls{sat} problem is substantially easier than the hardest \gls{unsat}. The difference is 10,092 search nodes, where the SAT problem takes 378 search nodes to be solved (\ref{table:SATUNSATnodes}) and it is \gls{sip} (``\#32\_1CY1.cm.A.out'', ``\#1CY0.cm.A.cmap''), solved for 4 milliseconds. Average search nodes figures also show that a SAT instance is on average 5 times easier to solve than an UNSAT instance(the second row in Table \ref{table:SATUNSATnodes}).
+
+\item 61\% of all instances in ppigo are \gls{sat} (\ref{table:dataSAT}, \ref{averageFailures}) and this is the main reason why the total SAT SIP search effort is larger than the UNSAT SIP search effort. The average search effort displayed in Table \ref{table:SATUNSATnodes} shows that SAT and UNSAT SIP instances are similarly hard on average for this dataset.
 \end{itemize}
 
 
 \newcolumntype{g}{>{\columncolor{red!15}}r}
 \newcolumntype{b}{>{\columncolor{blue!15}}r}
-\begin{table}[H]
+\begin{table}
 \centering
         \renewcommand{\arraystretch}{1.5}% Spread rows out...
         \begin{tabular}{c|bg|bg|bg|bg|bg|}
@@ -1054,10 +1290,10 @@ Looking at the SAT and UNSAT figures and the table, we notice that:
             \cline{2-11}
              \hline
             % & SAT & UNSAT & SAT & UNSAT & SAT & UNSAT & SAT & UNSAT & SAT & UNSAT\\
-            \multicolumn{1}{|c|}{\textbf{aids}}  &437 108  &2 295 724 &20.998 &10.473   &13  &0   &9  &0  &279   &619 \\
-            \multicolumn{1}{|c|}{\textbf{pcms}}  &13 644   &133 276   &23.047 &110.327  &17  &9   &9  &0  &378   &10 470 \\
-            \multicolumn{1}{|c|}{\textbf{pdbs}}  &894 260  &854 720   &321.67 &1042.341 &123 &544 &18 &17 &2 845 &7 152 \\
-            \multicolumn{1}{|c|}{\textbf{ppigo}} &714      &312       &6.932  &5.473    &6   &2   &5  &0  &30    &65 \\
+            \multicolumn{1}{|c|}{\textbf{aids}}  &437,108  &2,295,724 &21 &10.4   &13  &0   &9  &0  &279   &619 \\
+            \multicolumn{1}{|c|}{\textbf{pcms}}  &13,644   &133,276   &23 &110.3  &17  &9   &9  &0  &378   &10,470 \\
+            \multicolumn{1}{|c|}{\textbf{pdbs}}  &894,260  &854,720   &322 &1,042.3 &123 &544 &18 &17 &2,845 &7,152 \\
+            \multicolumn{1}{|c|}{\textbf{ppigo}} &714      &312       &6.932  &5.8    &6   &2   &5  &0  &30    &65 \\
             \hline
         \end{tabular}
         \caption{Number of nodes of search effort for each dataset. Blue for solvable and red for unsolvable SIP instances}
@@ -1065,17 +1301,48 @@ Looking at the SAT and UNSAT figures and the table, we notice that:
     \end{table}
 
 
-\subsubsection{Hardness of SIP in terms of running time}
+\subsection{Hardness of SIP in terms of running time}
+Table \ref{table:cpuTime} shows the total time in milliseconds taken to solve all \gls{sip} instances of a given dataset. The time on the first row includes file I/O, creating and instantiating objects and domains of variables, the filtering and the verification time. The second row shows the number of milliseconds taken to perform the filtering step and the third: the \gls{sip} algorithm. Note that the filtering step is performed for every sip instance, whereas verification is applied only on instances that were not rejected during filtering. The percentage of calls to sip for each dataset can be seen on Figure \ref{table:failures}.
 
+It is easy to notice that reading in the graphs from a file and instantiating the required objects and variables takes most of the running time for each dataset. For ppigo and pcms, filtering took more time than verification. These figures are very close for the aids dataset (filtering took 2,569 millis. and verification took 2,687 millis.). The 5,006 milliseconds spent on filtering for \gls{sip} problems in pdbs was wasteful, because no instance was rejected (\ref{averageFailures}). Performing \gls{sip} algorithm on all 3,600 instances (\ref{table:dataSAT}) took 16,102 milliseconds, which makes 4.47 milliseconds per instance on average. During the analysis of the search effort, it was noticed that pdbs is the hardest dataset. Achieving so fast verification time shows that the four Big Data datasets are indeed very easy.
 
+\subsubsection{Comparison with Big Data algorithms}
+\label{subsubsec:bigDataCompare}
+Evaluation of six ``state of the art'' subgraph query processing algorithms (\cite{ctindex,gcode,GRAPES,tree+delta>=graph,graphgrepsx,freqStructBasedIndexing1}) is presented in \cite{foteini}. The algorithms employ a heavy filtering approach using an \gls{index} structure and run \cite{vf2} \gls{sip} algorithm during verification over the \gls{c}. We use the results in this work for comparison with the performance of the light filters method with the evaluated approaches.
 
-\chapter{Empirical Study}
-    \section{Filter-Verification methods}
-    	\subsection{CT-Index}
-        - my evaluation
-        \subsection{Path-based indexing implementations}
-    \section{Light Filters}
-    
+In the study described in \cite{foteini}, it was observed that for pcms and ppigo, the filtering stage for four of the evaluated algorithms never finished executing, so the instances never underwent verification. Table \ref{table:cpuTime} shows that the performance of the light filters method is incomparably faster.
+
+For the aids datasets, the fastest of the evaluated algorithms is GraphGrepSX \cite{graphgrepsx} and it took 9 seconds to perform filtering and about 600 milliseconds for verification. It took us 2,569 milliseconds for filtering (\ref{table:cpuTime}), but verification was slower (2,687 milliseconds). The fastest algorithm evaluated in \cite{foteini} took about 7 seconds for filtering and 200 milliseconds for verification and it is again GraphGrepSX \cite{graphgrepsx}. The light filters approach has slower verification and slightly faster filtering.
+
+The algorithms evaluated in \cite{foteini} have an additional overhead that is not present in our approach, which is the size of the index that has to be stored.
+
+\section{Summary of findings}
+This Section includes a brief summary of the key points made in this Chapter. 
+
+It was discovered that the Big Data datasets are of poor quality. Two of the datasets have targets that are copied multiple times each. All four datasets contain very easy \gls{sip} instances. The hardest of the datasets is pdbs. Even with the hardest dataset, a \gls{sip} instance took only 4.47 milliseconds to be solved on average. Verification for 50\% of the instances in pdbs took much less than 90 \glspl{sn}, the most expensive \gls{sip} problem costs 10,470 \glspl{sn}. Surprising finding was that the datasets can be easily kept in memory. Big Data is much smaller than what we initially expected. Beneficial future work in this area would be to develop better quality, much bigger and harder datasets. 
+
+Filtering is bound to work only in the area of \gls{unsat} \gls{sip} instances. Consequently, when most of the instances of the dataset are \gls{sat}, filters can be more an overhead than help. The SIP algorithm, performed during verification, can both identify SAT and UNSAT problems. Therefore, constructing sophisticated filtering would give little gain, if any, but implementing fast and smart \gls{sip} would improve the performance significantly.  
+
+We did experiments to find out whether \gls{sat} problems are generally easier than \gls{unsat} problems that were not rejected by filtering. What was observed is that for each of the datasets, the hardest and the easiest instances in terms of \glspl{sn} were \gls{unsat}. Possible way of improvement is to modify the filters algorithm so that it can prune those hard instances. This will involve further investigation of what makes a problem hard. 
+
+\begin{table}
+\centering
+\renewcommand{\arraystretch}{1.3}% Spread rows out...
+\begin{tabular}{ |>{\centering\bfseries}m{1.2in} |>{\centering}m{0.5in}| >{\centering}m{0.5in}| >{\centering}m{0.5in}| >{\centering\arraybackslash}m{0.5in}|} 
+\hline
+ & \textbf{AIDS} & \textbf{PCMS} & \textbf{PDBS}  & \textbf{PPIGO} \\
+\hline
+total cpu T & 15,770 & 26,855 & 133,451 & 11,886 \\
+\hline
+total filtering T & 2,569 & 1,500 & 5,006 & 379 \\
+\hline
+total verification T & 2,687 & 1,013 & 16,102 & 51 \\
+\hline
+\end{tabular}
+\caption{Total running time in millisec for each dataset}
+\label{table:cpuTime}
+\end{table}    
+   
 \chapter{Conclusion and Future work}
 	\section{What did we do? What does it suggest?}
     \section{Suggestions for Future work}
@@ -1136,5 +1403,6 @@ a clq file
 
 \bibliographystyle{plain}
 \bibliography{bib}
-
+\printglossary
+\printglossary[type=\acronymtype]
 \end{document}
