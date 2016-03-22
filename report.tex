@@ -21,6 +21,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[acronym]{glossaries}
 
+
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 %\PassOptionsToPackage{noend}{algpseudocode}% comment out if want end's to show
@@ -55,8 +56,6 @@
 \patchcmd{\ALG@doentity}{\noindent\hskip\ALG@tlm}{\ALG@printindent}{}{\errmessage{failed to patch}}
 \makeatother
 
-
-
 \makeglossaries
 \glstoctrue
 \definecolor{Gray}{gray}{0.85}
@@ -75,6 +74,9 @@
 \newcommand{\fancyI}{\mathcal{I}}
 \newcommand{\fancyC}{\mathcal{C}}
 \newcommand{\fancyP}{\mathcal{P}}
+\newcommand{\fancyF}{\mathcal{F}}
+
+\interfootnotelinepenalty=1000
 %%%%%%%%% glossary entries and acronyms %%%%%%%%%%%%%%%%%%%%
 
 %%% The glossary entry the acronym links to   
@@ -116,6 +118,13 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 \newglossaryentry{sn}{name={search node}, description={A search node denotes the number of recursive calls to the SIP algorithm taken to find a solution}}
 
 \newglossaryentry{c}{name={candidate set ($\fancyC)$}, first={candidate set ($\fancyC$)}, description={todo}}
+
+\newglossaryentry{tree}{name={tree}, description={A tree is an undirected graph such that any two vertices are connected by exactly one path. In this work, we refer to the vertices of the tree as \emph{nodes}.}}
+
+\newglossaryentry{canonicalform}{name={canonical form}, description={A canonical form of a graph G is a labeled graph Canon(G) that is isomorphic to G, such that every graph that is isomorphic to G has the same canonical form as G}}
+
+\newglossaryentry{hashfunction}{name={hash function}, description={A function that can be used to map data of arbitrary size to data of fixed size. The values returned by a hash function are called hash values}}
+
 %%%%%%%%%%%%%%%% end of glossary and acronym entries %%%%%%%%%
 
 \begin{document}
@@ -163,18 +172,21 @@ In this section, we introduce all preliminary terminology and definition used th
 
 \subsection{Graph Theory}
 \label{sec:graphTheory}
-%% todo: check the label def part, might seem a bit dodggy
-A \textit{graph G} = (V$_{G}$, E$_{G}$, L$_{G}$) consists of set of vertices V$_{G}$ = \{u$_i$\}, 1 $\leq$ i $\leq$ $|V_{G}|$, set of edges E$_{G}$ = \{(u$_k$, u$_m$) $|$ u$_k$ $\in$ V$_{G}$, u$_m$ $\in$ V$_{G}$\}, and  function  L$_{G}$: V$_{G}$ $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each v $\in$ V$_{G}$, where $\Lagr$ is the set of all possible labels. A graph is \textit{undirected}, if for every (u, v) $\in$ E$_{G}$ $\Rightarrow$ (v, u) $\in$ E$_{G}$. In this work, only undirected graphs are considered. The \textit{size} of G is equal to the number of edges in the graph (i.e the cardinality of E$_{G}$ denoted as $|E_{G}|$). The \textit{order} of G is equal to the number of vertices in G, that is $|V_{G}|$.
+%% todo: define what is tree, it is needed for ct-index 
 
-A \textit{path} in a graph is a sequence of distinct edges which connect a sequence of distinct vertices. A path from vertex \textit{u} to vertex \textit{v} has \textit{u} as the first and \textit{v} as the last vertex in the sequence. A \textit{cycle} is a path where the first vertex in the sequence is also the last. In a given graph G, there may be zero, one or more than one path from \textit{u} to \textit{v} (and similarly for cycles).
+A \emph{graph G} = (V$_{G}$, E$_{G}$, L$_{G}$) consists of set of vertices V$_{G}$ = \{u$_i$\}, 1 $\leq$ i $\leq$ $|V_{G}|$, set of edges E$_{G}$ = \{(u$_k$, u$_m$) $|$ u$_k$ $\in$ V$_{G}$, u$_m$ $\in$ V$_{G}$\}, and  function  L$_{G}$: V$_{G}$ $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each v $\in$ V$_{G}$, where $\Lagr$ is the set of all possible labels. A graph is \emph{undirected}, if for every (u, v) $\in$ E$_{G}$ $\Rightarrow$ (v, u) $\in$ E$_{G}$. In this work, only undirected graphs are considered. The \emph{size} of G is equal to the number of edges in the graph (i.e the cardinality of E$_{G}$ denoted as $|E_{G}|$). The \emph{order} of G is equal to the cardinality of its vertex set $|V_{G}|$.
 
-The \textit{degree} of \textit{v} $\in$ V$_{G}$ is the number of vertices adjacent to \textit{v}, which are referred to as the neighbours of \textit{v}. By \textit{v} $\sim_{G}$ \textit{w} we mean that \textit{w} is a neighbour of \textit{v} in graph G.
+A \emph{path} in a graph is a sequence of distinct edges which connect a sequence of distinct vertices. A path from vertex \emph{u} to vertex \emph{v} has \emph{u} as the first and \emph{v} as the last vertex in the sequence. A \emph{cycle} is a path where the first vertex in the sequence is also the last. In a given graph G, there may be zero, one or more than one path from \emph{u} to \emph{v} (and similarly for cycles).
+
+The \emph{degree} of \emph{v} $\in$ V$_{G}$ is the number of vertices adjacent to \emph{v}, which are referred to as the neighbours of \emph{v}. By \emph{v} $\sim_{G}$ \textit{w} we mean that \textit{w} is a neighbour of \emph{v} in graph G.
  
 \begin{example}
 Figure \ref{fig:exampleGraph} shows an undirected labeled graph G$_{t}$, where each different color represents a vertex label. For instance, vertex 1 is labeled in yellow (Y) and vertex 2 is labeled in red (R). The degree of vertex 1 is 1, because it has only one vertex as a neighbour, namely 1 $\sim_{G_{t}}$ 2. 
 
 An example of a path from vertex 2 to vertex 6 is the one that goes through vertices 2, 3, 4 and 6. Graph G$_{t}$ has multiple cycles. For instance the path 2, 3, 8 is also a cycle.
 \end{example}
+
+A tree is an undirected graph such that any two vertices are connected by exactly one path. In this work, we refer to the vertices of the tree as \emph{nodes}.
 
 \begin{figure}[H]
 \centering
@@ -200,32 +212,33 @@ An example of a path from vertex 2 to vertex 6 is the one that goes through vert
 
 A graph G$^{\prime}$(V$_{G^{\prime}}$, E$_{G^{\prime}}$, L$_{G^{\prime}}$) is a \textit{subgraph} of G if and only if the vertices, edges and labels of G$^{\prime}$ are subsets of the vertices, edges and labels of G, that is V$_{G^{\prime}}$ $\subseteq$ V$_{G}$ and E$_{G^{\prime}}$ $\subseteq$ E$_{G}$ and L$_{G^{\prime}}$ $\subseteq$ L$_{G}$.
 
-The \textit{\gls{sip}} between a graph G$_{p}$(V$_{p}$, E$_{p}$, L$_{p}$), called pattern and graph G$_{t}$(V$_{t}$, E$_{t}$, L$_{t}$), called target, is to find a function $f$ that maps a different vertex of the target to every vertex in the pattern such that for every v $\in$ V$_{p}$, v = $f$(v) and L$_{p}$(v) = L$_{t}$($f$(v)), where $f$(v) $\in$ V$_{t}$; and for all pairs of vertices u,v $\in$ V$_{p}$, (u, v) $\in$ E$_{p}$ $\Leftrightarrow$ (f(u), f(v)) $\in$ E$_{t}$. In other words, a valid mapping of G$_{p}$ to a subgraph in G$_{t}$ preserves the labeling and the set of neighbours (and therefore the degree) of each vertex in G$_{p}$. If $f$ exists, we say that the \gls{sip} instance is \textit{\gls{sat}}, i.e. it has at least one solution, otherwise it is \textit{\gls{unsat}}, i.e. there are no solutions.
+The \emph{\gls{sip}} between a graph G$_{p}$(V$_{p}$, E$_{p}$, L$_{p}$), called pattern and graph G$_{t}$(V$_{t}$, E$_{t}$, L$_{t}$), called target, is to find a function $f$ that maps a different vertex of the target to every vertex in the pattern such that for every v $\in$ V$_{p}$, v = $f$(v) and L$_{p}$(v) = L$_{t}$($f$(v)), where $f$(v) $\in$ V$_{t}$; and for all pairs of vertices u,v $\in$ V$_{p}$, (u, v) $\in$ E$_{p}$ $\Leftrightarrow$ (f(u), f(v)) $\in$ E$_{t}$. In other words, a valid mapping of G$_{p}$ to a subgraph in G$_{t}$ preserves the labeling and the set of neighbours (and therefore the degree) of each vertex in G$_{p}$. If $f$ exists, we say that the \gls{sip} instance is \emph{\gls{sat}}, i.e. it has at least one solution, otherwise it is \emph{\gls{unsat}}, i.e. there are no solutions.
 
-\gls{sip} can be \textit{induced} or \textit{non-induced}. The induced version also requires that if \textit{v} $\nsim_{G_{p}}$ \textit{w}, then \textit{$f$(v)} $\nsim_{G_{t}}$ \textit{$f$(w)}. In this work, we discuss only the non-induced \gls{sip} that does not have this requirement.
+\gls{sip} can be \emph{induced} or \emph{non-induced}. The induced version also requires that if \emph{v} $\nsim_{G_{p}}$ \emph{w}, then \emph{$f$(v)} $\nsim_{G_{t}}$ \emph{$f$(w)}. In this work, we discuss only the non-induced \gls{sip} that does not have this requirement.
 
-When a valid matching function $f$ exists that maps vertex \textit{v} $\in$ G$_{p}$ to vertex \textit{w} $\in$ G$_{t}$, we write \textit{v} $\rightarrow_{f}$ \textit{w}. 
+When a valid matching function $f$ exists that maps vertex \emph{v} $\in$ G$_{p}$ to vertex \emph{w} $\in$ G$_{t}$, we write \emph{v} $\rightarrow_{f}$ \emph{w}. 
 
 \begin{example}
 Lest us consider the \gls{sip} instance (G$_{p}$, G$_{t}$) displayed in Figure \ref{fig:SIP}. This instance is \gls{sat}, because a function $f$ exists that produces a valid mapping of each vertex $\in$ G$_{p}$ to a vertex $\in$ G$_{t}$. For instance, 1 $\rightarrow_{f}$ 8, 2 $\rightarrow_{f}$ 3, 3 $\rightarrow_{f}$ 4 and 4 $\rightarrow_{f}$ 6. However, if 4 $\in$ G$_{t}$ was labeled in Y, then the \gls{sip} instance (G$_{p}$, G$_{t}$) would be \gls{unsat}, because no valid mapping that associates each vertex in G$_{p}$ to different vertex in G$_{t}$ would exist.
 \end{example}
 
 % \gls{sip} is NP-complete, however there exist a number of different approaches to solve it, some of which are ... 
-There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sipalgos}.
+There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010,nauty}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sipalgos}.
 
 \subsection{The Filter-Verification Paradigm}
-A set of target graphs is called a \textit{database} and it is denoted by \textit{T}. A set of pattern graphs, also known as \textit{query set} or \textit{queries}, is denoted by \textit{P}. A \textit{dataset D} is composed of \textit{T} and \textit{P}. 
+A set of target graphs is called a \emph{database} and it is denoted by \emph{T}. A set of pattern graphs, also known as \emph{query set} or \emph{queries}, is denoted by \emph{P}. A \emph{dataset D} is composed of \emph{T} and \emph{P}. 
 
-\textit{Subgraph query processing} is, when given a set of query graphs, for each query return all graphs from the database that contain the query. These graphs form the \textit{answer set} $\fancyA_{q}$ of the corresponding query \textit{q}. A way to perform subgraph query processing is to run a \gls{sip} algorithm for every instance (G$_{p}$, G$_{t}$) $\in$ P$\times$T, where G$_{p}$ $\in$ P and G$_{t}$ $\in$ T.
+\textit{Subgraph query processing} is, when given a set of query graphs, for each query return all graphs from the database that contain the query. These graphs form the \emph{answer set} $\fancyA_{q}$ of the corresponding query \emph{q}. A way to perform subgraph query processing is to run a \gls{sip} algorithm for every instance (G$_{p}$, G$_{t}$) $\in$ P$\times$T, where G$_{p}$ $\in$ P and G$_{t}$ $\in$ T.
 
 \begin{example}
-Let us consider again Figure \ref{fig:SIP} and assume that it represents a dataset \textit{T}, where Figure \ref{fig:exampleGraph2} is the query set, which contains only G$_{p}$, and Figure \ref{fig:exampleGraph} represents the graph database, which contains G$_{t}$. Then, subgraph query processing would solve the \gls{sip} (G$_{p}$, G$_{t}$), because \textit{P}$\times$\textit{T} = (G$_{p}$, G$_{t}$), returning $\fancyA_{G_{p}}$ = \{G$_{t}$\}, as \gls{sip} (G$_{p}$, G$_{t}$) is \gls{sat}.
+\label{ex:pathIndexing}
+Let us consider again Figure \ref{fig:SIP} and assume that it represents a dataset \emph{T}, where Figure \ref{fig:exampleGraph2} is the query set, which contains only G$_{p}$, and Figure \ref{fig:exampleGraph} represents the graph database, which contains G$_{t}$. Then, subgraph query processing would solve the \gls{sip} (G$_{p}$, G$_{t}$), because P $\times$ T = (G$_{p}$, G$_{t}$), returning $\fancyA_{G_{p}}$ = \{G$_{t}$\}, as \gls{sip} (G$_{p}$, G$_{t}$) is \gls{sat}.
 \end{example}
 
 %% todo: cite the np-complete part
-Another way of processing queries is the \textit{filter-verification framework}, which consists of two steps. The \textit{filter} step tries to prune targets that can not be matched to a given query. The set of targets left after this step formes the set of \textit{candidates}, denoted as $\fancyC_{p}$, where $\fancyC_{p}$ $\subseteq$ T. The following \textit{verification} step then performs \gls{sip} for every pair (G$_{p}$,$\fancyC_{G_{p}}$) $\in$ P $\times$ $\fancyC_p$. The usage of the filter-verification paradigm is motivated by the fact that subgraph isomorphism is NP-complete and reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern during the filtering step and performing \gls{sip} using the limited set of candidates would yield to significant performance improvement \cite{ctindex,foteini}.
+Another way of processing queries is the \emph{filter-verification framework}, which consists of two steps. The \emph{filter} step tries to prune targets that can not be matched to a given query. The set of targets left after this step formes the set of \emph{candidates}, denoted as $\fancyC_{p}$, where $\fancyC_{p}$ $\subseteq$ T. The following \textit{verification} step then performs \gls{sip} for every pair (G$_{p}$,$\fancyC_{G_{p}}$) $\in$ P $\times$ $\fancyC_p$. The usage of the filter-verification paradigm is motivated by the fact that subgraph isomorphism is NP-complete and reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern during the filtering step and performing \gls{sip} using the limited set of candidates would yield to significant performance improvement \cite{ctindex,foteini}.
 
-There are number of subgraph query processing algorithms based on the filter-verification framework \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. This approach is discussed in more detail in Chapter \ref{ch:existingWork}, where more definitions and annotations are introduced in Section \ref{sec:filterVerificationParadigm} followed by analysis of related work in Section \ref{sec:ctindex} and Section \ref{sec:otherindexes}.
+There are number of subgraph query processing algorithms based on the filter-verification framework \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. This approach is discussed in more detail in Chapter \ref{ch:existingWork}, where more definitions and annotations are introduced in Section \ref{sec:filterVerificationParadigm} followed by analysis of related work in Section \ref{sec:ctindex}.
 
 % how do we build the database index?
 % using a pre-built index of the database, denoted as $\fancyI_{T}$
@@ -240,72 +253,48 @@ There are number of subgraph query processing algorithms based on the filter-ver
 \label{ch:existingWork}
 \section{The nature of the problem}
 
+
 %%%% datasets
 \section{Datasets}
 \label{sec:datasets}
 
-    In this work we consider undirected graphs. We assume that, in each graph, each vertex has a unique identifier and in the graph database each graph has a unique identifier. 
+This Section includes the specifications and the nature of the four real datasets used for performance study of existing work in Section \ref{subsec:ctindexEval} and for evaluation in Section \ref{ch:evaluation}. The datasets are obtained from \cite{datasets}. Many related research publications use some of them to assess the performance of their developed subgraph query processing methods \cite{ctindex, gcode, graphgrepsx, tree+delta>=graph, GRAPES, lindex, foteini}. Therefore, running our experiments on these datasets makes our results easier to compare to existing work. Description of each dataset and its specifications are explained below.
 
-This section gives more information about the datasets that were used to check the correctness and performance of the algorithm implementations. All graphs in these datasets are undirected.\par
-\textbf{AIDS} is the standard database of the Antiviral Screen dataset of the National Cancer Insitute \cite{datasets}. The database has 40 000 molecules, represented as graphs. 
+All four datasets consist of undirected labeled graphs, as defined in \ref{sec:graphTheory}, that may contain cycles. Each dataset has a set of target graphs, also called a database, and a set of query graphs. Every graph and every vertex within every graph have a unique id.
 
-\begin{table}
-\centering
-\renewcommand{\arraystretch}{1.4}% Spread rows out...
-\begin{tabular}{ >{\bfseries}m{1.5in} >{\centering}m{0.5in} >{\centering}m{0.5in} >{\centering}m{0.5in} >{\centering\arraybackslash}m{0.5in}  } 
-\toprule
-   						   & aids   & pcms  & pdbs  & ppigo \\
-\midrule
- \# graphs 				   & 40 000 & 200	& 600   & 50 \\
- \# disconnected graphs$*$ & 3 157  &		&		&  \\ 
- \# distinct node labels   & 62	    &		& 		&  \\ 
- \# distinct edge labels   & 0 		& 0		& 0		& 0 \\ 
- avg \# edges			   & 46.95  & 		&		&  \\ 
- median \# edges		   & 	    &		&		&  \\ 
- avg \# nodes			   & 45		&		&		&  \\ 
- avg degree				   & 2.09	&		&		&  \\ 
- median \# nodes	       &		&		&		&  \\ 
- avg \# node labels		   & 4.4	&		&		&  \\ 
- median \# node labels     &		&		&		&  \\
- \bottomrule
-\end{tabular}
-\caption{Statistics about the datasets}
-\label{table:datasets}
-\end{table}    
+Aids is the standard database of the Antiviral Screen dataset of the National Cancer Insitute. The database contains the topological structure of 40,000 chemical compounds, represented as graphs. The number of vertices varies from 4 to 245. The graphs in this dataset are small and barely connected \ref{table:datasets}. Pcms contains 200 contact maps that represent relationships among amino acids. The graphs here are small and dense. Pdbs consists of 600 target graphs, which represent proteins. It contains larger graphs, each of them contains between 1,683 and 7,979 vertices. The last dataset is ppigo and it has a database that consists of 20 protein interaction networks, where networks belong to species.
 
+The specifications of each dataset is shown in Table \ref{table:datasets}. One can see that the pcms dataset is very dense, as the average vertex degree is 23.01. Pdbs and aids are very sparse with average vertex degree of about 2.
+
+Table \ref{table:dataSAT} shows how many satisfiable pattern-target there are for each dataset. For instance, pdbs consists of large number of \gls{sat} problems (77.22\%), whereas aids is the dataset with highest percent of \gls{unsat} problems (91.33\%).
 
 \begin{table}
 \centering
-\renewcommand{\arraystretch}{1.3}% Spread rows out...
-\begin{tabular}{ |>{\bfseries}m{0.5in} |>{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering}m{0.8in}| >{\centering\arraybackslash}m{0.8in}|} 
+        \renewcommand{\arraystretch}{1.4}% Spread rows out...
+        \begin{tabular}{l|r|r|r|r|}
+\cline{2-5}
+& \textbf{aids} & \textbf{pcms} & \textbf{pdbs} & \textbf{ppigo} \\
+\cline{1-5}
+\multicolumn{1}{|l|}{\# graphs}  & 40,000 & 200	& 600   & 20 \\
 \hline
- dataset & number of graphs & unique vertex labels & average node degree  & min node degree & max node degree\\
+\multicolumn{1}{|l|}{\# disconnected graphs} & 3,157 & 200 & 360 & 20 \\
 \hline
-AIDS & 40 000 & 62 & 2.09 & ne znam & ne znam \\
+\multicolumn{1}{|l|}{\# unique labels} & 62 & 21 & 10 & 46 \\
 \hline
-PCMS & 200 & 21 & 23.01 & ne znam & ne znam \\
+\multicolumn{1}{|l|}{\# vertices on average} & 45 & 377 & 2,939 & 4,942 \\
 \hline
-PDBS & 600 & 10 & 2.06 & ne znam & ne znam \\
+\multicolumn{1}{|l|}{\# edges on average} & 46.95 & 4,340 & 3,064 & 4,942 \\
 \hline
-PPIGO & 20 & 46 & 10.87 & ne znam & ne znam\\
+\multicolumn{1}{|l|}{average density} & 0.0475 & 0.0612 & 0.0007 & 0.0022 \\
+\hline
+\multicolumn{1}{|l|}{average vertex degree} & 2.09 & 23.01 & 2.06 & 10.87 \\
+\hline
+\multicolumn{1}{|l|}{\# labels on average} & 4.4 & 18.9 & 6.4 & 28.5 \\
 \hline
 \end{tabular}
 \caption{Characteristics of the datasets}
 \label{table:datasets}
-\end{table}    
-
-
-\small{$*$ A graph G is said to be disconnected if there exist two nodes in G such that no path in G has those nodes as endpoints.}
-
-    The input we are working with is a file with the following format:\newline
-    
-    - put a table with the datasets and more information about them \\ 
-    - average, median, etc. \\
-    - say we work only with undirected graphs \\
-    - say whether we consider induced/ non-induced subgraph isomorphism \\
-
-\subsection{Subgraph Isomorphism Answers}
-Each query in each query set matches at least one graph in the target set. Some queries match more than one graph. Below we give some statistics on number of target graphs matched.
+\end{table}
 
 \begin{table}
 \centering
@@ -330,213 +319,234 @@ Each query in each query set matches at least one graph in the target set. Some 
     \end{table}
 
 
-\section{Filtering-verification paradigm}
+\section{Filter-Verification paradigm}
 \label{sec:filterVerificationParadigm}
-- smaller $C$, less time spent on subgraph isomorphism check, but more tie spent on indexing process
+This Section gives an overview of already existing algorithms based on the filter-verification paradigm, defined in Section \ref{sec:theory}. We first start by introducing more preliminary concepts and notations that complement the definitions in Section \ref{sec:theory}. 
 
-	\section{Motivation for usage}
-    \section{What makes an index "good"}
-	\section{Common techniques}
-    	\subsection{Graph-mining}
-    	\subsection{Non-graph-mining}
-        \label{subsec:non-data-mining}
-    \section{Methods with respect to choice of indexing unit}
-        \subsection{Path-based indexing approach}
-        Follows the general idea: enumerate all the existing paths in a database up to \textit{maxLen} length and index them, where a path is a vertex-edgeProperty-vetex sequence. *example*
-        In order to create an index of a graph \textit{g}, this approach breaks \textit{g} into paths and in this way, the structural information of \textit{g} could be lost. This leads to more false-positive answers returned after the   
-        Advantages:
-        \begin{enumerate}
-            \item Paths are easier to manipulate than trees and graphs.
-            \item The index space is predefined: all the paths up to             \textit{maxLen} length are selected.
-        \end{enumerate}
-        
-        Disadvantages:
-        \begin{enumerate}
-            \item Path is too simple: structural information is lost
-            \item There are too many paths: the set of paths in a graph database usually is huge.
-        \end{enumerate}
-        \subsection{Tree-based indexing approach}
-        
-\subsection{CT-Index}
+\subsection{Filtering}
+This step consists of building an index of the database and then rejecting for verification with the query targets that can be proved not to contain the query. The process of rejecting/pruning uses the data stored in the index for the particular target and the characteristics of the query. The details follow below.
+
+\subsubsection{Database Index}
+An \emph{index} of a database D, denoted as $\fancyI_{D}$ is a collection of data, often stored in a file, that contains characteristics of the graphs in D, also known as \emph{features}. Features can be represented by paths, subtrees, cycles, or subgraphs. They are computed for every graph in the database. The index is independent of the queries so that it can be computed once and then reused for multiple queries as long as there is no change in the database. The process of computing the features of the graph to store them in the index is called \emph{feature extraction}.
+
+\begin{example}
+\label{ex:index}
+Let us have a database consisting of the graph G$_{t}$ displayed on Figure \ref{fig:exampleGraph}. In this example, we want to compute the index of G$_{t}$ using paths up to maximum length 2 as features and store each unique path as a string containing the labels of the vertices in the path. Each vertex in G$_{t}$ is labeled in yellow(Y), blue(B) or red(R).
+
+An example feature extraction algorithm will derive the following paths:
+B, Y, R, B-B, B-Y, R-Y, B-R \footnote{Note that the representation of some of the paths is not unique, as G$_{t}$ is undirected. For example, path B-Y is equivalent to path Y-B. In such cases, one can impose constraints on the ordering of the paths to avoid storing repetitive features in the index.}. These paths will then be stored in the index of G$_{t}$ and used further in the filtering process to check whether G$_{t}$ could be rejected for verification with a given query.
+\end{example}
+
+Computing the database index is the process is very expensive in terms of running time and data storage. However, the cost of building such structure is compensated by the fact that it can be reused and that it is query independent.
+
+\subsubsection{Candidate Set}
+The candidate set of a database D and query graph G$_{p}$, denoted as $\fancyC_{p}$ is a set of graphs that contain all features in G$_{p}$. $\fancyC_{p}$ is derived using $\fancyI_{D}$ and $\fancyF_{G_{p}}$, where $\fancyF_{G_{p}}$ contains all features in G$_{p}$, computed using the same algorithm that computed $\fancyI_{D}$. Note that unlikely $\fancyI_{D}$, $\fancyF_{G_{p}}$ is not reused\footnote{It could be useful to store the query features if large proportion the queries received were repetitive. In such cases, one could incrementally build a second index of the features. We do not know whether this has been tried so far. This can be an area of further investigation in the future.}.
+
+The purpose of filtering is to derive as small candidate set as possible in order to limit the number calls to a subgraph isomorphism algorithm during verification. Note that $\fancyC_{p}$ $\subseteq$ D. The worst case scenario is when $\fancyC_{p}$ = D, which means that filtering did not manage to prune any target graphs in the database.
+
+\begin{example}
+Let us extend Example \ref{ex:index} by introducing a query, which is the graph G$_{p}$ on Figure \ref{fig:exampleGraph2}. Let us use the same characteristics as features as the ones used in Example \ref{ex:index}. Then, $\fancyF_{G_{p}}$ = B, Y, R, B-Y, R-Y and G$_{t}$. Therefore, $\fancyC_{G_{p}}$ = \{G$_{t}$\}, because all features in G$_{p}$ are contained by G$_{t}$.
+\end{example}
+
+\subsection{Verification}
+Verification is the process of applying a subgraph isomorphism problem (\gls{sip}) algorithm on every pair (G$_{p}$,t) of graphs, where p is the query and t is the target, t $\in$ $\fancyC_{G_{p}}$. The aim of verification is to return the number of graphs in D that contain G$_{p}$. All targets that do not contain the pattern, but were not rejected during the filtering step, are called \emph{false-positives}. One wants to construct a filtering technique that admits as low number of false-positives as possible. The number of false-positives is often used as a measure of effectiveness of the filtering method\cite{foteini}.
+
+Most of the subgraph query processing methods that apply the filter-verification paradigm are mainly focused on improving the filtering stage, while reusing the same algorithm, known as VF2, for verification \cite{foteini}. 
+It is claimed that VF2 is ``state of the art''\cite{ctindex}. However, this is not the case (\cite{Solnon:2010, Larrosa:2002, Bonnici:2013, Zampelli:2010, CP2015}, Chapter \ref{ch:evaluation}). The subgraph isomorphism tests are reported as ``too time consuming''\cite{foteini} and this is explained by the nature of the complexity of the subgraph isomorphism problem\footnote{This problem is proved is NP-Complete by Stephen A. Cook in 1971 \cite{Cook:1971}}\cite{ctindex,foteini,freqStructBasedIndexing}. One can see that the reason for the reported low verification performance for some instances could be due to the poor choice of a \gls{sip} algorithm. This is further investigated and discussed later in this work.
+
+\subsection{Common Filtering Techniques}
+\label{subse:existingFVtechniques}
+
+This Section discusses some of the existing filtering algorithms with respect to feature extraction and choice of features.
+
+There are two types of feature extraction techniques, known as graph mining and exhaustive feature enumeration. \emph{Graph mining} techniques (\cite{freqStructBasedIndexing,fg-index,closure-tree,cp-index,lindex,tree+delta>=graph,treepi}) store the frequent features with high enough discriminative ratio in the database. A feature is \emph{frequent} if its support ratio is higher or equal to a certain algorithm-specific threshold value. The support ratio of a feature is defined as the percentage of graphs in the database containing it. The \emph{discriminative ratio} of a feature is a metric that characterizes the filtering power of the particular feature compared to other features. There is no universal formula to calculate the discriminative ratio of a feature, every technique employs a different calculation method.
+
+\emph{Exhaustive feature enumeration} techniques (\cite{graphgrepsx,ctindex,anotherindex,gcode}) store in the index all features of every graph in the database, regardless of their importance.  
+
+Choosing a feature extraction method often depends on the type of datasets one has to work with. For instance, graph mining techniques are inefficient when the data in the database is frequently being changed. When frequently inserting and deleting graphs in the database, the discriminative ratio of the indexes features may change so that it makes the index outdated. Consequently, the index becomes less reusable and thus the total execution time of subgraph query processing is highly increased.  Moreover, graph-mining techniques take longer time to built the database index \cite{foteini}.
+
+One of the advantages of graph mining techniques is that they require much less storage space than exhaustive feature enumeration algorithms, as one does not need to store all features of all graphs. This lowers the storage space requirements and makes the process of constructing the candidate set faster, as less number of target features have to be compared against the query features.
+
+There are various types of structures that can be used as features. Paths (\cite{graphgrepsx,GRAPES}), trees (\cite{closure-tree,treepi,ctindex}), subgraphs (\cite{fg-index,anotherindex,cp-index,lindex,tree+delta>=graph}) of the targets or all of them combined (\cite{ctindex,tree+delta>=graph}) can be extracted from the database graphs and stored in the index. Features can be derived based on the neighbours of each graph vertex \cite{gcode}. The choice of features influences the filtering performance and it is often a trade off in terms of time and filtering strength. This is further investigated in Section \ref{subsec:ctindexEval}, where we report on performance results obtained from an indexing method that uses a combination of paths, trees and graph cycles as features. A detailed review of this method is presented in the next Section.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                               CT-Index                               
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{CT-Index}
 \label{sec:ctindex}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                               CT-Index                               %%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO: move this to a background information section
-%%% TODO: give a definition of a path in a graph : A path in a graph is a sequence of distinct vertices, such that each successive pair of vertices are adjacent; we also allow a path from a vertex to itself, in which case the first and last vertices in the sequence are the same (and there is a cycle).
-% TODO: prove that from paths we can safely discard graphs as not subgraph isomorphic if they don't have the same paths.
 
-%
-%
-% NOTE 1 FROM PATRICK
-% You need to be consistent. There is confusion between vertices and nodes. Please resolve this
-% What I have done (and you might state) is that we assume nodes are in trees constructed from a pattern or target
-% graph composed of vertices and that you do this to distinguish between the two
-%
-CT-Index \cite{ctindex} is divided into two main parts, filtering and verification, both described below. Also presented is a complexity analysis of the algorithms used by CT-Index and an empirical study of its performance (using an open-source Java implementation).
-CT-Index supports data sets with edge and vertex labels and also wild card patterns. Although not explicitly stated in \cite{ctindex}, CT-Index addresses the non-induced subgraph isomorphism problem  ( definition \ref{def:subgraphIsomorphism}).
+CT-Index is an existing subgraph query processing approach that employs the filter-verification paradigm\cite{ctindex}. This method supports undirected graphs with edge and vertex labels and also wild card patterns. Although not explicitly stated in \cite{ctindex}, CT-Index addresses the non-induced subgraph isomorphism problem defined in Section \ref{sec:theory}. In this Section, we introduce and discuss the filtering algorithm and analyze its complexity in Section \ref{subsec:ctindexF}. Section \ref{subsec:ctindexV} explains the verification algorithm. Also presented is a complexity analysis of the algorithms used by CT-Index and an empirical study of its performance (using an open-source Java implementation) in Section \ref{subsec:ctindexEval}.
 
-\subsubsection{Filtering}
-During the filtering step, the features of all graphs in the target data set are extracted and saved to a file, i.e. the target index. The index is then used to filter out target graphs that cannot contain the pattern.  Features are specific subgraphs used to classify graphs, and are stored as hash-key fingerprints. Features may be paths, subtrees or cycles of bounded length. Since vertices and edges may contain labels, these features can be viewed as strings from a specified alphabet (where the alphabet is the labels). In \cite{ctindex} it is stated that the reason for using trees and cycles (as well as paths) is that ``trees capture additional structural information" and cycles ``represent the distinct characteristic of graphs ... often neglected when using only trees as features".
+\subsection{Filtering}
+\label{subsec:ctindexF}
+During the filtering step, the features of all graphs in the target data set are extracted and saved to a file, i.e. the target index ($\fancyI_{T}$). $\fancyI_{T}$ is used to filter out target graphs (G$_{t}$) that cannot contain the pattern (G$_{p}$). Features are specific subgraphs used to classify graphs, and are stored as hash-key fingerprints. Features may be paths, subtrees or cycles of bounded length. Since vertices and edges may contain labels, these features can be viewed as strings from a specified alphabet (where the alphabet is the labels). In \cite{ctindex} it is stated that the reason for using \glspl{tree} and cycles (as well as paths) is that ``trees capture additional structural information" and cycles ``represent the distinct characteristic of graphs, often neglected when using only trees as features".
 
-%
-% NOTE 2 FROM PATRICK
-% Note simple way to use maths
-%
-Although the time complexity of computing all features of a graph is not reported, it can be derived as follows. To extract a subtree of graph $G$ with $maxT$ number of edges, one starts with initially empty tree and repeatedly adds edges to extend the vertices that are in the current tree via the recursive function $ExtendTree$. We write $F$ for the set of every edge $(u,v)$ in $G$ and vertices $u$ and $v$ that belong to $G$, such that one vertex (say, $u$) is part of the current tree and the other (say, $v$) is not. If we have $n$ number of vertices in the current tree, each with degree $d$, then the size of $F$ is at most $n(d-1)$. $ExtendTree$ extends the current tree with a specified edge as parameter, generates $F$ and makes a recursive call for every edge in $F$, until the tree reaches size $maxT$.
+Although the time complexity of computing all features of a graph is not reported, it can be derived as follows. To extract a subtree of graph $G$ with e$_{max}$ number of edges, one starts with initially empty tree and repeatedly adds edges to extend the vertices that are in the current tree via the recursive function ExtendTree. We write F for the set of every edge e$_{uv}$ $\in$ G with vertices \textit{u} $\in$ G and \textit{v} $\in$ G, such that one of them (say, \textit{u}) is part of the current tree and the other (say, \textit{v}) is not. If we have \textit{n} number of vertices in the current tree, each with degree \textit{d}, then the size of F is at most n(d - 1). ExtendTree adds an edge specified as parameter to the current tree, generates F and makes a recursive call for every e$_{uv}$ $\in$ $F$, until the tree reaches size e$_{max}$.
+
 %%% todo for the big O
-In the start of the tree extraction when adding the first edge to the empty tree, the vertices on both ends of the edge are also added as part of the tree. Therefore, the size of $F$ initially is $2.(d-1)$. After every recursive call, one more vertex is added to the tree, which introduces $(d-1)$ new edges. That makes a total of $maxT+1$ vertices that will be added to the tree and $(maxT+1).(d-1)$ visited edges. Consequently, the complexity of extracting tree features is $\mathcal{O}(|E|.(maxT+1).(d-1))$. From this formula one can see that the number of edges in the graph has significant impact on the performance of the algorithm. When increasing the graph density, the algorithm will have slower performance, caused by the degree of each vertex and the total number of edges, which both will increase.
+In the start of the \gls{tree} extraction when adding the first edge to the empty tree, the vertices on both ends of the edge are also added as part of the tree. Therefore, the size of $F$ initially is 2.(d-1). After every recursive call, one more vertex is added to the tree, which introduces (d-1) new edges. That makes a total of e$_{max}$ + 1 vertices that will be added to the tree and (e$_{max}$ + 1)(d - 1) visited edges. Consequently, the complexity of extracting tree features is $\mathcal{O}(|e|(e_{max} + 1)(d - 1))$. From this formula one can see that the number of edges in the graph has significant impact on the performance of the algorithm. When increasing the graph density, the algorithm will have slower performance, caused by the degree of each vertex and the total number of edges, which both will increase.
 
-CT-Index computes a unique representation of each distinct feature, its \emph{canonical form}, and stores its string encoding in the index file. Thus, the equality of two features can be checked by testing the equality of their canonical forms. The canonical label of a tree feature is computed as follows: (1) find the root node $r$ of the tree, (2) impose a unique ordering of the children of each node. Step (1) is computed by repeatedly removing all leaf nodes of a tree until a single node or two adjacent nodes remain. In the first case, root $r$ is the last node left. In the second case the edge connecting the two remaining nodes are removed to obtain two trees, each with one of the remaining nodes as a root. 
-Step (2) is based on the ordering of edge and vertex labels. For each node $p$ that is a parent of nodes $u$ and $v$, deciding whether $u$ is before $v$ depends first on the labels of the edges $(p,u)$ and $(p,v)$, then on the labels of $u$ and $v$ and finally on the subtrees of $u$ and $v$. A bottom-up approach is used (i.e. start with the nodes in the lowest level and move up towards the root) to compute this.
+CT-Index computes a unique representation of each distinct feature, its \emph{\gls{canonicalform}}, and stores its string encoding in $\fancyI_{T}$. Thus, the equality of two features can be checked by testing the equality of their canonical forms. The canonical label of a tree feature is computed as follows: (1) find the root node \emph{r} of the tree, (2) impose a unique ordering of the children of each node. Step (1) is computed by repeatedly removing all leaf nodes of a tree until a single node or two adjacent nodes remain. In the first case, \emph{r} is the last node left. In the second case the edge connecting the two remaining nodes are removed to obtain two trees, each with one of the remaining nodes as a root.
+Step (2) is based on the ordering of edge and node labels. For each node \textit{p} that is a parent of nodes \textit{u} and \textit{v}, deciding whether \textit{u} is before \textit{v} depends first on the labels of the edges e$_{pu}$ and e$_{pv}$, then on the labels of \textit{u} and \textit{v} and finally on the subtrees of \textit{u} and \textit{v}. A bottom-up approach is used (i.e. start with the nodes in the lowest level and move up towards the root) to compute this.
 
 %%%% complexity of canonical label algorithm %%%%
 Although not stated in \cite{ctindex} the complexity of their canonical labeling can be derived as follows. Step (1) is $\mathcal{O}(n)$, where $n$ is the number of nodes in the tree, as one needs to visit each node before removing it. The complexity of step (2) is as follows. We write $|p|$ for the number of interior nodes in the trees, which is equal to $n$ minus the number of leaf nodes. Step (2) visits a node, then visits its parent, and for every child of the parent node checks whether it should be first or second in the canonical label, using the vertex and edge labels conditions described above. This is repeated for every node in the tree up to the root. Therefore, the complexity of step (2) is $\mathcal{O}(|p|.|c|^{2})$, where $|c|$ denotes the number of children of a parent.
 
 %%% 
-In \cite{ctindex} it is claimed that step (2) is not linear time but is tolerable because ``... the trees occurring as features usually are small and vertex and edge labels are diverse and hence the order can be solved quickly". Therefore, we might assume that CT-Index is designed to support only specific types of data sets and that there exists data sets with less label diversity and with big trees as features that would result in poor performance. More specifically, as $maxT$ increases, or average degree increases, so too does the cost of step (2), and performance suffers (and we conduct experiments to test this hypothesis in section \ref{sec:ct-index-performance}).
-
+In \cite{ctindex} it is claimed that step (2) is not linear time but is tolerable because ``... the trees occurring as features usually are small and vertex and edge labels are diverse and hence the order can be solved quickly". Therefore, we might assume that CT-Index is designed to support only specific types of data sets. Therefore one could expect poor performance for data sets with less label diversity and with big trees as features. More specifically, as e$_{max}$ increases, or average degree increases, so too does the cost of step (2), and performance suffers (we conduct experiments to test this hypothesis in Section \ref{subsec:ctindexEval}).
 
 \subsubsection{Fingerprints}
+
 %%%% hash-key fingerprints %%%%
-CT-Index uses a storage technique called \emph{hash-key fingerprint} to capture the features in the graph. A separate fingerprint is computed from the canonical labels for each graph in the database. A fingerprint is an array of bits and denotes whether a particular feature occurs in the graph or not. As there is no predefined set of possible features for each graph, reserving one bit for each feature in the feature set is considered infeasible\footnote{However, due to the restricted alphabet of labels it may be possible to enumerate all possible features thus avoiding some of the pitfalls of hashing, such as collisions and sensitivity to hash table size.}. A hash function maps extracted features to bit positions.
+CT-Index uses a storage technique called \emph{hash-key fingerprint} to capture the features in the graph. A separate fingerprint is computed from the canonical labels for each graph in the database. A fingerprint is an array of bits and denotes whether a particular feature occurs in the graph or not. As there is no predefined set of possible features for each graph, reserving one bit for each feature in the feature set is considered infeasible\footnote{However, due to the restricted alphabet of labels it may be possible to enumerate all possible features thus avoiding some of the pitfalls of hashing, such as collisions and sensitivity to hash table size.}. A \gls{hashfunction} maps extracted features to bit positions.
 CT-Index is not the first indexing algorithm to employ fingerprints as a storage technique. The chemical information system called Thor and developed by Daylight \cite{fingerprints} is an example of an information processing system that uses bit arrays to store the features of the graphs.
 
 %%%
-Depending on the quality of the hash function, the size of the bitset and the size of the fingerprint, collisions may occur, i.e. different features may map to the same bitset position, introducing false-positives. The \cite{ctindex} paper briefly discussed some optimization techniques that could be used to minimize the influence of collisions, but it is unclear whether CT-Index employs them. 
+Information on the implementation of the hash function is not specified in the paper. Depending on the quality of the hash function, the size of the bitset and the size of the fingerprint, collisions may occur, i.e. different features may map to the same bitset position, introducing false-positives. The \cite{ctindex} paper briefly discusses some optimization techniques that could be used to minimize the influence of collisions, but it is unclear whether CT-Index employs them. 
 It is stated that ``... the loss of information caused by the use of hash-key fingerprints seems to be justifiable by the compact nature and convenient processing of bit arrays as long as the amount of false positives does not increase significantly due to collisions".
 
-Collisions can occur also if the size of the fingerprint is too small for the particular data, i.e. there is bigger number of features than the number of spaces in the array to store them. On the other hand, making the fingerprint size too big introduces additional overhead by requiring more memory storage space that is not used. The paper does not specify the hash function used or how to decide on the size of bitsets (feature hash tables). 
+Collisions can occur also if the size of the fingerprint is too small for the particular data, i.e. there is bigger number of features than the number of spaces in the array to store them. However, making the fingerprint size too big introduces additional overhead by requiring more memory storage space that is not used. The paper does not specify the hash function used or how to decide on the size of bitsets (feature hash tables). 
 
 %%%% advantages %%%%
 The main advantage of hashing the features and storing them in arrays is that this makes certain operations much cheaper. For example, checking whether a pattern fingerprint is included in a target fingerprint involves inexpensive bit operations. In particular, one only needs to compute a bitwise AND-operation with the two fingerprints to determine if features in the pattern exist within the target. If this test returns false then the target cannot be a candidate for that pattern. However, if it returns true then the target \emph{may} be a candidate and subgraph isomorphism must be verified.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\subsubsection{Verification}
+\subsection{Verification}
+\label{subsec:ctindexV}
+
 The verification step checks all candidates computed in the filtering step via a subgraph isomorphism test. A backtracking algorithm \cite{backtracking-algorithms}, similar to VF2 \cite{vf2} with additional heuristics, is used.  This test is theoretically NP-Complete, and is avoided as far as possible via the filtering process. CT-Index is not alone in using (essentially) the VF2 algorithm.
 For example it is used in GraphGrepSX \cite{graphgrepsx}, gCode \cite{gcode} and Tree+$\Delta$ \cite{tree+delta>=graph}. Most papers claim that VF2 is ``state of the art".  However, this is not the case (\cite{Solnon:2010,Larrosa:2002,Bonnici:2013,Zampelli:2010,CP2015}.
-VF2 has been shown to perform erratically and poorly \cite{CP2015}. Therefore we might summarise CT-Index architecture as using a potentially expensive indexing and filtering stage in order to minimise the computational cost of using an outdated subgraph isomorphism problem (SIP) algorithm.
+VF2 has been shown to perform erratically and poorly \cite{CP2015}. Therefore we might summarize CT-Index architecture as using a potentially expensive indexing and filtering stage in order to minimize the computational cost of using an outdated \gls{sip} algorithm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Performance}
-\label{sec:ct-index-performance}
-%%%% foteini's paper %%%%
-%%%% TODO rewrite that part %%%$
-This section describes the performance 
-We searched for more information in alternative sources. In \cite{foteini} the authors compare several well-established indexing techniques, including CT-Index and try to draw conclusions on their performance depending on a set of key-factor parameters. The authors use the four datasets described in section \ref{sec:datasets} as well as a synthetically generated database of targets and queries to conduct their experiments. These are some of the conclusions made after the experiments:
+\subsection{Performance}
+\label{subsec:ctindexEval}
+
+There is an existing work, where several well-established subgraph query processing techniques as well as CT-Index are evaluated, the results are reported in \cite{foteini}. The experiments are conducted on the four datasets described in Section \ref{sec:datasets} using the default input parameters for each of the compared techniques. CT-Index requires five integers as an input, specified in the following order:
+\begin{enumerate}
+\item Fingerprint size. This indicates the number of bits allowed to store the features of each graph in the index. The specified fingerprint size must be equal to 2$^{n}$ for some integer n.
+\item Maximum path length. Indicates the maximum length of a path that is allowed to be extracted. If we specify -1, then no paths are extracted.
+\item Maximum subtree length. Same as 2, but for subtrees.
+\item Maximum cycle length. Same as 2 and 3, but for cycles.
+\end{enumerate}
+%The main conclusions that were made after the experiments are as follows.
+%\begin{enumerate}
+%\item Datasets with increased number of distinct labels are easier and faster to filter and verify.
+%\item The size of the query affects performance, especially when the datasets contain graphs of high density.
+%\item CT-Index has relatively small index size, compared to other indexing techniques.
+%\item There is no universal subgraph query processing method that is guaranteed to be the best one across different datasets.
+%\end{enumerate}
+
+The default input parameters of CT-Index are $<$4096, -1, 4, 4 $>$ \cite{ctindex, foteini}. No information on why exactly these parameters should be used is given. For each of the four datasets, the indexing algorithm is run, putting a time limit of 8 hours\footnote{When the algorithm did not finish it execution within the time limit, the authors waited for more than 24 hours, but to no avail.}. The obtained results are presented in four Diagrams, showing filtering time, index size, verification time and false positive ratio (FP ratio). The FP ratio is calculated using formula (2.1) and its purpose is to indicate how many of the \gls{unsat} instances are filtered without using a \gls{sip} algorithm. \textit{$|A\{p\}|$} denotes the number of \gls{sat} instances for a pattern p $\in$ P and \textit{$|\fancyC\{p\}|$} is the cardinality of the candidate set for p.
+\begin{equation}
+\label{eq:fpratio}
+FP Ratio = \frac{1}{|P|} \sum_{p \in P} \frac{|\fancyC\{p\}| - |A\{p\}|}{|\fancyC\{p\}|}
+\end{equation}
+
+One can notice that when the value of \textit{$|A\{p\}|$} becomes closer to the value of \textit{$|\fancyC\{p\}|$} (filtering has managed to discard most of the \gls{unsat} instances), the FP ratio approaches 0. Whenever there is a big difference between \textit{$|\fancyC\{p\}|$} and \textit{$|A\{p\}|$} (filtering did not discard many \gls{unsat} instances, the size of the candidate set is close to the size of the database)  the formula approaches 1. We can deduce that the closer to 1 this formula is, the less successful filtering was. Similarly, when the formula approaches 0, this indicates high filtering performance.
+ 
+The results obtained by \cite{foteini} using these parameters for each dataset are as follows.
 \begin{itemize}
-%\item Datasets with increased number of distinct labels are easier and faster to index and compute subgraph isomorphism answers.\newline
-%The reason for this result is straightforward, as the more distinct labels a graph has, the easier it is to discard nodes as possible matches to a pattern node, taking only the labels of nodes and edges into account.
-\item The size of the query affects the performance of the indexing method\newline
-This conclusion is also very easy to obtain. As the size of the pattern becomes larger, there are more nodes that have to be matched to a target node. Suppose that we have a pattern graph $p$ with $|p|$ number of nodes and a target graph $t$ with $|t|$ number of nodes that is a candidate for subgraph isomorphism. Assume that all techniques to discard $t$ before the search have failed, i.e. $|t|$ $\geq$ to $|p|$, etc. Then, for each node in $p$, the ct-index algorithm tries to map to a node in $t$ and continues until either it either fails or succeeds. In the first case, the algorithm backtracks and tries to map an alternative node from $t$ and in the second case, the algorithm terminates, as a valid map of all pattern nodes to some of the target nodes is found. One can easily notice that the bigger the size of $|p|$, the more checks the subgraph isomorphism algorithm will do. The same conclusion could be reached for $|t|$. When there are more nodes in $t$, more different ways exist for matching a node in $p$ to a node in $t$.
-\item CT-Index has relatively small index size, compared to other indexing techniques.\newline
-Again, this result could be obtained even without running any experiments. As the CT-Index uses bitset arrays to store the features, it straightforward to reach to the conclusion that CT-Index always has smaller index size, compared to other techniques that do not compress the features, but directly store them in the index file.\par
+\item For datasets ``pcm'' and ``ppigo'', CT-Index never manages to complete execution of the filtering step. Therefore, no verification is done.
+\item For the ``aids'' dataset, CT-Index performs best. Filtering takes about 80 seconds and verification: about 0.7 seconds. The FP ratio is 0.8.
+\item CT-Index takes about 9,000 seconds for filtering graphs in ``pdbs'' and about 1 second to execute the verification step. The FP ratio is 0.2.
 \end{itemize}
-%%%
-The results from \cite{foteini} have a major limitation: for each indexing methods, the authors use the "default" input parameter values, given by the original authors of each of the indexing methods. They never experiment with alternative values. It is not clear why the corresponding input values are fair and the best ones to use and why the authors do not consider the possibility of obtaining completely different results if they changed the input parameters values. Also, the authors never say whether they have checked how they verified that the indexing methods compared in the paper give correct results.\par
-%%%% our evaluation %%%%
-We conducted a separate evaluation using the implementation and the datasets descried in section \ref{sec:datasets}. Table \ref{table:runningTime} shows the running time of CT-Index: time to build the index, time to compute answers out of the set of candidates and the total running time depending on the values of the parameters specified for the AIDS dataset, namely the size of the fingerprint, the maximum bound for path, subtree and cycle size; and the number of candidates for after indexing and filtering for the corresponding query number. Table \ref{table:answers} shows the actual number of targets that contain the particular query as subgraph. This can be used to check the ratio of false-positives against real results for each query for each of the different input parameter values. We write -1 as the value of maximum path, cycle or subtree length whenever we do not want to use the corresponding structure as feature. We recorded the running time of both indexing and querying, as well as the number of candidates, because in real applications, the index is computed once and then reused multiple times, until the target dataset is changed. This means that for applications that require frequent changes to the database it is desirable to compute the index as fast as possible, whereas for datasets that are rarely changed, the time to compute the index is not that important and one may focus on increasing the quality of the index (i.e. it leads to smaller number of candidates).\par
-To verify the correctness of the results obtained by CT-Index and later on be able to use the implementation as a benchmark, we did the following activities. As we did not have set of answers for each query, we first computed the answers for each query, varying the input parameters values. We verified that all results are the same by executing a script that checks whether every set of answers a query is the same as every set of answers obtained for the same query, but with different parameter values. Finally, we used a subgraph isomorphism solver program that does not employ indexing to compute the answers for each query and we compared these answers with the CT-Index answers to conclude that they are the same and CT-Index is correct at least for the corresponding input parameter values.\par
-%%% 
+
+We decided to conduct experiments to investigate in more depth the performance of the algorithms implemented in CT-Index depending on the input parameters. We used an open source java implementation of CT-Index written by its authors and we ran the software with the ``aids'' dataset using alternative to the default set of parameters. For our experiments, we chose a fixed size of parameter set\footnote{This was done due to the large number of possible input values.} the purpose of which is to identify how the change of one parameter changes the performance of the algorithms implemented in CT-Index. As in \cite{foteini}, we measured the filtering and verification time, the FP ratio using formula (2.1) and calculated the total time, that is the sum of the filtering and the verification time. For the size of the fingerprints (2$^{n}$ for some integer \textit{n}), we varied \textit{n} from 0 to 16. Note that when n is 0, no index can be created (all features of every graph have to be stored in a bitset of size 1) and verification is computed for every pair (G$_{p}$, G$_{t}$) $\in$ P$x$. The values of path, subtree and cycle maximum length are a permutation of combination of -1 and 5. Here, -1 tells us how much the effective rate of filtering drops when a feature is switched off, and 5 shows the performance of filtering when the feature is on (i.e -1 and 5 play the role of binary to indicate for each feature that it is either off or on). For every \textit{n}, we executed the algorithm with all permutations of every combination of assignment of -1 and 5.
+
+Table \ref{table:runningTime} shows a selection of our results that aids to illustrate best the change of performance depending on the input parameters. The first 10 rows show the changes in running time and FP-ratio depending on the size of the fingerprints. The values of all parameters are fixed. As expected, the FP ratio goes down with the increase of the fingerprint size. We also notice significant decrease in the verification running time when we allow bigger bitset size. The reason for these results is the fact that the number of collisions when hashing the features to places in the bitset is lower when the bitset has bigger size. Then, more targets can be rejected during filtering and less number of \gls{sip} tests have to be computed during verification.
+
 %%%% big table with ct-index running times and results on the AIDS dataset %%
 \newcommand\TstrutT{\rule{0pt}{2.6ex}}         % = `top' strut
 \newcommand\Bstrut{\rule[-1ex]{0pt}{0pt}} 
-\begin{table}[H]
-\caption{CT-Index: Running time and results}
-\label{table:runningTime}
+
+\begin{table}
+%\begin{minipage}
 \begin{center}
-\begin{tabular}{ |c|p{25mm}|c|c|c|p{18mm}|}\hline
- & fingerprint size \newline max path len\newline max subtree len \newline max cycle len & index build T[sec]& query T[sec]& total T [sec] & \textbf{query\#} \#candidates\TstrutT\Bstrut\\
+\renewcommand{\arraystretch}{1.2}% Spread rows out...
+\begin{tabular}{ |c|r|r|r|r|r|}\hline
+ Row \# & Input & Filtering T[sec]& Verification T[sec]& Total T[sec] & FP Ratio\\
  \hline
-1& 4096 -1 \,5 \,5  & 82.376 & 5.896 & 88.272 & \textbf{0} 11 160 \newline \textbf{1} 13 577 \newline \textbf{2} 975 \newline \textbf{3} 2 950 \newline \textbf{4} 2 575 \newline \textbf{5} 6 \TstrutT\Bstrut\\ 
+  1 & 1 5 \,\,5 \,\,5 & 108.934  & 67.395 & 176.329 & 0.913 \\
  \hline
-2 & 4096 \,5 \,5 \,\,5 & 108.465  & 5.948 & 114.413 & \textbf{0} 11 168 \newline \textbf{1} 13 589 \newline \textbf{2} 1058 \newline \textbf{3} 2 949 \newline \textbf{4} 2 576 \newline \textbf{5} 6 \TstrutT\Bstrut \\ 
+  2 & 64 5 \,\,5 \,\,5 & 110.797 & 59.622 & 170.419 & 0.85 \\
  \hline
-3 & 4096 \,5 -1 -1 & 37.621  & 7.929 & 45.550 & \textbf{0} 31 083 \newline \textbf{1} 36 458 \newline \textbf{2} 4 285 \newline \textbf{3} 7 261 \newline \textbf{4} 13 316 \newline \textbf{5} 252 \TstrutT\Bstrut \\ 
+  3 & 128 5 \,\,5 \,\,5 & 110.9 & 31.711 & 142.611 & 0.87 \\
+ \hline
+  4 & 256 5 \,\,5 \,\,5 & 104.586 & 22.373 & 126.959 & 0.81 \\
+ \hline
+  5 & 512 5 \,\,5 \,\,5 & 104.883 & 17.008 & 121.891 & 0.69 \\
+ \hline
+  6 & 1024 5 \,\,5 \,\,5 & 112.132 & 15.477 & 127.609 & 0.64 \\
+ \hline
+  7 & 2048 5 \,\,5 \,\,5 & 107.024 & 14.693 & 121.717 & 0.63 \\
+ \hline
+  8 & 4096 5 \,\,5 \,\,5 & 106.136 & 13.006 & 119.142 & 0.60 \\
+ \hline
+  9 & 8192 5 \,\,5 \,\,5 & 107.625 & 12.337 & 119.962 & 0.62 \\
+ \hline
+  10 & 16384 5 \,\,5 \,\,5 & 107.991 & 14.083 & 122.074 & 0.61 \\
+ \hline
+  11 & 4096 5 \,\,5 -1 & 105.441 & 12.926 & 118.367 & 0.62 \\
+ \hline
+  12 & 4096 5 -1 \,\,5 & 39.743 & 32.068 & 71.811 & 0.88 \\
+ \hline
+  13 & 4096 -1 \,\,5 -1 & 81.826 & 12.785 & 94.611 & 0.62 \\
+ \hline
+  14 & 4096 -1 -1 \,\,5 & 6.234 & 61.346 & 67.580 & 0.913 \\
  \hline 
-4 & 4096 \,5 \,\,1 \,\,1 & 41.482  & 7.96 & 49.442 & \textbf{0} 31 083 \newline \textbf{1} 36 458 \newline \textbf{2} 4 285 \newline \textbf{3} 7 261 \newline \textbf{4} 13 316 \newline \textbf{5} 252 \TstrutT\Bstrut\\ 
+  15 & 4096 -1 \,5 \,5  & 82.376 & 5.896 & 88.272 & 0.62\\ 
  \hline
-5 & 2048 \,5 \,\,1 \,\,1 & 41.269  & 13.295 & 54.564 & \textbf{0} 31 085 \newline \textbf{1} 36 458 \newline \textbf{2} 4 293 \newline \textbf{3} 8 539 \newline \textbf{4} 13 319 \newline \textbf{5} 252 \TstrutT\Bstrut\\ 
- \hline
-6 &  2048 \,-1 \,\,5 \,\,5 & 87.959  & 8.22 & 96.179 & \textbf{0} 11 540 \newline \textbf{1} 13 582 \newline \textbf{2} 987 \newline \textbf{3} 2 983 \newline \textbf{4} 2 660 \newline \textbf{5} 9 \TstrutT\Bstrut\\ 
- \hline
+  16 & 4096 \,\,5 -1 -1 & 37.621  & 7.929 & 45.550 & 0.88 \\ 
+ \hline 
 \end{tabular}
+\caption{CT-Index: Running time and results depending on the specified parameters}
+\label{table:runningTime}
 \end{center}
+%\end{minipage}
 \end{table}
 %%%
-%%%% Analysis of the big table %%%%
-Looking at rows 1 and 2, we can conclude that extracting paths as features as well as subtrees and cycles leads to significantly slower index built time and slightly worse filtering power. Comparing row 1 and row 3, one can see that extracting only paths takes significantly lower amount of time, compared to using only trees as features. However, it leads to worse filtering power. The results from rows 1, 2 and 3 support the claim that trees are much more descriptive features than paths. Also, they show that using paths, subtrees and cycles all together as features leads to slower running time.\par
-%%%
-As it can be seen that the rows with the smallest number of candidates are the ones that store trees in the index file (rows 1, 2 and 6), these are also the instances with the slowest index built time. The reason could be that trees are more complex than paths and require more time to be extracted and transformed to unique string representations. As explained in the previous section, the authors use algorithm that computes the canonical form the the features of high complexity. Maybe if the authors used more optimal algorithm, it would lead to faster running time.\par
-%%%
-As it can be seen in column 5 of table \ref{table:runningTime}, the total running time of CT-Index varies from 49 seconds to 114 seconds depending on the specified input parameters. If we look at rows 4 and 5, the only difference of the input parameter values is the fingerprint size. As it can be seen from the table, the time difference to build the index in 4 and 5 is only around 200 miliseconds. However, the time taken to compute the answers from the set of candidates is more than 6 seconds slower in row 5 compared to row 4, although the number of candidates for the two rows are almost the same for every query except query 3. Similar difference can be observed when comparing row 1 with row 6. The reason for these results could be that fingerprint of size 2048 is too small for the particular dataset and this leads to more collisions.\par
-%%%
-To conclude, in CT-Index, when using only paths as features leads to smaller running time for building index, however it significantly bigger number of candidates and therefore bigger amount of time to find all targets containing the query from the set of candidates. Using trees as features results to an index with much better filtering power, but slower to compute. Hashing features constructed from paths and trees does not give any benefit, moreover, it it slower and results to slightly bigger number of candidate graphs.\par
 
-%%%% TODO write about the experiments with other data sets
-%When running the implementation of \cite{ctindex}, we observed that the algorithm never terminated for some instances of pdbs and ppigo. A similar question arises here: it this because the indexing technique is insufficient to eliminate incompatible targets 
-% TODO: write the answer of these questions:
-% is it because of SIP of ct-index being really bad?
-% is it the case that both SIP of ct-index is really bad and the indexing pat also takes a lot of time and is useless? Need to do ct-index data analyzing to be able to answer these questions.
-%%% TODO add some plots 
-\subsection{gIndex, gCoding .... mention them}
-\label{sec:otherindexes}
+The last 7 rows of Table \ref{table:runningTime} show the performance of CT-Index depending on the other 3 parameters. The input with the worst verification run time is in row 14. No target was rejected during the filtering stage for each of the patterns, as indicated by the high FP ratio value. This data shows that extracting only cycles as features is not effective in pruning and it is almost equivalent to not having an index structure at all. A reason for this can be that the graphs in the datasets don`t' have many cycles.
+
+Comparing the results from rows 8 and 15, one can see that extracting paths and subtrees as features for this dataset gives worse performance in both filtering and verification steps. The reason for this could be that subtrees and cycles are descriptive enough to be used as the only types of features.
+
+Using only paths as features is the option that shows best performance (row 16). Subtree extraction for this dataset takes about 60 seconds more, it gives better filtering ratio, however slightly worse verification run time(rows 16 and 11). From this we can see that the algorithm for subtree extraction significantly lowers the filtering run time, as derived during the empirical analysis in \ref{subsec:ctindexF}. One can reach the same conclusion when comparing rows 15 and 16. The options in row 15 give better performance during verification time, but they result in more than twice slower filtering time.
+
+We tried running similar experiments with the other datasets discussed in \ref{sec:datasets}. However, as also observed in \cite{foteini}, most of the experiments finished computation within matter of days.
+
+
 \section{Subgraph Isomorphism Algorithms}
 \label{sec:sipalgos}
+This Section reports on existing work in the area of the subgraph isomorphism problem (\gls{sip}).
+
+- subgraph isomorphism with constraints programming
+
 \subsection{Partick and Ciaran's paper}
 \label{sec:sippatrick}
+
 \subsection{Christine's paper}
 \label{sec:sipchristine}
 
-\chapter{Path-based query processing algorithms based on filtering-verification }
+%%%%%%%%%%%%%%%%%% the path-based indexes %%%%%%%%%%%%%%%%%%%%
+\chapter{Implementation of Filtering Methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This Chapter includes detailed description of two path-based exhaustive feature enumeration algorithms, their implementation and empirical analysis.
 
-The order of a graph is the cardinality of its
-vertex set. We write V(G) for the vertex set of a graph G.
+%%% TODO move this to a different section
+%The filtering stage of the CT-Index algorithm reviewed in Section \ref{sec:ctindex} is used as a benchmark for the algorithms described here. 
+%   The correctness of the results is checked comparing the answers obtained from CT-Index. We implemented a class called \textit{Verify} that checks whether the resulting candidate set after each query execution contains the answers of subgraph isomorphism. \textit{Verify} was very useful for discovering a lot of bugs during the software development process.
 
-%A non-induced subgraph isomorphism from a graph P (called the pattern) to a graph T (called the target) is an injective mapping from V(P)to V(T) which preserves adjacency— that is, for every adjacent v and w in V(P), the vertices i(v) and i(w) are adjacent in T. An induced subgraph isomorphism additionally preserves non-adjacency—that is, if v and w are not adjacent in P, then i(v) and i(w) must not be adjacent in T. We use the notation i : P  T for a non-induced isomorphism, and i : P ,\→ T for an induced isomorphism.
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Benchmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Benchmarks} %% not sure this is the best name for this 
-This section includes more information about the already existing indexing algorithm implementations that were used as a standard point of reference against our graph indexing implementations. 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Index algorithms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% todo move this to where I explain the filter-verification paradigm
-\section{Index algorithms}
-
-    All algorithms described in this section generate the candidate set of graphs in the following steps:
     
-    \begin{enumerate}
-        \label{indexSteps}
-        \item Compute the index of all graphs in T;
-        \item Compute the index of all patterns in P;
-        \item Using the target and pattern indexes computed in the previous two steps, extract all graphs in T that contain all features in the pattern index;
-        \item All extracted graphs from step 3 form the candidate set C.
-	\end{enumerate}
-    
-    In this work, we consider only induced subgraphs (definition \ref{def:induced-subgraph} in section \ref{subsec:definitions}) and the induced version of the subgraph isomorphism problem (definition \ref{def:inducedSubgraphIsomorphism} in section \ref{subsec:definitions})
-    
-    The correctness of the results is checked comparing the answers obtained from CT-Index. We implemented a class called $Verify.java$ that checks whether the resulting candidate set after each query execution contains the answers of subgraph isomorphism. $Verify.java$ was very useful for discovering a lot of bugs during the software development process.
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%------------------------- Path Index --------------------------%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%                      Path Index
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Path Index}
 \label{path-index}
-This section gives an overview of the first indexing technique that was designed and implemented. In following subsections we describe the main idea of the algorithm ans the implementation. The performance results that were obtained after running various types of queries on targets of varying size are described along with a summary of the advantages and limitations of the algorithm.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{The idea}
-\label{path-index-idea}
-    The algorithm uses an exhaustive path-enumeration approach to build its index. This technique is employed by various algorithms like CT-Index \cite{ctindex}, gCode \cite{gcode} and GraphGrepSX \cite{graphgrepsx}. The main idea behind \textit{exhaustive path-enumeration} is to enumerate all existing paths in a database up to $maxL$ length and index them, where a path is a sequence of vertexes such that each vertex is connected with an edge with the previous and the next vertex in the sequence.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   Given a set of target graphs $T$ and a pattern graph $p$, $Path$-$index$ first computes the index of all graphs in $T$ by enumerating exhaustively all paths in every target up to a specified maximum path length $maxL$. The paths are then stored in a file, which is the target$'$s index. The same procedure using the same value of $maxL$ is followed to derive the pattern index. The two files are then used for finding the candidate set $C$ of all graphs in $T$ that have to be checked for subgraph isomorphism with $p$. Using the pattern index, we check which targets contain all paths in the pattern index and filter out all targets that do not have all paths that the pattern does. The rationale behind this filtering method is that if some features of graph $p$ do not exist in a graph $t$, $t$ cannot contain $p$. However, if $t$ contains all features of $p$, this does not meant that $p$ is subgraph of $t$: $t$ can be a \textit{false-positive} and a subgraph isomorphism test needs to be performed on $t$ and $p$ to identify whether $t$ is a \textit{false positive} or it indeed contains $p$. All targets in $T$ that have all paths, extracted from the pattern graph, form the candidate set $C$. All graphs in $C$ are then checked for subgraph isomorphism with $p$. \par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-As mentioned before, each path is a sequence of vertices of maximum size $maxL$, such that each vertex is connected with an edge with the previous and the next node in the sequence. Each path, extracted from the graph, is stored in the index file in a string representation, derived from the label of each node in the sequence and the label of the edge (if existent) between the node and its neighbors. In this work, we refer to these path string representations as path-strings. To avoid redundancy index comprises of unique path-strings, computed from the paths taking the following points into consideration:
+This Section gives an overview of the first implemented filtering technique, called P-Index. The algorithm uses an exhaustive path-enumeration approach to build its index, which is a commonly employed technique, as discussed in Chapter \ref{ch:existingWork}. Example \ref{ex:pathIndexing} illustrates the main idea of this method.
+
+Given a database of target graphs D, P-Index computes all paths up to a specified maximum path length l$_{max}$ of every target and stores them as features in $\fancyI_{D}$. A path is represented as a sequence of l$_{max}$ number of vertices, such that each vertex is connected via an edge with the previous and the next vertex in that sequence. Before adding the path to the set of features in $\fancyI_{D}$, we compute its unique string representation in order to avoid storing different string representations of the same path more than once. As the datasets we are working with contain undirected graphs, a path of length more than 1 has two 
+
+%Each path, extracted from the graph, is stored in the index file in a string representation, derived from the label of each node in the sequence and the label of the edge (if existent) between the vertex and its neighbors. In this work, we refer to these path string representations as path-strings. To avoid redundancy index comprises of unique path-strings, computed from the paths taking the following points into consideration:
 \begin{itemize}
 \item Path $a$ is equivalent to its reverse variant $a$-$reversed$, because the graphs in the datasets are undirected, as mentioned above. There is no need to store both $a$ and $a$-$reversed$ in the index, as this would lead to redundancy.
 \item Path $a$ is not equivalent to a path $a$-$sorted$, where $a$-$sorted$ is the sorted variant of $a$ in lexicographical order (either increasing or decreasing). Sorting $a$ can change the places of some of the nodes that comprise the sequence, which means that some nodes may have different neighbors in the sorted path. This introduces new edges in $a$-$sorted$ that may not exist in $a$ or in the graph.
@@ -1123,7 +1133,7 @@ In the worst case, SIP1 will assign all values from the domain of each pattern v
 %%% TODO make graphs with the running time in milliseconds
 \section{Light Filters}
 \label{eval:sip1}
-This Section reports on the observed performance of the subgraph query processing algorithm described in Chapter \ref{ch:sip1}. SIP1 was run with each of the datasets discussed in Section \ref{sec:datasets}, some of which were also used for empirical study by \cite{foteini, graphgrepsx, GRAPES, graphgrepsx, ctindex, gcode, tree+delta>=graph}. The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, same machine used by \cite{foteini}. Run time is measured in milliseconds from when the process starts until it completes, including the time to read in all the graphs, to perform filtering and verification for each instance and to write out all results to a file.
+This Section reports on the observed performance of the subgraph query processing algorithm described in Chapter \ref{ch:sip1}. SIP1 was run with each of the datasets discussed in Section \ref{sec:datasets}, some of which were also used for empirical study by \cite{foteini, graphgrepsx, GRAPES, graphgrepsx, ctindex, gcode, tree+delta>=graph, lindex}. The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, same machine used by \cite{foteini}. Run time is measured in milliseconds from when the process starts until it completes, including the time to read in all the graphs, to perform filtering and verification for each instance and to write out all results to a file.
 
 For each rejected \gls{sip} instance during filtering, we recorded the test that rejected it using the scale on Table \ref{table:failures} and calculated the total number of instances that were eliminated by a particular test for each dataset. These numbers were then used to derive the percentage of \gls{sip} instances eliminated by each fail test. We also computed the percentage of \gls{sat} and \gls{unsat} \gls{sip} instances for each dataset. Figure \ref{averageFailures} shows our results. The brown part of each bar represents the percentage of \gls{sip} instances that are \gls{sat}, the rest of the bar for \gls{unsat} problems. All satisfiable instances had to go through the verification step, whereas for some of the \gls{unsat} problems were discarded during the filtering. For instance, the leftmost bar represents the aids dataset, where 8.67\% of all instances are \gls{sat}. Out of the \gls{unsat} problems, 24.211\% were discovered during the verification stage and the rest 32.881\% were filtered by either of the trivial failures. The number of \gls{sat} and \gls{unsat} problems are on Table \ref{table:dataSAT}. The following observations were made:
 
@@ -1379,6 +1389,31 @@ total verification T & 2,687 & 1,013 & 16,102 & 51 \\
 \label{table:answers}
 \end{table}        
 %%%%
+
+
+\begin{table}
+\caption{CT-Index: Running time and results}
+\label{table:ctindexAllRunningT}
+\begin{center}
+\begin{tabular}{ |c|p{25mm}|c|c|c|p{18mm}|}\hline
+ & fingerprint size \newline max path len\newline max subtree len \newline max cycle len & index build T[sec]& query T[sec]& total T [sec] & \textbf{query\#} \#candidates\TstrutT\Bstrut\\
+ \hline
+1& 4096 -1 \,5 \,5  & 82.376 & 5.896 & 88.272 & \textbf{0} 11 160 \newline \textbf{1} 13 577 \newline \textbf{2} 975 \newline \textbf{3} 2 950 \newline \textbf{4} 2 575 \newline \textbf{5} 6 \TstrutT\Bstrut\\ 
+ \hline
+2 & 4096 \,5 \,5 \,\,5 & 108.465  & 5.948 & 114.413 & \textbf{0} 11 168 \newline \textbf{1} 13 589 \newline \textbf{2} 1058 \newline \textbf{3} 2 949 \newline \textbf{4} 2 576 \newline \textbf{5} 6 \TstrutT\Bstrut \\ 
+ \hline
+3 & 4096 \,5 -1 -1 & 37.621  & 7.929 & 45.550 & \textbf{0} 31 083 \newline \textbf{1} 36 458 \newline \textbf{2} 4 285 \newline \textbf{3} 7 261 \newline \textbf{4} 13 316 \newline \textbf{5} 252 \TstrutT\Bstrut \\ 
+ \hline 
+4 & 4096 \,5 \,\,1 \,\,1 & 41.482  & 7.96 & 49.442 & \textbf{0} 31 083 \newline \textbf{1} 36 458 \newline \textbf{2} 4 285 \newline \textbf{3} 7 261 \newline \textbf{4} 13 316 \newline \textbf{5} 252 \TstrutT\Bstrut\\ 
+ \hline
+5 & 2048 \,5 \,\,1 \,\,1 & 41.269  & 13.295 & 54.564 & \textbf{0} 31 085 \newline \textbf{1} 36 458 \newline \textbf{2} 4 293 \newline \textbf{3} 8 539 \newline \textbf{4} 13 319 \newline \textbf{5} 252 \TstrutT\Bstrut\\ 
+ \hline
+6 &  2048 \,-1 \,\,5 \,\,5 & 87.959  & 8.22 & 96.179 & \textbf{0} 11 540 \newline \textbf{1} 13 582 \newline \textbf{2} 987 \newline \textbf{3} 2 983 \newline \textbf{4} 2 660 \newline \textbf{5} 9 \TstrutT\Bstrut\\ 
+ \hline
+\end{tabular}
+\end{center}
+\end{table}
+%%%
 
 An example of running from the command line is as follows:
 \begin{verbatim}
