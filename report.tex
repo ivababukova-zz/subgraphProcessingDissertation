@@ -1,3 +1,9 @@
+%%%%%% TODOs:
+% put instructions on how to run my code (2 projects)
+% put instructions on how to run the experiments?
+%
+%
+
 \pdfoutput=1
 
 \documentclass{l4proj}
@@ -148,9 +154,13 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 \chapter{Introduction}
 \label{ch:introduction}
 \pagenumbering{arabic}
-This chapter starts by introducing the problem statement and the aims and motivations to solve it. We then give important definitions and concepts that are used throughout the report.
+
+This Chapter starts by introducing the problem statement and the aims and motivations to solve it. We then give important definitions and concepts that are used throughout the report. 
 
 \section{Problem Statement}
+The subgraph isomorphism problem involves finding a pattern graph inside a target graph, where a graph is a structure that represents schemaless data such as proteins, chemical compounds, and XML documents. Subgraph isomorphism has a wide variety of applications in many fields. For instance, finding the best treatment to fight a particular cancer involves screening a patient's tumor to search for particular set of biomarkers \cite{nature:2015}. Such tasks involve repeatedly examining a large number of graphs, typically stored in a database, comparing each of them with a pattern.
+
+
 \section{Aims and Motivations}  
 %    Many substructure-searching problems call for repeatedly examining a large number of molecules (typically stored in a database), comparing each with a pattern. In such situations, it pays to spend some time "up front," storing the answers to specific questions for each structure in the database. Subsequent searches of the database use these pre-computed answers to vastly improve search time; the up-front computation time is paid back quickly as repeated searches are performed.
 %        \begin{itemize}
@@ -166,9 +176,11 @@ This chapter starts by introducing the problem statement and the aims and motiva
 %        \item treating diseases like cancer: screen a patient's tumor for a set of biomarkers to choose the best treatment to fight the particular cancer -- nature vol 527 no 7578
 %        \end{itemize}
 
+The remaining of this work is organised as follows. Section \ref{sec:graphTheory} contains terminology, definitions and notation used throughout this work. Chapter 2 presents review and analysis of existing approaches to solve the problem and properties of 4 real datasets used for testing and evaluation. An implementation and empirical analysis of two graph indexing and filtering methods is presented in Chapter 3. Chapter 4 describes a new approach to solve the problem, called Light Filters. The evaluation of Light Filters and analysis of the hardness of satisfiable and unsatisfiable subgraph isomorphism instances in the datasets are presented in Chapter 5. Chapter 6 provides a summary of this work and suggestions how to extend it in the future. 
+
 \section{Terminology, Definitions and Notations}
 \label{sec:theory}
-In this section, we introduce all preliminary terminology and definition used throughout the document. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
+In this Section, we introduce all preliminary terminology and definition used throughout the document. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
 
 \subsection{Graph Theory}
 \label{sec:graphTheory}
@@ -247,7 +259,6 @@ There are number of subgraph query processing algorithms based on the filter-ver
 % what is a candidate set?
 % graph index, features, ...
 % what is false-positive? what is false-negative, why it can't exist?
-\section{Report Organization}
 
 %%%%%%%%%%%%%%%%%%%%%%%%% CHAPTER 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Review of existing work}
