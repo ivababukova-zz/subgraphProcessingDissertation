@@ -127,6 +127,8 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 
 \newglossaryentry{tree}{name={tree}, description={A tree is an undirected graph such that any two vertices are connected by exactly one path. In this work, we refer to the vertices of the tree as \emph{nodes}.}}
 
+\newglossaryentry{sufftree}{name={suffix tree}, description={A suffix tree S is a compressed trie containing all the suffixes of the given text as their keys and positions in the text as their values. It has the following properties: the tree has exactly n leaves numbered from 1 to n; except for the root, every internal node has at least two children; each edge is labeled with a non-empty substring of S; no two edges starting out of a node can have string-labels beginning with the same character; the string obtained by concatenating all the string-labels found on the path from the root to leaf i spells out suffix S[i..n], for i from 1 to n.}}
+
 \newglossaryentry{canonicalform}{name={canonical form}, description={A canonical form of a graph G is a labeled graph Canon(G) that is isomorphic to G, such that every graph that is isomorphic to G has the same canonical form as G}}
 
 \newglossaryentry{hashfunction}{name={hash function}, description={A function that can be used to map data of arbitrary size to data of fixed size. The values returned by a hash function are called hash values}}
@@ -433,7 +435,7 @@ VF2 has been shown to perform erratically and poorly \cite{CP2015}. Therefore we
 \subsection{Performance}
 \label{subsec:ctindexEval}
 
-There is an existing work, where several well-established subgraph query processing techniques as well as CT-Index are evaluated, the results are reported in \cite{foteini}. The experiments are conducted on the four datasets described in Section \ref{sec:datasets} using the default input parameters for each of the compared techniques. CT-Index requires five integers as an input, specified in the following order:
+There is an existing work, where several well-established subgraph query processing techniques as well as CT-Index are evaluated \cite{foteini}. The experiments are conducted on the four datasets described in Section \ref{sec:datasets} using the default input parameters for each of the compared techniques. CT-Index requires five integers as an input, specified in the following order:
 \begin{enumerate}
 \item Fingerprint size. This indicates the number of bits allowed to store the features of each graph in the index. The specified fingerprint size must be equal to 2$^{n}$ for some integer n.
 \item Maximum path length. Indicates the maximum length of a path that is allowed to be extracted. If we specify -1, then no paths are extracted.
@@ -540,67 +542,31 @@ This Section reports on existing work in the area of the subgraph isomorphism pr
 \label{sec:sipchristine}
 
 %%%%%%%%%%%%%%%%%% the path-based indexes %%%%%%%%%%%%%%%%%%%%
-\chapter{Implementation of Filtering Methods}
+\chapter{Framework for graph indexing and filtering}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-This Chapter includes detailed description of two path-based exhaustive feature enumeration techniques, their implementation and empirical analysis. The fist one is Path Index, described in the next Section, that uses simple path enumeration approach. The second technique is built on top of Path Index and is presented in Section \ref{path-subtree-index}.
+This Chapter describes a subgraph-query filtering and indexing framework designed and implemented in Java. The framework implements the first stage of the filtering-verification paradigm. It takes a set of target and a set of pattern graphs, computes their indices and generates a candidate set for SIP. There are two path based exhaustive feature enumeration techniques that can be used to generate the index of a set of graphs: Path Index and Path-Subtree Index. Their design, implementation and empirical analysis is presented in Section \ref{sec:PIandPSI}.
 
-%%% TODO move this to a different section
-%The filtering stage of the CT-Index algorithm reviewed in Section \ref{sec:ctindex} is used as a benchmark for the algorithms described here. 
-%   The correctness of the results is checked comparing the answers obtained from CT-Index. We implemented a class called \textit{Verify} that checks whether the resulting candidate set after each query execution contains the answers of subgraph isomorphism. \textit{Verify} was very useful for discovering a lot of bugs during the software development process.
-
+%3 main stages of subgraph query filtering:
+%	1. read in the files, create graph data structures
+%   2. paths extraction
+%	3. computing p-features, store in index --- PI and PSI
+%   4. generate candidate set: create pattern index, filter -- PI and PSI
     
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%                      Path Index
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Path Index}
-\label{path-index}
-This Section gives an overview of the first implemented filtering technique, called Path Index (PI). The algorithm uses an exhaustive path-enumeration approach to build its index, which is a commonly employed technique, as discussed in Chapter \ref{ch:existingWork}. Example \ref{ex:pathIndexing} illustrates the main idea of this method. This Section is organized as follows. We first discuss the method of computing the features and its implementation in Section \ref{pi:features}. We then describe the path extraction approach and how it was implemented in Section \ref{pi:pathExtr}.
+%    step 2 can be done only once and then the index can be reused, but the current framework does not support this
 
-\subsection{Features}
-\label{pi:features}
-Given a database D, PI computes all paths up to a specified maximum path length l$_{max}$ of every target in D and stores the paths as features in the index ($\fancyI_{D}$). A path is represented as a sequence of l$_{max}$ number of vertices, such that each vertex is connected via an edge with the previous and the next vertex in that sequence. The unique string representation of each path, referred to as \emph{p-feature}, is stored once in $\fancyI_{D}$. P-features are computed as follows.
-\begin{enumerate}
-\item Given a sequence of vertices v$_{seq}$ (i.e. a path), replace each vertex in v$_{seq}$ with its label to obtain the \emph{p-feature}.
-\item Reverse the order of vertices in v$_{seq}$ to obtain v$_{seq}^{\prime}$.
-\item Calculate \emph{p-feature}$^{\prime}$, that is the unique string representation of v$_{seq}^{\prime}$.
-\item Store in $\fancyI_{D}$ the lexicographically smaller of the two string representations (i.e. \emph{p-feature}$^{\prime}$ or \emph{p-feature}), unless it has already been added before.
-\end{enumerate}
-%% todo complexity of computing this
-Step 1 involves iterating through the sequence of vertices, that is at most $l_{max}$ elements. Accessing the label of each vertex is a constant time operation, therefore the complexity of Step 1 is $\mathcal{O}(l_{max})$. The complexity of Step 2 is $\mathcal{O}(l_{max})$, as well as Step 3. Step 4 takes constant time\footnote{Assuming that the insertion algorithm does not go through the whole list of previously stored p-features to insert the new one.}. Therefore, the complexity of deriving of deriving and storing a p-feature in the index is $\mathcal{O}(l_{max})$.
-\subsubsection{Implementation}
-\label{pi:featuresImpl}
-Algorithm \ref{alg:outputPath} shows the pseudo code of the algorithm. Given a sequence of vertices nseq as parameter, procedure ``getPath'' computes the \emph{p-feature}(line 2) and \emph{p-feature}$^{\prime}$(line 3, 4) and stores the lexicographically smaller variant in the index.
+The framework is composed of the two indexing algorithms described previously (PI and PSI) and the filtering method. Subgraph query filtering can be performed using either PI or PSI. To run the framework, the user specifies the filename of the target graphs, the filename of the pattern graphs, $l_{max}$ and a bit which if 1, the framework will index the graphs using PSI, or otherwise use PI. More detailed instructions on how to run the framework can be found in the code repository on github \cite{framework-github}.
 
-%%% proper output path algorithm
-\begin{algorithm}
-\centering
-\caption{Output path procedure}
-\label{alg:outputPath}
-\begin{algorithmic}[1]
-\Procedure{getPath }{nseq}
-\State pfeature $\gets$ nseq.toString() \Comment{\textit{returns a string of the labels of the nodes in nseq}}
-\State rseq $\gets$ nseq.reverse() \Comment{\textit{reverse the order of nodes in nseq}}
-\State pfeature$^{\prime}$ $\gets$ rseq.toString() \Comment{\textit{returns a string of the labels of the nodes in rseq}}
-\If {pfeature$^{\prime}$ $<$ pfeature}
-\State pfeature $\gets$ pfeature$^{\prime}$ \Comment{\textit{put to index the lexicographically smaller string}}
-\EndIf
-\If {pfeature not in $\fancyI_{D}$}
-\State add pfeature to $\fancyI_{D}$
-\EndIf
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-%%% end of algorithm
+\section{Graph representation}
+\label{path-index:graph-representation}
+Graphs are  represented with a Java class \emph{Graph} that has an integer id and a collection of objects of type \emph{Vertex} as fields. A Vertex has an id, a label and a list of edges that connect it to its neighbours. The number of edges a Vertex has equal to its degree. An Edge object has a label and a destination Vertex as fields. As the graphs we are working with are not directed, two Edge objects are created to represent an edge. The first object has one of the vertices as destination Vertex and then added in the list of edges of the other Vertex: the source Vertex. The second edge object will have the source Vertex of the first edge object as destination Vertex and included in the list of edges of the destination Vertex of the first edge object, which will be its source Vertex. The label of both edge objects will be the same.
 
-\subsection{Paths Extraction}
-\label{pi:pathExtr}
-Path extraction is referred to the process of generating all paths up to length l$_{max}$ in a graph G. For every vertex v in G, we execute a recursive depth-first search algorithm with bound on the size of the stack not in exceed l$_{max}$. We output the sequence of vertices, that are currently stored in the stack, after each recursive call. The implementation of the algorithm and its empirical study is discussed in the next Section.
+\section{Paths Extraction}
+\label{pathsExtraction}
+A path is a sequence of vertices, such that every pair of consecutive vertices in the sequence are neighbours. Path extraction is referred to the process of generating all paths up to a given length l$_{max}$ in a graph G. For every vertex \emph{v} in G, we execute a recursive depth-first search algorithm with a bound on the size of the stack of maximum number of vertices l$_{max}$. We output the sequence of vertices currently stored in the stack after each recursive call. Every generated sequence is then fed into the \ref{alg:outputPath} procedure to derive the p-feature and store it in the index.
 
-\subsubsection{Implementation}
-\label{pi:pathExtrImpl}
-Algorithm \ref{alg:generatePath} describes our approach. Before procedure ``generatePath'' is called, an empty stack \emph{s} is initialized (line 3). The stack is used for storing the sequence of vertices generated during depth-first search. Function generatePath in \textrm{Algorithm 1} takes the list of all vertices in the graph and path length $maxL$ as parameters and calls procedure ``dfsBounded'' for every vertex in the list as starting vertex (line 5). The start vertex is also pushed on the stack (line 4), as it is part of the path that is to be generated.
+Algorithm \ref{alg:generatePath} describes our approach. Before generatePath procedure is called, an empty stack \emph{s} is initialized (line 3). The stack is used for storing the sequence of vertices generated during depth-first search procedure. Procedure generatePath ( \textrm{Algorithm \ref{alg:generatePath}}) takes all vertices in the target graph and l$_{max}$ as parameters. It calls procedure dfsBounded for every vertex in the list as starting vertex (line 5). The start vertex is also pushed on the stack (line 4), as it is part of the path that is to be generated.
 
-Algorithm \ref{alg:dfsBounded} shows the pseudo code of the ``dfsBounded'' procedure. Given a starting vertex \emph{v}, l$_{max}$ and stack s, Algorithm \ref{alg:dfsBounded} iterates through all neighbours of \emph{v}, adding each neighbour \emph{n} to the stack (line 10) and calling dfsBounded with \emph{n} as a starting vertex (line 11). At each call of dfsBounded, the current sequence of vertices in the stack is passed to procedure getPath (Algorithm \ref{alg:outputPath}) until all vertices reachable by the start vertex within distance l$_{max}$ are visited.
+Algorithm \ref{alg:dfsBounded} performs a depth-first search with bound path length. Given a starting vertex \emph{v}, l$_{max}$ and stack s, Algorithm \ref{alg:dfsBounded} iterates through all neighbours of \emph{v}, adding each neighbour \emph{n} to the stack (line 10) and calling dfsBounded with \emph{n} as a starting vertex (line 11). At each call of dfsBounded, the current sequence of vertices in the stack is passed to procedure computeFeature (Algorithm \ref{alg:outputPath}) until all vertices reachable by the start vertex within distance l$_{max}$ are visited.
 
 %%% proper path extraction algorithm
 \begin{algorithm}
@@ -646,161 +612,250 @@ Algorithm \ref{alg:dfsBounded} shows the pseudo code of the ``dfsBounded'' proce
 \end{algorithmic}
 \end{algorithm}
 %%% end of algorithm
- 
+%%% TODO check this complexity 
 The complexity of dfsBounded is derived as follows. Algorithm \ref{alg:outputPath} iterates through each vertex in the graph, calling the dfsBounded procedure. The number of calls to dfsBounded from this Algorithm is equal to the order of the graph, say \emph{n}. Let us denote the degree of a vertex as \emph{d}. Then, dfsBounded will generate d$^{l_{max}-1}$ paths. This will result to \emph{d + d$^{2}$ + \ldots d$^{l_{max}-1}$} calls to dfsBounded in total. Therefore, the overall cost of extracting all paths in a graph of maximum length l$_{max}$ is $\mathcal{O}(n(d + d^{2} + \ldots d^{l_{max}-1}))$.
 
-\subsubsection{Graph representation}
-\label{path-index:graph-representation}
-	Each graph is represented with a Java class \textrm{Graph} that has an integer id and a collection of vertex objects as fields, where the integer is a unique identifier. Each vertex object has an id, a label and a list of edge objects, where the vertex is a source vertex for each edge contained in the list. The length of the list of the edge object is equal to the degree of the vertex. Therefore, each edge object does not need to keep a record of the source vertex: it only has a label and a destination vertex as fields. As the graphs we are working with are not directed, two Edge objects are created to represent an edge. The first object has one of the vertices as destination vertex and then added in the list of edges of the other vertex: the source vertex. The second edge object will have the source vertex of the first edge object as destination vertex and included in the list of edges of the destination vertex of the first edge object, which will be its source vertex. The label of both edge objects will be the same.
+%%% TODO move this to a different section
+%The filtering stage of the CT-Index algorithm reviewed in Section \ref{sec:ctindex} is used as a benchmark for the algorithms described here. 
+%   The correctness of the results is checked comparing the answers obtained from CT-Index. We implemented a class called \textit{Verify} that checks whether the resulting candidate set after each query execution contains the answers of subgraph isomorphism. \textit{Verify} was very useful for discovering a lot of bugs during the software development process.
 
-\subsection{Candidates extraction}
-\label{pi:candExtr}
-This Section describes how the set of candidate graphs for a \gls{sip} test with the pattern is formed, using the database index $\fancyI_{D}$ and the set of features of the pattern $\fancyI_{G_{p}}$.
+\section{Indexing and candidates extraction algorithms}
+\label{sec:PIandPSI}
+The rest of the subgraph query filtering process is carried out by using two algorithms: Path Index (PI) and Path-Subtree Index (PSI). PSI and PI employ different feature representation and candidates extraction algorithms, which are explained below.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Path Index}
+\label{path-index}
+This Section presents PI: a technique to compute features of a graph commonly used in many filtering algorithms \cite{graphgrepsx}. Below we describe the features calculation and candidate extraction algorithms employed in PI.
+
+\subsubsection{Features}
+\label{pi:features}
+PI computes the features stored in the index using the paths extracted during the path extraction procedure outlined in Section \ref{pathsExtraction}. To store a path in $\fancyI_{D}$, we compute its unique string representation, referred to as \emph{p-feature}. The procedure to derive p-features and store them in $\fancyI_{D}$ is the following.
+\begin{enumerate}
+\item Given a sequence of vertices v$_{seq}$ (i.e. a path), replace each vertex in v$_{seq}$ with its label to obtain its \emph{p-feature}.
+\item Reverse the sequence v$_{seq}$ to obtain v$_{seq}^{\prime}$.
+\item Calculate \emph{p-feature}$^{\prime}$, that is the unique string representation of v$_{seq}^{\prime}$.
+\item If not added previously, store in $\fancyI_{D}$ the lexicographically smaller of the two string representations (i.e. \emph{p-feature}$^{\prime}$ or \emph{p-feature}).
+\end{enumerate}
+
+The complexity of each of the four steps of the p-feature computation and storage is the following. Step 1 involves iterating through the sequence of vertices, that is at most $l_{max}$ elements. Accessing the label of each vertex is a constant time operation, therefore the complexity of Step 1 is $\mathcal{O}(l_{max})$. The complexity of Step 2 and Step 3 is $\mathcal{O}(l_{max})$. Step 4 has $\mathcal{O}(p)$ worst case complexity, where p is the current size of the index of the current graph being indexed. Note that as the index grows larger and larger, the cost of adding new p-features increases.
+
+\begin{example}
+Figure \ref{C2H4-1} represents a graph G with 6 vertices, each with an id: a number from 1 to 6, and a label: either yellow(Y) or blue(B). The sequence of vertices $<$1, 5, 6$>$ is a valid path, because every pair of consecutive vertices in the sequence are neighbours in G. Executing Step 1 of the procedure explained above results in obtaining the p-feature ``Y-B-B''. After computing Step 2 and 3, we derive the p-feature of the reversed sequence equal to ``B-B-Y''. We store the string ``B-B-Y'' in $\fancyI_{D}$, because it is lexicographically smaller than ``Y-B-B''.
+\end{example}
+
+The path extraction algorithm will encounter both v$_{seq}^{\prime}$ and v$_{seq}$ throughout its execution, but only one p-feature to represent both of them will be stored in the index. Storing the p-feature of both of them would be redundant, because the graphs we work with are undirected. Therefore, choosing to store only one of them (in this case the lexicographically smaller one) limits the size of the index by half.
+
+%% TODO: prove this
+\begin{theorem}
+Let us have two paths: v$_{seq}$ and v$_{seq}^{\prime}$ in an undirected graph G, such that v$_{seq}^{\prime}$ is the reverse of v$_{seq}$. We can represent v$_{seq}$ and v$_{seq}^{\prime}$ using one p-feature without loosing structural information about G. 
+\end{theorem}
+
+\begin{proof}
+The correctness of this statement follows from the fact that G is undirected. 
+\end{proof}
+
+%%%
+\begin{figure}
+\centering
+\begin{minipage}[t]{.5\textwidth}
+  \centering
+  \includegraphics[height=3.3cm,width=4.4cm]{images/graphs/C2H4-1.png}
+  \caption{Graph G}
+  \label{C2H4-1}
+\end{minipage}
+\end{figure}
+%%
 
 \subsubsection{Implementation}
-\label{pi:candExtrImpl}
-Algorithm \ref{alg:candidatesExtraction} describes our approach. Procedure ``candidatesExtractor'' takes the index of one graph from the target dataset and the index of the pattern (or one of the set of pattern graphs, if there are more than one pattern) as parameters (line 1). For every p-feature in the pattern, we check whether it is contained in the target index (lines 3, 4). If yes, the algorithm continues, because the target might be a candidate (line 6). Otherwise, the procedure returns false and terminates (line 4).
+\label{pi:featuresImpl}
+Algorithm \ref{alg:outputPath} describes the implementation of Steps 1-4 described above. Given a sequence of vertices \emph{vseq} as parameter, the procedure computes the \emph{p-feature} (line 2) and \emph{p-feature}$^{\prime}$ (lines 3, 4) and stores the lexicographically smaller variant in the index.
 
-%%% proper candidates extraction algorithm
+%%% proper output path algorithm
 \begin{algorithm}
 \centering
-\caption{Candidates extraction}
-\label{alg:candidatesExtraction}
+\caption{Compute p-features procedure}
+\label{alg:outputPath}
 \begin{algorithmic}[1]
-\Procedure{candidatesExtractor }{$\fancyI_{G_{p}}$, $\fancyI_{G_{t}}$}
-\For{path$_{p}$ in $\fancyI_{G_{p}}$}
-\For{path$_{t}$ in $\fancyI_{G_{t}}$}
-\If{no path$_{t}$ is equal to path$_{p}$} \Return false \Comment{\textit{path$_{p}$ is not in $\fancyI_{G_{t}}$, return false}}
+\Procedure{computeFeature }{vseq}
+\State pfeature $\gets$ vseq.toString() \Comment{\textit{returns a string of the labels of the nodes in vseq}}
+\State rseq $\gets$ vseq.reverse() \Comment{\textit{reverse the order of nodes in vseq}}
+\State pfeature$^{\prime}$ $\gets$ rseq.toString() \Comment{\textit{returns a string of the labels of the nodes in rseq}}
+\If {pfeature$^{\prime}$ $<$ pfeature}
+\State pfeature $\gets$ pfeature$^{\prime}$ \Comment{\textit{put to index the lexicographically smaller string}}
 \EndIf
-\EndFor
-\EndFor
+\If {pfeature not in $\fancyI_{D}$}
+\State add pfeature to $\fancyI_{D}$
+\EndIf
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 %%% end of algorithm
 
-Algorithm \ref{alg:candidatesExtraction} visits every path stored in the pattern index and for each pattern path, it goes through the target index and checks whether it contains the same path. This procedure is done for every target graph in the dataset. If we assume that the number of paths in the pattern index is \emph{p$_{G_{p}}$}, the number of paths in the current target index is \emph{p$_{G_{t}}$} and the number of graphs in the target dataset is \emph{g}, the complexity of the algorithm is $\mathcal{O}(g.p_{G_{p}}.p_{G_{t}})$.
+\subsubsection{Candidates Extraction}
+%for each path in the pattern index: check whether there exists the same path in the target index. Output the ids of all targets that contain all paths of the pattern.
+The process of computing the set of candidates for subgraph isomorphism test with the pattern is referred to as candidate extraction. Algorithm \ref{alg:piCandidatesExtraction} shows the procedure. It returns a list of the ids of all graphs in the database that contain all p-features of the pattern graph \emph{p}. Algorithm \ref{alg:piCandidatesExtraction} iterates once through all graphs in the database (line 3) and for each target checks whether it contains all p-features of the pattern (lines 5, 6, 7). Let the number of targets be \emph{n}, the size of the pattern be \emph{p$_{i}$} and the average size of a target graph index be \emph{t$_{i}$}. Then the time complexity is equal to $\mathcal{O}(n. p_{i}. t_{i})$.
 
-Say that this is very naive way to implement it and suggest the way with having a dictionary structure to keep every feature and the number of times it occurs in the particular graph. Analyze what the complexity of this would be, would it be better and why.
+\begin{algorithm}
+\centering
+\caption{Candidates Extraction Procedure}
+\label{alg:piCandidatesExtraction}
+\begin{algorithmic}[1]
+\Procedure{candidatesExtractor }{$\fancyI_{G_{p}}$, $\fancyI_{G_{t}}$}
+\State{candidates $\gets$ new ArrayList$<>$()}
+\For{ Graph t : targets}
+	\State{flag $\gets$ true}
+	\For{pfeature : $\fancyI_{G_{p}}$}
+    	\If{\textbf{not} \Call{contains }{ t.index, pfeature}} \Comment{\textit{check whether pfeature is contained in the index of t}}
+        	\State{flag $\gets$ false; break}
+        \EndIf
+	\EndFor
+    \If{flag}
+    	candidates.add(t.id)
+    \EndIf
+\EndFor
+\State{\Return{candidates}}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%---------------------- Path-Subtree Index -------------------------%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Path-Subtree Index}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Path-Subtree Index}
 \label{path-subtree-index}
-  Path-Subtree Index (PSI) is the second indexing technique that was designed, implemented and evaluated. This method is based on PI that was discussed in the previous Section. In this Section, we present PSI, how it subsumes PI and its implementation and empirical analysis.
+Path-Subtree Index (PSI) is a novel indexing technique based on the notion of vertex neighbourhood label, somewhat similar to the labeling approach used for solving the subgraph isomorphism problem employed by \cite{Solnon:2010}. This Section presents the algorithm for computing the p-features of paths and the candidates extraction approach employed in PSI. We prove that PSI has greater filtering power than PI.
 
-\subsection{Features}
-Similarly to PI, PSI uses paths of bound length as features. However, PSI implements alternative method of computing \textit{p-features}. It is explained below.
+\subsubsection{Features}
+The difference between PSI and PI is the approach of computing the unique string representation (p-feature) of paths. The difference lies in the labeling employed by PSI: it is based on the neighbourhood label of a vertex. Below we discuss the notion of vertex neighbourhood label and the procedure of computing p-features.
 
-\begin{enumerate}
-\item Given a sequence of vertices v$_{seq}$, replace each vertex in v$_{seq}$ with its \emph{neighbourhood label (n-label)} to obtain the p-feature of v$_{seq}$.
-\item Reverse the order of vertices to obtain v$_{seq}^{\prime}$.
-\item Calculate p-feature$^{\prime}$, that is the string representation of v$_{seq}^{\prime}$. 
-\end{enumerate}
+\subsubsection{Vertex Neighbourhood Label}
 
-%PI can`t extract most of the structural information present in the graphs. It is almost of no use for targets that have small number of different labels, like the AIDS data set for example. $Path$-$Subtree$ index addresses the problem of insufficient structural information extraction by introducing a novel representation of the paths that takes into account the neighborhood of each node. A new version of the label of each node that is present in the path is computed and stored in the index instead of the node$'$s original label. In this work, we refer to this alternate label as \textit{neighborhood label}. The next paragraphs introduce necessary naming conventions and then describe what \textit{neighborhood label} means and why we believe it helps to derive a better index.
-
-%Let \texttt{v} be a vertex with neighbors \texttt{N} = $\{$ $n^{}_1$, $n^{}_2$ \ldots $n^{}_i$ $\}$, where \texttt{i} is the size of \texttt{N}. Let us define a labeling function \textit{l} that maps the vertex \texttt{v} and each vertex in \texttt{N} to a character, also called the vertex label. We refer to the label of \texttt{n} as \texttt{$L^{}_v$} and the label of each vertex $n^{}_j$ in \texttt{N}, where $j$ is between $1$ and $i$ inclusive, as \texttt{$L^{}_j$}. It is important to note that using this notation we do not mean that each vertex has unique label, i.e. there may exist vertices $n^{}_g$ and $n^{}_h$, where $g$ and $h$ are between $1$ and $i$ inclusive, and \texttt{$L^{}_g$} is the same as \texttt{$L^{}_h$}.
-
-The term \emph{neighborhood label (n-label)} is a specific label that is computed for each vertex in the graph using the labels of the vertices in its neighbourhood.
+The term \emph{neighborhood label (n-label)} refers to a specific label that is computed for each vertex in the graph using the labels of the vertices in its neighbourhood. The n-label of a vertex \emph{v} with label \emph{l} is a string composed of the labels of its neighbours and \emph{l} ordered in lexicographically increasing order, starting always with \emph{l}.
 
 \begin{example}
 \label{ex:nlabel}
-put a small graph, take 1 path from it, compute the feature out of this path
+Figure \ref{C2H4-1} represents a graph with 6 vertices with ids from 1 to 6. Each vertex is labeled either in yellow (Y) or in blue (B), as shown in the Figure. The n-label of vertex 6 is ``BBYYY'', as it is its label is B, it has 4 neighbours, 3 of them with label Y and one with label B. Similarly, the n-label of vertex 5 is ``BBY'', and the n-label of vertices 1, 2, 3 and 4 is equal to ``YB''.
 \end{example}
 
-%%%
-%write an example of the paths derived using this method
-%%%
-%The resulting path-strings from path extraction of \ref{CH4-subtree-label-graph} for $maxL$ equal to 3 are shown on figure \ref{CH4-subtree-label-paths}, where the the character $"-"$ denotes an edge. It is important to note that although the path representation stored in the index file is changed, the original node labels of the graph are not removed so that the structure and labeling remains unchanged. Also, the paths on figure \ref{CH4-subtree-label-paths} are composed from the same nodes as the paths of figure \ref{CH4-paths}. The difference of the representation comes only from the alternative labeling model. The method of extracting the paths remains the same as the one used for $Path$ index and described in section \ref{path-index}. Similarly, computing the set of graphs possibly subgraph isomorphic to a pattern graph \texttt{p}, also called the \textit{candidate set}, is done using the same method as $Path$ index.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Like $Path$ index, $Path$-$Subtree$ index supports graphs that have labels on edges and nodes. When deriving the representation of each path that is later stored in the index, we include the label of the edge that connects every two nodes \texttt{a} and \texttt{b} that are part of the path. If we take the graph on figure \ref{CH4-subtree-label-graph}, we notice that there are no labels of its edges. Consequently, the paths stored in the target index, also shown on figure \ref{CH4-subtree-label-paths} have the character $"-"$ between the \textit{neighborhood label} of each two nodes. If graph \ref{CH4-subtree-label-graph} had edge labels, we would include the corresponding label instead of $"-"$. \par  
-%%%%%%%%%%%%%%%%% WHY IS NEIGHBORHOOD METHOD BETTER? %%%%%%%%%%%%%%%%%%%
+\begin{enumerate}
+\item Given a sequence of vertices v$_{seq}$, replace each vertex in v$_{seq}$ with its \emph{neighbourhood label (n-label)} to obtain the p-feature of v$_{seq}$.
+\item Reverse the sequence v$_{seq}$ to obtain v$_{seq}^{\prime}$.
+\item Calculate \emph{p-feature}$^{\prime}$, that is the unique string representation of v$_{seq}^{\prime}$.
+\item If not added previously, store in $\fancyI_{D}$ the lexicographically smaller of the two string representations (i.e. \emph{p-feature}$^{\prime}$ or \emph{p-feature}).
+\end{enumerate}
+
+\subsubsection{Implementation}
+
+The toString method used in Algorithm \ref{alg:outputPath} is modified to take a bit as an input, which constructs a p-feature using the n-labels of the vertices of the bit is set or returns a p-feature composed of the labels of the vertices otherwise.
+
+One can see that the difference between the features representation and computation between PI and PSI lies only in Step 1. The algorithm to implement the features representation and storage is almost the same as the one for PI with (Algorithm \ref{alg:outputPath}). The only difference is the modification of the toString() method (line 2,4) to output the n-labels or the labels of the vertices in the sequence depending on the value of a bit given as an input parameter. The p-features are constructed using labels of vertices if the bit is set to false or using the n-labels otherwise. The n-labels of the vertices in each graph are computed prior to the invocation of Algorithm \ref{alg:outputPath}, as explained below. Thus there is no additional time complexity to the features representation and storage algorithm used in PI.
+
+Computing the n-label of a vertex is done after all the graphs from the input files are read and initialized. Additional field called n-label of type String and methods to compute it are added to the Vertex class. Algorithm \ref{alg:nlabel} shows our approach. It is executed for every vertex in every target. For every vertex, we compute a sequence of labels of its neighbours ordered lexicographically. The complexity of insertion sort is $\mathcal{O}(n^{2})$ \cite{backtracking-algorithms} and therefore the overall complexity of running Algorithm \ref{alg:nlabel} is $\mathcal{O}(d.n^{2})$, where \emph{d} denotes the average degree of a vertex.
+ 
+%%% n-label algorithm
+\begin{algorithm}
+\centering
+\caption{Set n-label procedure}
+\label{alg:nlabel}
+\begin{algorithmic}[1]
+\Procedure{setNlabel }{}
+\State{nlabel $\gets$ ``''}
+\For{Edge e : this.edges}
+\State u $\gets$ e.dstVertex
+\State \Call{insertionSort }{nlabel, u.label} \Comment{\textit{Insert u`s' label in n-label in lexicographically increasing order}}
+\EndFor
+\EndProcedure
+\State{nlabel $\gets$ label + nlabel} \Comment{\textit{append the label of the vertex to its n-label}}
+\end{algorithmic}
+\end{algorithm}
+%%% end of algorithm
+
+\subsubsection{Candidates extraction}
+\label{pi:candExtr}
+This Section describes how the set of candidate graphs for a \gls{sip} test with the pattern is formed, using the database index $\fancyI_{D}$ and the set of features of the pattern $\fancyI_{G_{p}}$.
+
+The method to extract the candidate set is the same as the one shown in Algorithm \ref{alg:piCandidatesExtraction}. The only change is in the implementation of the contains procedure (Algorithm \ref{alg:piCandidatesExtraction} line 6). Instead of checking whether there exists a feature in the target index \emph{Tindex} that is identical to a given pattern feature \emph{pf}, we check whether the following two conditions are met:
+\begin{enumerate}
+\item The label of a vertex in i$^{th}$ position in the target path is equal to the label of a vertex in i$^{th}$ position in the pattern path.
+\item The nlabel of a vertex in  i$^{th}$ position in the target path contains the nlabel of a vertex in i$^{th}$ position in the pattern path.
+\end{enumerate}
+
+The first condition is equivalent to the filtering procedure employed by PI: we check for compatibility using only the labels. The purpose of the second condition is to verify that the neighbourhood of each pattern vertex can be matched to a neighbourhood of a vertex in the target.
+
+Algorithm \ref{alg:psicandidatesExtraction} illustrates the implementation of the contains procedure. For every path in the target index, it calls Algorithm \ref{alg:psicontainsFeature} to check that the two conditions discussed above are met (Algorithm \ref{alg:psicandidatesExtraction} line 3). If condition 1 (Algorithm \ref{alg:psicontainsFeature} line 2) is met, then procedure containsLabel checks whether condition 2 is satisfied (Algorithm \ref{alg:psicontainsFeature} line 8). Procedure containsLabel takes two nlabels as arguments and returns true if the second nlabel is contained in the first nlabel or false otherwise.
+%%% 
+\begin{algorithm}
+\centering
+\caption{Contains procedure}
+\label{alg:psicandidatesExtraction}
+\begin{algorithmic}[1]
+\Procedure{contains }{Tindex, patPath} \Comment{\textit{Tindex is the target index, patPath is path in the pattern index}}
+\For{tarPath : Tindex}
+	\If{\Call{containsFeature}{tarPath, patPath}}
+    \State{\Return{true}}
+    \EndIf
+\EndFor
+\State{\Return{false}}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\centering
+\caption{containsFeature procedure}
+\label{alg:psicontainsFeature}
+\begin{algorithmic}[1]
+\Procedure{containsFeature}{tarPath, patPath}
+\If{tarPath.length $<$ patPath.length} \Return{false} \Comment{\textit{if tarPath is shorter than patPath, then it can`t contain it}}
+\EndIf
+\If{label of each vertex in tarPath \textbf{not equal} label of each vertex in patPath} \Comment{\textit{equivalent to PI filter}}
+	\State{\Return{false}}
+\EndIf
+\For{i in range(0, tarPath.size())} \Comment{\textit{for i$^{th}$ nlabel in tarf, check that it contains the i$^{th}$ nlabel in patPath}}
+    \If{\textbf{not} \Call{containsLabel}{tarPath.get(i), patPath.get(i)}}
+        \State{\Return{false}}
+    \EndIf
+\EndFor
+\State{\Return{true}}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Algorithm \ref{alg:psicandidatesExtraction} involves visiting each path in the index of a single target, calling Algorithm \ref{alg:psicontainsFeature} (line 3), which then visits at most all characters that form a given nlabel. Therefore, the overall complexity of Algorithm \ref{alg:psicandidatesExtraction} is linear with the size of the input.
+
+%%% WHY IS NEIGHBORHOOD METHOD BETTER? %%%
 \begin{theorem}
-The set of target graphs filtered by path index is always a subset of the targets filtered by path-subtree index.
+\label{psiisbettertheorem}
+Let $\fancyC_{PI}$ be the candidate set retrieved by PI and let $\fancyC_{PSI}$ be the candidate set obtained after running the framework using PSI. Then $\fancyC_{PSI}$ $\subseteq$ $\fancyC_{PI}$.
 \end{theorem}
 
 \begin{proof}
-Prove this
-
+The first filtering condition implemented by Algorithm \ref{alg:psicontainsFeature} puts an upper bound on the size of $\fancyC_{PSI}$ to be at most $|\fancyC_{PI}|$ and condition 2 gives PSI additional filtering strength by requiring an existence of matching of the neighbourhood of each pattern vertex to a neighbourhood of a vertex in the target. Therefore $\fancyC_{PSI}$ $\subseteq$ $\fancyC_{PI}$. 
 \end{proof}
 
-%%%
-%With the following example we show that $Path$-$Subtree$ index discriminates graphs that $Path$ index can not. Let us consider the graphs on figure \ref{C2H6} and \ref{CH4}. Let \ref{C2H6} be the target graph and \ref{CH4} to be the pattern. Before running the subgraph isomorphism test on the two graphs, we will index them and see whether we can filter out \ref{C2H6}. As we can see, \ref{C2H6} does not contain \ref{CH4} and we are going to check whether Index-2 will return the target graph as a false-positive candidate for subgraph isomorphism with our pattern. After computing the indexes of the two graphs, we get the results for \ref{C2H6} shown on figure \ref{C2H6-subtree-label-paths} and the results for \ref{CH4} on figure \ref{CH4-subtree-label-paths}. As we can see from the figures, the index of our pattern graph has paths that the target does not contain, for example \texttt{CHHHH, CH-CHHHH, CH-CHHHH-CH}. The target graph is not returned as a candidate for subgraph isomorphism. Computing the index using $Path$ index results in getting the paths, displayed on figure \ref{C2H6-paths} for our target graph \ref{C2H6} and the paths on figure \ref{CH4-paths} for the pattern. As all paths of \ref{CH4} are contained in the index of \ref{C2H6}, $Path$ index returns \ref{C2H6} as candidate for subgraph isomorphism.\par
-%%%
-%\subsection{Problems with Path-Subtree index}
-%\label{path-subtree index problems}
-%After we implemented $Path$-$Subtree$ index based on the principles described in the previous subsection, we discovered that our algorithm is wrong. Apart from the expected false positives, it had false negatives. False negatives in this case are target graphs that contain the pattern, but are wrongly filtered out after the graph indexing step and are never included in the candidate set. The existence of false negatives is strongly undesired, as it is an indication that the indexing algorithm is wrong and therefore useless. We discovered what the reason for discarding targets wrongly is. In the following paragraphs we explain in more details the problem using a worked example and propose a modification of the algorithm that has the potential to solve the issue.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Let the graph on figure \ref{C2H6} be our target graph and the graph on figure \ref{C2H3} be the pattern. As we can see from the two figures, \ref{C2H6} contains \ref{C2H3} and we expect that a correct indexing technique will return \ref{C2H3} as a candidate for subgraph isomorphism check. After computing the indexes of the target and the pattern graphs, we derive the results for the target, shown on figure \ref{C2H6-subtree-label-paths}, and for the pattern, shown on figure \ref{C2H3-subtree-label-paths}. As we can see from the two figures, although the target contains the pattern, the paths in their indexes are different. As the target index does not contain paths existent in the pattern index, like \texttt{CC, CC-CCHHH} and \texttt{CH-CCHHH-CC} for instance. In this case, \ref{C2H6} is a false negative, discarded wrongly because of our incorrect indexing technique.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\begin{figure}[h]
-%  \begin{minipage}[t]{.5\textwidth}
-%    \centering
-%    \includegraphics[height=3.3cm,width=3.7cm]{images/graphs/C2H3.png}
-%    \caption{Pattern graph}
-%    \label{C2H3}
-%  \end{minipage}
-%  \begin{minipage}[t]{.5\textwidth}
-%  \centering
-%  \includegraphics[height=3.9cm,width=3.8cm]{images/paths/C2H3-isomer-paths.png}
-%  \caption{Subtree-label paths}
-%  \label{C2H3-subtree-label-paths}
-%  \end{minipage}
-%\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Algorithm Refinement}
-%  In order to solve the problem with false negatives, we changed the candidate extraction part. For every path $pp$ in the pattern index, we check which target graphs contain $pp$ as a path. Let us have $pp$ = \texttt{CH-CCHHH} and we want to check it against the target path $tp$ = \texttt{CH-CCCHHH-CHHH}. For every \textit{neighborhood label} in $pp$, our algorithm will whether it is contained in the corresponding label in $tp$. We first compare \texttt{CH} and \texttt{CH}, and as they are equal, we continue with the labels on the next position: \texttt{CCHHH} and \texttt{CCCHHH}. As \texttt{CCCHHH} contains \texttt{CCHHH} and this is the last label in $pp$, we stop and return true, $tp$ contains $pp$.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Using the refinement described above, we removed the problem with false negatives, described in section \ref{path-subtree index problems}. However, this results in weaker filtering power. Now, there are some cases where $path$-$index$ would perform better, although it extracts less structural information about the graphs. We will show how our refined method introduces more false-positives using an example. Let us consider the two graphs on figures \ref{C2H4-1} and \ref{C2H}. Let us apply the refined $Path$-$Subtree$ indexing method for the two graphs, where \ref{C2H} is the pattern and \ref{C2H4-1} is the target (clearly, \ref{C2H4-1} does not contain \ref{C2H} as subgraph). The \textit{neighborhood labels} of the target and the pattern for $maxL$=3 are shown on figures \ref{C2H4-1-subtree-label-paths} and \ref{C2H-subtree-label-paths} respectively. Applying the new candidate extraction technique, we will have \ref{C2H4-1} returned as candidate, because it contains all paths in \ref{C2H}.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-\begin{figure}[h]
-\centering
-\begin{minipage}[t]{.5\textwidth}
-  \centering
-  \includegraphics[height=3.3cm,width=4.4cm]{images/graphs/C2H4-1.png}
-  \caption{Graph A}
-  \label{C2H4-1}
-\end{minipage}%
-\begin{minipage}[t]{.5\textwidth}
-  \centering
-  \includegraphics[height=1cm,width=3cm]{images/graphs/C2H.png}
-  \caption{Graph B}
-  \label{C2H}
-\end{minipage}%
+\section{Empirical analysis and suggestions for improvement}
+%%% TODO: make some small experiments and put them in the appendix, then put a reference to the appendix here.
+In this Section we discuss the performance of the framework using PI and PSI. Both of them were ran with the datasets described in Section \ref{sec:datasets} and their filtering strength and execution time was compared with CT-Index \cite{ctindex}, analyzed in Section \ref{sec:ctindex}. CT-Index results are also used as a benchmark for correctness of the implemented algorithms. We outline the strengths and weaknesses of PI and PSI and give suggestions for improvement.
 
-%\begin{minipage}[t]{.5\textwidth}
-%  \centering
-%  \includegraphics[height=4.4cm,width=3.9cm]{images/paths/C2H-isomer-paths.png}
-%  \caption{Neighborhood label paths of A}
-%  \label{C2H4-1-subtree-label-paths}
-%\end{minipage}%
-%\begin{minipage}[t]{.5\textwidth}
-%  \centering
-%  \includegraphics[height=2.1cm,width=2.7cm]{images/paths/C2H-isomer-paths.png}
-%  \caption{Neighborhood label paths of A}
-%  \label{C2H-subtree-label-paths}
-%\end{minipage}%
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Let us examine in more detail the only path of length 3 in the pattern graph. It is composed from the nodes with ids \texttt{0, 1} and \texttt{2}. Using $Path$-$Subtree$ index method, this path is represented as \texttt{CH-CCH-CH} in the index file. If we used $path$-$index$, we would store this path as the string \texttt{C-H-C}. Although the path representation \textit{neighborhood label} gives us more information about the node neighbors, with us we loose important structural information, which is: the label of the actual node. In the string \texttt{CCH},  either of the letters could be the label of the node. As shown in the example above, this confusion leads to more false positives.\par
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%TODO
-%  - we changed the string representation of the isomer label. First letter is always the original label, the others are from the neighbors, sorted in lexicographic order\\
+Let us denote the index and the candidate set obtained after running the framework using PI as $\fancyI_{PI}$ and $\fancyC_{PI}$ respectively, and the index and the candidate set obtained after running the framework using PSI as $\fancyI_{PSI}$ and $\fancyC_{PSI}$. 
 
-\subsection{Implementation}
-       
-%       - extend IB-Index 1 and put an option to extract paths using isomer labels.\\
-%       - describe the extension of the project to support both types of indexing.\\
-%       - when parsing the graphs, after parsing each graph, compute the isomer label of every node for this graph\\
-%       - additional field in Node class for isomer labels\\
-%       - we have a class Path to represent the paths. Each path is an array of nodes. There is a toString method that returns the desired string that we are to store in the index. Depending on the option, we can return path from the labels (ib-index 1), path from the isomer labels (ib-index 2) or a path from the id of each node, made for testing purposes There is a method to reverse the path and it is used when storing the paths in the index: we always store the lexicographically smaller path, comparing each path with its reversed equivalent.\\
- %      - re-written the candidates extraction part. We have to check for containment ... \\
+PSI requires significantly more storage space than PI. In particular, if we assume that the average vertex degree in the target database is \emph{d}, the p-feature of each path computed using PSI will be \emph{d} times bigger than the p-feature of the same path computed using PI due to the size of the nlabel of each vertex. Therefore, the size of $\fancyI_{PSI}$ is three times bigger than the size of $\fancyI_{PI}$.
 
- 
- 
- 
+Theorem \ref{psiisbettertheorem} states that the filtering performance of PSI is not worse than the filtering performance of PI. In practice, the size of $\fancyC_{PSI}$ is rarely close to the size of $\fancyC_{PI}$. In particular, when running the framework with the AIDS dataset (Section \ref{sec:datasets}) with maximum path length of 2, 3, 4 and 5, the size of $\fancyC_{PSI}$ was several times smaller than the size of $\fancyC_{PI}$. Moreover, setting the maximum path length bound to 5 removes 80\% of the unsatisfiable instances on average. This filtering result is not only better than PI, but it also outperforms CT-Index.
+
+Both PI and PSI are much slower than CT-Index. In particular, increasing the maximum path length bound significantly increases the algorithms computation time. This stems from the fact that maximum path length makes great impact on the complexity of the path extraction algorithm and on the size of the index. PSI is slower than PI both during index computation and candidates extraction time. Looking at the difference in their time complexities, this result is not surprising.
+
+The filtering power of PSI and PI does increase linearly when increasing the maximum path length bound. There exists a bound \emph{m} on the maximum path length after which there is almost no filtering gain, but only significantly increased computation and storage overhead. The value of \emph{m} is usually smaller for PSI than for PI. For instance, when PSI is ran with instances from the AIDS dataset, \emph{m} is equal to 5. This is the peak when the algorithm performs best. Any value larger than 5 results in much worse computation speed and almost unchanged filtering performance.
+
+There are several ways in which the framework can be made more efficient. In the framework, the index of a database is the union of the indices of all targets. Naively, it does not take into an account the fact that a feature can be present in more than one graph. When working with datasets where the graphs are similarly structured like AIDS, removing repetitive features results in significant decrease of the index size. The following strategies can be employed to decrease the size of the index without lowering its filtering capability.
+
+We can represent the index using a \gls{tree} data structure similar to \gls{sufftree} \cite{weiner:1973} that stores all extracted features from the database as strings and number of leaf nodes of the tree denotes the number of features. The representation of strings in the tree is the same as the representation employed by \glspl{sufftree} except from the construction of leaf nodes and the feature suffixes insertion. Each leaf node is a list of the ids of all graphs that contain the corresponding feature. We insert the full feature without inserting its suffixes. This is because each label/nlabel part of a feature is a feature on its own and it will be extracted from the path extraction algorithm. Therefore, there is no need to insert unique termination character at the end of a feature, as it is done with \glspl{sufftree}. The tree can be built incrementally during features extraction in $\mathcal{O}(n.log(n))$ time on average, where \emph{n} is the length of the string that results when appending all features in the database, and worst-case time complexity $\mathcal{O}(n^{2})$. More efficient suffix tree construction algorithms exist \cite{weiner:1973, McCreight:1976, Ukkonen:1995} that could be adjusted to work for the tree. Searching for a feature \emph{F} of length \emph{m} in the suffix tree requires following a path from the root matching characters until reaching the leaf node and can be done in $\mathcal{0}(m)$ time. %Therefore, candidates extraction with pattern index with \emph{n$_{p}$} number of features of average length \emph{m$_{p}$} and target index with \emph{n$_{d}$} number of features of average length \emph{m$_{d}$} would take $\mathcal{O}(n)$ has time complexity $\mathcal{O}()$
+
+%Alternative way is to represent the index as a dictionary. - having a dictionary structure to keep every feature and the number of times it occurs in the particular graph. Analyze what the complexity of this would be, would it be better and why.
+
+%- the framework provides a functionality to save the index to a file and then reuse it from the file. In practice, the way the code works at the moment is to store the target index in memory. Experiments with the datasets used by big data research community were run on a simple machine and no memory overflow was encountered.
+
+%- reduce the index size by employing the maximal features thing (cite needed papers --- graphgrepsx about the idea and the early IBM paper about the notion of descriptive feature).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%------------------------------SIP Algorithms--------------------------%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -810,7 +865,7 @@ Prove this
 %% make the graphs be in log scale
 \chapter{Light Filters}
 \label{ch:sip1}
-This section describes the study of a simple \gls{sip} algorithm, called SIP1, that implements a fast filter that does not employ an index structure.
+This section describes the study of a simple subgraph isomorphism problem(\gls{sip}) algorithm, called SIP1, that implements a fast filter that does not employ an index structure.
 
 Light Filters is an algorithm for subgraph query processing and it is based on a modified version of the filter-verification paradigm. Here, filtering and verification steps are applied separately for each \gls{sip} instance. This approach uses simple filtering tests that require much less computational effort (i.e. lighter filtering). More importance is placed on the quality of the \gls{sip} algorithm than on the filters, because the major computational effort goes for solving the non-filtered \gls{sip} instances. 
 
