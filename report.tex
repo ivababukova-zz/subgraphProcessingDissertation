@@ -133,6 +133,14 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 
 \newglossaryentry{hashfunction}{name={hash function}, description={A function that can be used to map data of arbitrary size to data of fixed size. The values returned by a hash function are called hash values}}
 
+\newglossaryentry{dfs}{name={depth-first search}, description={An algorithm for traversing or searching tree or graph data structures reported to be introduced by Charles Pierre Trémaux, a 19$^{th}$ century French mathematician. One starts at the root (selecting some arbitrary node as the root in the case of a graph) and explores as far as possible along each branch before backtracking}}
+
+\newglossaryentry{propagator}{name={constraints propagator}, description={todo}}
+
+\newglossaryentry{hallset}{name={Hall set}, description={A set of \emph{n} whose domains include only \emph{n} values between them. Finding a Hall set allows for removing the values part of the hall set from the domains of variables that are not part of the Hall set.}}
+
+\newglossaryentry{simd}{name={SIMD}, description={Single Instruction Multiple Data (SIMD) is a class of computers with multiple processing elements that perform the same operation on multiple data points simultaneously. Such machines exploit data level parallelism, but not concurrency: there are simultaneous (parallel) computations, but only a single process (instruction) at a given moment. }}
+
 %%%%%%%%%%%%%%%% end of glossary and acronym entries %%%%%%%%%
 
 \begin{document}
@@ -159,11 +167,125 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 
 This Chapter starts by introducing the problem statement and the aims and motivations to solve it. We then give important definitions and concepts that are used throughout the report. 
 
-\section{Problem Statement}
+\section{Terminology, Definitions and Notations}
+\label{sec:theory}
+In this Section, we introduce all preliminary terminology and definition used throughout the document. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
+
+\subsection{Graph Theory}
+\label{sec:graphTheory}
+%% todo: define what is tree, it is needed for ct-index 
+
+A graph \emph{G} consists of a set of vertices V, a set of edges E, where each edge is a pair of vertices in V, and a function L: V $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each vertex in V, where $\Lagr$ is the set of all possible labels. We write V(\emph{G}) for the vertex set of \emph{G}, E(\emph{G}) for the set of edges in \emph{G} and L(\emph{G}) for the set of labels in \emph{G}. By L(\emph{G}, \emph{v}) = l we mean that vertex \emph{v} in \emph{G} has label l.
+We say that \emph{G} is \emph{undirected}, if every edge in E(\emph{G}) is an unordered pair of elements of V(\emph{G}). In this work, only undirected graphs are considered. The \emph{size} of \emph{G} is equal to the cardinality of E(\emph{G}). The \emph{order} of \emph{G} is equal to the cardinality of V(\emph{G}).
+
+A \emph{path} in a graph is a sequence of distinct vertices, such that each successive pair of vertices are adjacent (i.e. connected by an edge). A path can be from a vertex to itself, in which case the first and last vertices in the sequence are the same and we say that there is a \emph{cycle}. There may be zero, one or more distinct paths from vertex \emph{u} to vertex \emph{v} in \emph{G}. The \emph{length} of a path is equal to the number of its edges.
+
+The neighbours of a vertex \emph{v} in \emph{G} are all vertices adjacent to \emph{v}. The \emph{degree} of \emph{v} is the cardinality of its set of neighbours. By \emph{v} $\sim_{G}$ \textit{w} we mean that vertex \textit{w} is a neighbour of \emph{v} in \emph{G}. The set of neighbours of \emph{v} forms the \emph{neighbourhood} of \emph{v}, denoted as N(\emph{G}, \emph{v}). The neighbourhood degree sequence of \emph{v}, denoted nds(\emph{G}, \emph{v}), is the sequence consisting of the degrees of every neighbour of \emph{v}, from largest to smallest.
+
+A graph \emph{G} is \emph{connected} if there exists a path between any pair of vertices in \emph{G}. An \emph{acyclic} graph has no cycles. A \emph{tree} is an acyclic connected graph. In this work, we refer to the vertices of the tree as \emph{nodes}.
+
+\begin{example}
+Figure \ref{fig:exampleGraph} shows an undirected labeled graph T, where each color represents a vertex label. For instance, vertex 2 is labeled in red (R). The degree of vertex 2 is equal to 3, because it is adjacent to three vertices (2 $\sim_{T}$ 1, 2 $\sim_{T}$ 3 and 2 $\sim_{T}$ 8). Consequently, N(\emph{T}, 2) = 1, 3, 8. The sequence of vertices \{2, 3, 4, 5\} is a path of length 3. The path consisting of vertices \{2, 3, 8, 2\} is a cycle.
+\end{example}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{.3\textwidth}
+  \centering
+  \includegraphics[height=2.1cm,width=2.3cm]{images/graphs/exampleGraph2.png}
+  \caption{graph P}
+  \label{fig:exampleGraph2}
+\end{minipage}%
+\begin{minipage}[t]{.4\textwidth}
+  \centering
+  \includegraphics[height=3.4cm,width=5cm]{images/graphs/exampleGraph.png}
+  \caption{graph T}
+  \label{fig:exampleGraph}
+\end{minipage}%
+\begin{minipage}[t]{.3\textwidth}
+  \centering
+  \includegraphics[height=3.4cm,width=3cm]{images/graphs/smalltarget.png}
+  \caption{graph T1}
+  \label{fig:exampleGraph}
+\end{minipage}%
+\caption{Instances of subgraph isomorphism problem (SIP)}
+\label{fig:SIP}
+\end{figure}
+
+%% induced : if edge in p, then edge in t, but if edge not in p then edge not in t
+%% non-induced: if edge in p, then edge in t
+\subsection{The Subgraph Isomorphism Problem}
+A \emph{subgraph} of \emph{G} is a graph \emph{H} whose vertices and edges are subsets of the vertices and edges of \emph{G} and the labeling on the vertices is preserved.
+
+A \emph{non-induced subgraph isomorphism} is an injective mapping \emph{i} : \emph{P} $\rightarrow$ \emph{T} from a graph \emph{P} to a graph \emph{T} that preserves adjacency and labeling on vertices. That is, if \emph{v} $\sim_{P}$ \emph{w}, then \emph{i(v)} $\sim_{T}$ \emph{i(w)} and if L(\emph{P}, \emph{v}) = l, then L(\emph{T}, \emph{i(v)}) = l. The \emph{non-induced subgraph isomorphism problem} (SIP) is to find such a mapping from a given graph \emph{P}, called a pattern, to a given graph \emph{T} referred to as a target. The \emph{induced} SIP additionally requires that if \emph{v} $\nsim_{P}$ \emph{w} then \emph{i(v)} $\nsim_{T}$ \emph{i(w)}. In this work, we discuss only the non-induced version. We say that an instance of SIP is \emph{satisfiable} (SAT) if such a mapping \emph{i} exists. Otherwise, the instance is \emph{unsatisfiable} (UNSAT).
+
+\begin{example}
+\label{ex:sip}
+Lets us consider the two graphs in Figure \ref{fig:SIP}. The SIP instance between the pattern P (in the left-hand side of the Figure) and the target T (the graph in the middle of the Figure) is SAT- the mapping from P to T maps vertex 1 to vertex 8, vertex 2 to vertex 3, vertex 3 to vertex 4 and vertex 4 to vertex 6.
+\end{example}
+
+% \gls{sip} is NP-complete, however there exist a number of different approaches to solve it, some of which are ... 
+There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010,nauty}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sipalgos}.
+
+\subsection{The Filter-Verification Paradigm}
+A \emph{database} \emph{D} is a set of target graphs. A set of pattern graphs is called a \emph{query set} or \emph{queries}, is denoted by \emph{Q}. Let \emph{S} be the Cartesian product of \emph{Q} and \emph{D}. \emph{Subgraph query processing} is the process of solving the \gls{sip} for every pair in \emph{S}.
+
+\begin{example}
+\label{ex:pathIndexing}
+Let us consider again Figure \ref{fig:SIP} and assume that graph P (in the left-hand side) is the query set \emph{Q}, and graphs T (in the middle) and T1 (in the right-hand side) represent the graph database \emph{D}. Then, subgraph query processing would solve the SIP for instances (P, T) and (P, T1), where the former instance will be determined as SAT (Example \ref{ex:sip}) and the latter as UNSAT (there is no valid mapping from P to T1). 
+\end{example}
+
+%% todo: cite the np-complete part
+Another way of processing queries is the \emph{filter-verification framework}, which consists of two steps. The \emph{filter} step tries to prune targets that can not be matched to a given query. The set of targets left after this step formes the set of \emph{candidates}, denoted as $\fancyC_{p}$, where $\fancyC_{p}$ $\subseteq$ T. The following \textit{verification} step then performs \gls{sip} for every pair (G$_{p}$,$\fancyC_{G_{p}}$) $\in$ P $\times$ $\fancyC_p$. The usage of the filter-verification paradigm is motivated by the fact that subgraph isomorphism is NP-complete and reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern during the filtering step and performing \gls{sip} using the limited set of candidates would yield to significant performance improvement \cite{ctindex,foteini}.
+
+%%% TODO: move all definitions about filter-verif here
+
+There are various subgraph query processing algorithms based on the filter-verification framework \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. This approach is discussed in more detail in Chapter \ref{ch:existingWork}, where more definitions and annotations are introduced in Section \ref{sec:filterVerificationParadigm} followed by analysis of related work in Section \ref{sec:ctindex}.
+
+% how do we build the database index?
+% using a pre-built index of the database, denoted as $\fancyI_{T}$
+
+% what is a candidate set?
+% graph index, features, ...
+% what is false-positive? what is false-negative, why it can't exist?
+
+% TODO
+\subsection{Filtering}
+This step consists of building an index of the database and then rejecting for verification with the query targets that can be proved not to contain the query. The process of rejecting/pruning uses the data stored in the index for the particular target and the characteristics of the query. The details follow below.
+
+\subsubsection{Database Index}
+An \emph{index} of a database D, denoted as $\fancyI_{D}$ is a collection of data, often stored in a file, that contains characteristics of the graphs in D, also known as \emph{features}. Features can be represented by paths, subtrees, cycles, or subgraphs. They are computed for every graph in the database. The index is independent of the queries so that it can be computed once and then reused for multiple queries as long as there is no change in the database. The process of computing the features of the graph to store them in the index is called \emph{feature extraction}.
+
+\begin{example}
+\label{ex:index}
+Let us have a database consisting of the graph G$_{t}$ displayed on Figure \ref{fig:exampleGraph}. In this example, we want to compute the index of G$_{t}$ using paths up to maximum length 2 as features and store each unique path as a string containing the labels of the vertices in the path. Each vertex in G$_{t}$ is labeled in yellow(Y), blue(B) or red(R).
+
+An example feature extraction algorithm will derive the following paths:
+B, Y, R, B-B, B-Y, R-Y, B-R \footnote{Note that the representation of some of the paths is not unique, as G$_{t}$ is undirected. For example, path B-Y is equivalent to path Y-B. In such cases, one can impose constraints on the ordering of the paths to avoid storing repetitive features in the index.}. These paths will then be stored in the index of G$_{t}$ and used further in the filtering process to check whether G$_{t}$ could be rejected for verification with a given query.
+\end{example}
+
+Computing the database index is the process is very expensive in terms of running time and data storage. However, the cost of building such structure is compensated by the fact that it can be reused and that it is query independent.
+
+\subsubsection{Candidate Set}
+The candidate set of a database D and query graph G$_{p}$, denoted as $\fancyC_{p}$ is a set of graphs that contain all features in G$_{p}$. $\fancyC_{p}$ is derived using $\fancyI_{D}$ and $\fancyF_{G_{p}}$, where $\fancyF_{G_{p}}$ contains all features in G$_{p}$, computed using the same algorithm that computed $\fancyI_{D}$. Note that unlikely $\fancyI_{D}$, $\fancyF_{G_{p}}$ is not reused\footnote{It could be useful to store the query features if large proportion the queries received were repetitive. In such cases, one could incrementally build a second index of the features. We do not know whether this has been tried so far. This can be an area of further investigation in the future.}.
+
+The purpose of filtering is to derive as small candidate set as possible in order to limit the number calls to a subgraph isomorphism algorithm during verification. Note that $\fancyC_{p}$ $\subseteq$ D. The worst case scenario is when $\fancyC_{p}$ = D, which means that filtering did not manage to prune any target graphs in the database.
+
+\begin{example}
+Let us extend Example \ref{ex:index} by introducing a query, which is the graph G$_{p}$ on Figure \ref{fig:exampleGraph2}. Let us use the same characteristics as features as the ones used in Example \ref{ex:index}. Then, $\fancyF_{G_{p}}$ = B, Y, R, B-Y, R-Y and G$_{t}$. Therefore, $\fancyC_{G_{p}}$ = \{G$_{t}$\}, because all features in G$_{p}$ are contained by G$_{t}$.
+\end{example}
+
+\subsection{Verification}
+Verification is the process of applying a subgraph isomorphism problem (\gls{sip}) algorithm on every pair (G$_{p}$,t) of graphs, where p is the query and t is the target, t $\in$ $\fancyC_{G_{p}}$. The aim of verification is to return the number of graphs in D that contain G$_{p}$. All targets that do not contain the pattern, but were not rejected during the filtering step, are called \emph{false-positives}. One wants to construct a filtering technique that admits as low number of false-positives as possible. The number of false-positives is often used as a measure of effectiveness of the filtering method\cite{foteini}.
+
+Most of the subgraph query processing methods that apply the filter-verification paradigm are mainly focused on improving the filtering stage, while reusing the same algorithm, known as VF2, for verification \cite{foteini}. 
+It is claimed that VF2 is ``state of the art''\cite{ctindex}. However, this is not the case (\cite{Solnon:2010, Larrosa:2002, Bonnici:2013, Zampelli:2010, CP2015}, Chapter \ref{ch:evaluation}). The subgraph isomorphism tests are reported as ``too time consuming''\cite{foteini} and this is explained by the nature of the complexity of the subgraph isomorphism problem\footnote{This problem is proved is NP-Complete by Stephen A. Cook in 1971 \cite{Cook:1971}}\cite{ctindex,foteini,freqStructBasedIndexing}. One can see that the reason for the reported low verification performance for some instances could be due to the poor choice of a \gls{sip} algorithm. This is further investigated and discussed later in this work. 6  
+
+\section{Aims and Motivations}
 The subgraph isomorphism problem involves finding a pattern graph inside a target graph, where a graph is a structure that represents schemaless data such as proteins, chemical compounds, and XML documents. Subgraph isomorphism has a wide variety of applications in many fields. For instance, finding the best treatment to fight a particular cancer involves screening a patient's tumor to search for particular set of biomarkers \cite{nature:2015}. Such tasks involve repeatedly examining a large number of graphs, typically stored in a database, comparing each of them with a pattern.
 
-
-\section{Aims and Motivations}  
+%% patrick and ciaran's sip paper:
+Applications include bioinformatics\cite{Bonnici:2013}, chemistry\cite{Regin:1995}, computer vision\cite{Damiand:2011,Solnon:2015}, law enforcement\cite{Coffman:2004}, model checking\cite{Calder:2015} and pattern recognition\cite{Conte:2004}.
 %    Many substructure-searching problems call for repeatedly examining a large number of molecules (typically stored in a database), comparing each with a pattern. In such situations, it pays to spend some time "up front," storing the answers to specific questions for each structure in the database. Subsequent searches of the database use these pre-computed answers to vastly improve search time; the up-front computation time is paid back quickly as repeated searches are performed.
 %        \begin{itemize}
 %            \item graphs are widely used nowadays to represent data
@@ -180,87 +302,6 @@ The subgraph isomorphism problem involves finding a pattern graph inside a targe
 
 The remaining of this work is organised as follows. Section \ref{sec:graphTheory} contains terminology, definitions and notation used throughout this work. Chapter 2 presents review and analysis of existing approaches to solve the problem and properties of 4 real datasets used for testing and evaluation. An implementation and empirical analysis of two graph indexing and filtering methods is presented in Chapter 3. Chapter 4 describes a new approach to solve the problem, called Light Filters. The evaluation of Light Filters and analysis of the hardness of satisfiable and unsatisfiable subgraph isomorphism instances in the datasets are presented in Chapter 5. Chapter 6 provides a summary of this work and suggestions how to extend it in the future. 
 
-\section{Terminology, Definitions and Notations}
-\label{sec:theory}
-In this Section, we introduce all preliminary terminology and definition used throughout the document. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
-
-\subsection{Graph Theory}
-\label{sec:graphTheory}
-%% todo: define what is tree, it is needed for ct-index 
-
-A \emph{graph G} = (V$_{G}$, E$_{G}$, L$_{G}$) consists of set of vertices V$_{G}$ = \{u$_i$\}, 1 $\leq$ i $\leq$ $|V_{G}|$, set of edges E$_{G}$ = \{(u$_k$, u$_m$) $|$ u$_k$ $\in$ V$_{G}$, u$_m$ $\in$ V$_{G}$\}, and  function  L$_{G}$: V$_{G}$ $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each v $\in$ V$_{G}$, where $\Lagr$ is the set of all possible labels. A graph is \emph{undirected}, if for every (u, v) $\in$ E$_{G}$ $\Rightarrow$ (v, u) $\in$ E$_{G}$. In this work, only undirected graphs are considered. The \emph{size} of G is equal to the number of edges in the graph (i.e the cardinality of E$_{G}$ denoted as $|E_{G}|$). The \emph{order} of G is equal to the cardinality of its vertex set $|V_{G}|$.
-
-A \emph{path} in a graph is a sequence of distinct edges which connect a sequence of distinct vertices. A path from vertex \emph{u} to vertex \emph{v} has \emph{u} as the first and \emph{v} as the last vertex in the sequence. A \emph{cycle} is a path where the first vertex in the sequence is also the last. In a given graph G, there may be zero, one or more than one path from \emph{u} to \emph{v} (and similarly for cycles).
-
-%%% todo define what is adjacent
-The \emph{degree} of \emph{v} $\in$ V$_{G}$ is the number of vertices adjacent to \emph{v}, which are referred to as the neighbours of \emph{v}. By \emph{v} $\sim_{G}$ \textit{w} we mean that \textit{w} is a neighbour of \emph{v} in graph G. The set of neighbours of v forms the \emph{neighbourhood} of v, denoted as N$_{v}$. 
-
-\begin{example}
-Figure \ref{fig:exampleGraph} shows an undirected labeled graph G$_{t}$, where each different color represents a vertex label. For instance, vertex 1 is labeled in yellow (Y) and vertex 2 is labeled in red (R). The degree of vertex 1 is 1, because it has only one vertex as a neighbour, namely 1 $\sim_{G_{t}}$ 2. Consequently, the neighbourhood of 1 (N$_{1}$) is \{2\}.
-
-An example of a path from vertex 2 to vertex 6 is the one that goes through vertices 2, 3, 4 and 6. Graph G$_{t}$ has multiple cycles. For instance the path 2, 3, 8 is also a cycle.
-\end{example}
-
-A tree is an undirected graph such that any two vertices are connected by exactly one path. In this work, we refer to the vertices of the tree as \emph{nodes}.
-
-\begin{figure}[H]
-\centering
-\begin{minipage}[t]{.4\textwidth}
-  \centering
-  \includegraphics[height=2.1cm,width=2.3cm]{images/graphs/exampleGraph2.png}
-  \caption{graph G$_{p}$}
-  \label{fig:exampleGraph2}
-\end{minipage}%
-\begin{minipage}[t]{.6\textwidth}
-  \centering
-  \includegraphics[height=3.4cm,width=5cm]{images/graphs/exampleGraph.png}
-  \caption{graph G$_{t}$}
-  \label{fig:exampleGraph}
-\end{minipage}%
-\caption{Instance of subgraph isomorphism problem (SIP)}
-\label{fig:SIP}
-\end{figure}
-
-%% induced : if edge in p, then edge in t, but if edge not in p then edge not in t
-%% non-induced: if edge in p, then edge in t
-\subsection{The Subgraph Isomorphism Problem}
-
-A graph G$^{\prime}$(V$_{G^{\prime}}$, E$_{G^{\prime}}$, L$_{G^{\prime}}$) is a \textit{subgraph} of G if and only if the vertices, edges and labels of G$^{\prime}$ are subsets of the vertices, edges and labels of G, that is V$_{G^{\prime}}$ $\subseteq$ V$_{G}$ and E$_{G^{\prime}}$ $\subseteq$ E$_{G}$ and L$_{G^{\prime}}$ $\subseteq$ L$_{G}$.
-
-The \emph{\gls{sip}} between a graph G$_{p}$(V$_{p}$, E$_{p}$, L$_{p}$), called pattern and graph G$_{t}$(V$_{t}$, E$_{t}$, L$_{t}$), called target, is to find a function $f$ that maps a different vertex of the target to every vertex in the pattern such that for every v $\in$ V$_{p}$, v = $f$(v) and L$_{p}$(v) = L$_{t}$($f$(v)), where $f$(v) $\in$ V$_{t}$; and for all pairs of vertices u,v $\in$ V$_{p}$, (u, v) $\in$ E$_{p}$ $\Leftrightarrow$ (f(u), f(v)) $\in$ E$_{t}$. In other words, a valid mapping of G$_{p}$ to a subgraph in G$_{t}$ preserves the labeling and the set of neighbours (and therefore the degree) of each vertex in G$_{p}$. If $f$ exists, we say that the \gls{sip} instance is \emph{\gls{sat}}, i.e. it has at least one solution, otherwise it is \emph{\gls{unsat}}, i.e. there are no solutions.
-
-\gls{sip} can be \emph{induced} or \emph{non-induced}. The induced version also requires that if \emph{v} $\nsim_{G_{p}}$ \emph{w}, then \emph{$f$(v)} $\nsim_{G_{t}}$ \emph{$f$(w)}. In this work, we discuss only the non-induced \gls{sip} that does not have this requirement.
-
-When a valid matching function $f$ exists that maps vertex \emph{v} $\in$ G$_{p}$ to vertex \emph{w} $\in$ G$_{t}$, we write \emph{v} $\rightarrow_{f}$ \emph{w}. 
-
-\begin{example}
-Lest us consider the \gls{sip} instance (G$_{p}$, G$_{t}$) displayed in Figure \ref{fig:SIP}. This instance is \gls{sat}, because a function $f$ exists that produces a valid mapping of each vertex $\in$ G$_{p}$ to a vertex $\in$ G$_{t}$. For instance, 1 $\rightarrow_{f}$ 8, 2 $\rightarrow_{f}$ 3, 3 $\rightarrow_{f}$ 4 and 4 $\rightarrow_{f}$ 6. However, if 4 $\in$ G$_{t}$ was labeled in Y, then the \gls{sip} instance (G$_{p}$, G$_{t}$) would be \gls{unsat}, because no valid mapping that associates each vertex in G$_{p}$ to different vertex in G$_{t}$ would exist.
-\end{example}
-
-% \gls{sip} is NP-complete, however there exist a number of different approaches to solve it, some of which are ... 
-There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010,nauty}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sipalgos}.
-
-\subsection{The Filter-Verification Paradigm}
-A set of target graphs is called a \emph{database} and it is denoted by \emph{T}. A set of pattern graphs, also known as \emph{query set} or \emph{queries}, is denoted by \emph{P}. A \emph{dataset D} is composed of \emph{T} and \emph{P}. 
-
-\textit{Subgraph query processing} is, when given a set of query graphs, for each query return all graphs from the database that contain the query. These graphs form the \emph{answer set} $\fancyA_{q}$ of the corresponding query \emph{q}. A way to perform subgraph query processing is to run a \gls{sip} algorithm for every instance (G$_{p}$, G$_{t}$) $\in$ P$\times$T, where G$_{p}$ $\in$ P and G$_{t}$ $\in$ T.
-
-\begin{example}
-\label{ex:pathIndexing}
-Let us consider again Figure \ref{fig:SIP} and assume that it represents a dataset \emph{T}, where Figure \ref{fig:exampleGraph2} is the query set, which contains only G$_{p}$, and Figure \ref{fig:exampleGraph} represents the graph database, which contains G$_{t}$. Then, subgraph query processing would solve the \gls{sip} (G$_{p}$, G$_{t}$), because P $\times$ T = (G$_{p}$, G$_{t}$), returning $\fancyA_{G_{p}}$ = \{G$_{t}$\}, as \gls{sip} (G$_{p}$, G$_{t}$) is \gls{sat}.
-\end{example}
-
-%% todo: cite the np-complete part
-Another way of processing queries is the \emph{filter-verification framework}, which consists of two steps. The \emph{filter} step tries to prune targets that can not be matched to a given query. The set of targets left after this step formes the set of \emph{candidates}, denoted as $\fancyC_{p}$, where $\fancyC_{p}$ $\subseteq$ T. The following \textit{verification} step then performs \gls{sip} for every pair (G$_{p}$,$\fancyC_{G_{p}}$) $\in$ P $\times$ $\fancyC_p$. The usage of the filter-verification paradigm is motivated by the fact that subgraph isomorphism is NP-complete and reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern during the filtering step and performing \gls{sip} using the limited set of candidates would yield to significant performance improvement \cite{ctindex,foteini}.
-
-There are number of subgraph query processing algorithms based on the filter-verification framework \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. This approach is discussed in more detail in Chapter \ref{ch:existingWork}, where more definitions and annotations are introduced in Section \ref{sec:filterVerificationParadigm} followed by analysis of related work in Section \ref{sec:ctindex}.
-
-% how do we build the database index?
-% using a pre-built index of the database, denoted as $\fancyI_{T}$
-
-% what is a candidate set?
-% graph index, features, ...
-% what is false-positive? what is false-negative, why it can't exist?
 
 %%%%%%%%%%%%%%%%%%%%%%%%% CHAPTER 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Review of existing work}
@@ -335,38 +376,7 @@ Table \ref{table:dataSAT} shows the number and percent of \gls{sat} \gls{sip} in
 
 \section{Filter-Verification paradigm}
 \label{sec:filterVerificationParadigm}
-This Section gives an overview of already existing algorithms based on the filter-verification paradigm, defined in Section \ref{sec:theory}. We first start by introducing more preliminary concepts and notations that complement the definitions in Section \ref{sec:theory}. 
-
-\subsection{Filtering}
-This step consists of building an index of the database and then rejecting for verification with the query targets that can be proved not to contain the query. The process of rejecting/pruning uses the data stored in the index for the particular target and the characteristics of the query. The details follow below.
-
-\subsubsection{Database Index}
-An \emph{index} of a database D, denoted as $\fancyI_{D}$ is a collection of data, often stored in a file, that contains characteristics of the graphs in D, also known as \emph{features}. Features can be represented by paths, subtrees, cycles, or subgraphs. They are computed for every graph in the database. The index is independent of the queries so that it can be computed once and then reused for multiple queries as long as there is no change in the database. The process of computing the features of the graph to store them in the index is called \emph{feature extraction}.
-
-\begin{example}
-\label{ex:index}
-Let us have a database consisting of the graph G$_{t}$ displayed on Figure \ref{fig:exampleGraph}. In this example, we want to compute the index of G$_{t}$ using paths up to maximum length 2 as features and store each unique path as a string containing the labels of the vertices in the path. Each vertex in G$_{t}$ is labeled in yellow(Y), blue(B) or red(R).
-
-An example feature extraction algorithm will derive the following paths:
-B, Y, R, B-B, B-Y, R-Y, B-R \footnote{Note that the representation of some of the paths is not unique, as G$_{t}$ is undirected. For example, path B-Y is equivalent to path Y-B. In such cases, one can impose constraints on the ordering of the paths to avoid storing repetitive features in the index.}. These paths will then be stored in the index of G$_{t}$ and used further in the filtering process to check whether G$_{t}$ could be rejected for verification with a given query.
-\end{example}
-
-Computing the database index is the process is very expensive in terms of running time and data storage. However, the cost of building such structure is compensated by the fact that it can be reused and that it is query independent.
-
-\subsubsection{Candidate Set}
-The candidate set of a database D and query graph G$_{p}$, denoted as $\fancyC_{p}$ is a set of graphs that contain all features in G$_{p}$. $\fancyC_{p}$ is derived using $\fancyI_{D}$ and $\fancyF_{G_{p}}$, where $\fancyF_{G_{p}}$ contains all features in G$_{p}$, computed using the same algorithm that computed $\fancyI_{D}$. Note that unlikely $\fancyI_{D}$, $\fancyF_{G_{p}}$ is not reused\footnote{It could be useful to store the query features if large proportion the queries received were repetitive. In such cases, one could incrementally build a second index of the features. We do not know whether this has been tried so far. This can be an area of further investigation in the future.}.
-
-The purpose of filtering is to derive as small candidate set as possible in order to limit the number calls to a subgraph isomorphism algorithm during verification. Note that $\fancyC_{p}$ $\subseteq$ D. The worst case scenario is when $\fancyC_{p}$ = D, which means that filtering did not manage to prune any target graphs in the database.
-
-\begin{example}
-Let us extend Example \ref{ex:index} by introducing a query, which is the graph G$_{p}$ on Figure \ref{fig:exampleGraph2}. Let us use the same characteristics as features as the ones used in Example \ref{ex:index}. Then, $\fancyF_{G_{p}}$ = B, Y, R, B-Y, R-Y and G$_{t}$. Therefore, $\fancyC_{G_{p}}$ = \{G$_{t}$\}, because all features in G$_{p}$ are contained by G$_{t}$.
-\end{example}
-
-\subsection{Verification}
-Verification is the process of applying a subgraph isomorphism problem (\gls{sip}) algorithm on every pair (G$_{p}$,t) of graphs, where p is the query and t is the target, t $\in$ $\fancyC_{G_{p}}$. The aim of verification is to return the number of graphs in D that contain G$_{p}$. All targets that do not contain the pattern, but were not rejected during the filtering step, are called \emph{false-positives}. One wants to construct a filtering technique that admits as low number of false-positives as possible. The number of false-positives is often used as a measure of effectiveness of the filtering method\cite{foteini}.
-
-Most of the subgraph query processing methods that apply the filter-verification paradigm are mainly focused on improving the filtering stage, while reusing the same algorithm, known as VF2, for verification \cite{foteini}. 
-It is claimed that VF2 is ``state of the art''\cite{ctindex}. However, this is not the case (\cite{Solnon:2010, Larrosa:2002, Bonnici:2013, Zampelli:2010, CP2015}, Chapter \ref{ch:evaluation}). The subgraph isomorphism tests are reported as ``too time consuming''\cite{foteini} and this is explained by the nature of the complexity of the subgraph isomorphism problem\footnote{This problem is proved is NP-Complete by Stephen A. Cook in 1971 \cite{Cook:1971}}\cite{ctindex,foteini,freqStructBasedIndexing}. One can see that the reason for the reported low verification performance for some instances could be due to the poor choice of a \gls{sip} algorithm. This is further investigated and discussed later in this work.
+This Section gives an overview of already existing algorithms based on the filter-verification paradigm, defined in Section \ref{sec:theory}.
 
 \subsection{Existing Filtering Techniques}
 \label{subse:existingFVtechniques}
@@ -529,44 +539,61 @@ Using only paths as features is the option that shows best performance (row 16).
 We tried running similar experiments with the other datasets discussed in \ref{sec:datasets}. However, as also observed in \cite{foteini}, most of the experiments finished computation within matter of days.
 
 
-\section{Subgraph Isomorphism Algorithms}
+\section{Subgraph Isomorphism with Constraint Programming}
 \label{sec:sipalgos}
-This Section reports on existing work in the area of the subgraph isomorphism problem (\gls{sip}).
+% todo: patrick's algorithm is not solved with constraint programming
+Subgraph isomorphism problem (\gls{sip}) can be solved using tools of constraints programming. This constraint-based search approach dates back to works by Ullmann\cite{Ullmann:1976}. We can model it as a CSP by creating a variable \emph{x$_{u}$} for every vertex \emph{u} in the pattern graph. The domain of \emph{x$_{u}$} denoted as \emph{D$_{u}$} is the set of vertices in the target graph. A global \emph{AllDiff} constraint \cite{Regin:1994} ensures that no two pattern vertices are matched with the same vertex from the target. In addition, a binary constraint is introduced for each edge in the pattern to guarantee that every edge in the pattern graph is associated to an edge in the target graph. The set of solution of SIP is equal to the set of all valid assignments of target vertices to pattern vertices. The initial size of the search space is the Cartesian product of the initial domains of all variables. 
 
-- subgraph isomorphism with constraints programming
+There are various pieces of existing work that employ this model \cite{Solnon:2010, Ullmann:1976, Regin:1995, Larrosa:2002, Solnon:2010a, CP2015}, where the exact constraints and the level of filtering varies. The algorithm presented in \cite{CP2015} is bit- and thread parallel and introduces the use of supplemental graphs to create implied constraints. It is discussed in more detail in Section \ref{sec:sippatrick}.% In \cite{Solnon:2010}, an iterative labeling is introduced to associate a global label for each vertex based on its neighbourhood. This algorithm is discussed in Section \ref{sec:sipchristine}.
 
 \subsection{Partick and Ciaran's paper}
 \label{sec:sippatrick}
+%% what SIP, what types of graphs?
+The paper discusses the non-induced version of the subgraph isomorphism problem for finite, undirected graphs that do not have multiple edges between pairs of vertices, but may have loops. Although the algorithm does not consider labels, it can be easily adjusted to take into account labeled vertices and/or edges by adding additional constraints. In fact, adding labeling support would make the algorithm faster, as follows from a result proved in \cite{Ciaran:2016}. Unlikely most recent work in subgraph isomorphism\cite{Solnon:2010a,SND}, this algorithm replaces strong inference with cheaper techniques and shows that they can be beneficial. The algorithm exploits parallelism for both pre-processing and search and introduces a novel usage of backjumping that does not need maintaining conflict sets. 
 
-\subsection{Christine's paper}
-\label{sec:sipchristine}
+%% graph representation
+The algorithm uses bitset encodings: graphs are represented as bit sets, each pattern vertex has a domain which is a bit set. This representation allows for fast execution of operations. For instance, the neighbourhood intersections discussed shortly are bitwise-and operations, the unions of domains used during alldifferent propagation and nogood values discovered during search are computed using bitwise-or operations, and cardinality checks involve computing the Hamming weight (also known as population count) of the set \cite{Reed:1954}, which is a single instruction in modern CPUs \cite{CP2015}.  
+
+%% explain supplemental graphs
+The supplemental graph G$^{[c,l]}$ is a graph that has at least \emph{c}
+number of paths of length exactly \emph{l} between two vertices \emph{v} and \emph{w} in G\cite{CP2015}. Supplemental graphs are based on the idea that \emph{i}: \emph{P} $\rightarrow$ \emph{T} is a subgraph isomorphism with target \emph{T} and pattern \emph{P}, then F(\emph{i}): F(\emph{P}) $\rightarrow$ F(\emph{T}) is a subgraph isomorphism for certain functions F. Supplemental graph pairs are constructed from the pattern and the target with bound on the path distance 3\footnote{The bound is chosen after an observation that distances greater than 3 rarely give additional filtering power and their construction is computationally very expensive \cite{CP2015}}. The intuition behind their usage is to put a restriction that vertices of distance \emph{x} apart must be mapped to vertices that are within distance \emph{x}. This also implies that adjacent vertices in the pattern must be mapped to adjacent vertices in the target. These restrictions are put on top of the search during the initialization of domains in order to perform initial filtering at the top of the search.
+
+The initial filtering on top of the search also checks for compatibility of neighbourhood degree sequences of the pattern and target vertices, based on the fact that a vertex \emph{v} can only be mapped to a vertex \emph{w} if the sequence consisting of the degrees of every neighbour of \emph{w} is bigger or equal to the sequence consisting of the degrees of every neighbour of \emph{v} \cite{Solnon:2010}. Neighbourhood degree sequence compatibility was introduced by \cite{Solnon:2010} and is used in the Light filters approach introduced later in this work in Chapter \ref{ch:sip1}. 
+
+%% explain search
+The algorithm employs a recursive search procedure that repeatedly picks a variable with the smallest domain to branch on, breaking ties on descending static degree in the original pattern graph. The values of the domain of each variable are ordered by descending static degree in the target graph. If the assigned value to a variable is in conflict with the current partial solution or does not obey certain constraints, then the search returns a nogood set of variables. In such case, the algorithm can perform a variation of conflict directed backjumping \cite{Prosser:1993} without explicitly maintaining conflict sets. On success of value assignment of a variable, the algorithm updates the partical solution and makes recursive call until every variable is assigned (success) or no solution is proved to exist. 
+
+%% explain the counting based alldifferent
+A variable assignment algorithm is called every time a variable \emph{v} is to be given a value \emph{e} from its domain \emph{D$_{v}$}. The algorithm assigns \emph{e} to \emph{v} and then infers which values may be eliminated from the remaining domains. It removes \emph{e} from the domains of all other variables and eliminates any detected \glspl{hallset} from future variables\footnote{The algorithm may fail to identify some Hall sets if the initial ordering of domains is imperfect. However, it gives big pay off in terms of running time, as validated experimentally in the paper}, thus detecting that an assignment is impossible even if values remain in each variable`s domain.
+
+%% explain the parallelism bit
+The SIP algorithm achieves \gls{simd}-like parallelism from the bitset encodings. The algorithm also allows for parallel supplemental graphs construction, neighbourhood degree sequence calculation, graph construction and domain initialization. In addition, the subtrees created by recursive calls made during search can be explored in parallel by multiple threads using early diversity work-stealing approach, where a single thread always preserves the sequential search order, finding states of the search space that are to be explored. The rest of the threads take work from the main thread, trying to steal early in the search tree, because value-ordering heuristics are expected to be weakest early in the search \cite{Harvey:1995}.
+
+%% evaluation and performance
+Both the sequential and the threaded version of the algorithm was compared with an implementation of SND \cite{SND}, LAD\cite{Solnon:2010a} and VF2\cite{vf2}. The properties of the hardware, implementation-specific details, the nature of the datasets used in the experiments and the results from the evaluation are presented in the paper\cite{CP2015}. Below are highlights of the results obtained after the experiments:
+\begin{itemize}
+\item The algorithm is the single best among the evaluated approaches for non-trivial instances. VF2 is stronger on trivial instances. The reason for this the time needed to instantiate domains, generate supplemental graphs and perform the inference on top of the search. These results show that there is no single algorithm that performs best on all instances and suggests for taking more flexible future approach that allows for instance-specific configuration. For example, for trivial problems one may not need to create supplemental graphs.
+\item Except at very low sequential runtimes, parallelism results in general improvement of speed. For exceptionally hard satisfiable instances, parallelism results to superlinear speedup. This shows that the early work stealing approach is able to recover from early mistakes of value ordering heuristic choices by avoiding strong commitment to such choices.
+\item Backjumping always either pays for itself or gives slight improvement. For some instances, that constitute of highly structured data, it makes an improvement of several orders of magnitude.
+\item The last part of the 
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%% the path-based indexes %%%%%%%%%%%%%%%%%%%%
 \chapter{Framework for graph indexing and filtering}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-This Chapter describes a subgraph-query filtering and indexing framework designed and implemented in Java. The framework implements the first stage of the filtering-verification paradigm. It takes a set of target and a set of pattern graphs, computes their indices and generates a candidate set for SIP. There are two path based exhaustive feature enumeration techniques that can be used to generate the index of a set of graphs: Path Index and Path-Subtree Index. Their design, implementation and empirical analysis is presented in Section \ref{sec:PIandPSI}.
-
-%3 main stages of subgraph query filtering:
-%	1. read in the files, create graph data structures
-%   2. paths extraction
-%	3. computing p-features, store in index --- PI and PSI
-%   4. generate candidate set: create pattern index, filter -- PI and PSI
-    
-%    step 2 can be done only once and then the index can be reused, but the current framework does not support this
-
-The framework is composed of the two indexing algorithms described previously (PI and PSI) and the filtering method. Subgraph query filtering can be performed using either PI or PSI. To run the framework, the user specifies the filename of the target graphs, the filename of the pattern graphs, $l_{max}$ and a bit which if 1, the framework will index the graphs using PSI, or otherwise use PI. More detailed instructions on how to run the framework can be found in the code repository on github \cite{framework-github}.
+This Chapter describes a subgraph-query filtering and indexing framework designed and implemented in Java. The framework implements the first stage of the filtering-verification paradigm with a choice of two feature enumeration and candidates extraction techniques: Path Index(PI) and Path-Subtree Index(PSI). Given two sets of graphs: one with patterns and the other one with targets(a.k.a database), the framework computes their indices and generates a candidate set for subgraph isomorphism, which is a subset of the database. In the next sections, we present the design and implementation of every component of the framework and comment on its complexity. Section \ref{sec:graph-representation} presents the choice of graph representation. Section \ref{sec:pathsExtraction} explains the paths extraction algorithm, a procedure based on \gls{dfs} with bound on the path length. Section \ref{sec:PIandPSI} describes PI and PSI and finally Section \ref{sec:performance} we comment on the performance of the framework and give suggestions to improve its efficiency.
 
 \section{Graph representation}
-\label{path-index:graph-representation}
+\label{sec:graph-representation}
 Graphs are  represented with a Java class \emph{Graph} that has an integer id and a collection of objects of type \emph{Vertex} as fields. A Vertex has an id, a label and a list of edges that connect it to its neighbours. The number of edges a Vertex has equal to its degree. An Edge object has a label and a destination Vertex as fields. As the graphs we are working with are not directed, two Edge objects are created to represent an edge. The first object has one of the vertices as destination Vertex and then added in the list of edges of the other Vertex: the source Vertex. The second edge object will have the source Vertex of the first edge object as destination Vertex and included in the list of edges of the destination Vertex of the first edge object, which will be its source Vertex. The label of both edge objects will be the same.
 
 \section{Paths Extraction}
-\label{pathsExtraction}
-A path is a sequence of vertices, such that every pair of consecutive vertices in the sequence are neighbours. Path extraction is referred to the process of generating all paths up to a given length l$_{max}$ in a graph G. For every vertex \emph{v} in G, we execute a recursive depth-first search algorithm with a bound on the size of the stack of maximum number of vertices l$_{max}$. We output the sequence of vertices currently stored in the stack after each recursive call. Every generated sequence is then fed into the \ref{alg:outputPath} procedure to derive the p-feature and store it in the index.
+\label{sec:pathsExtraction}
+A path is a sequence of distinct vertices, such that each successive pair of vertices are adjacent. A path can also be from a vertex to itself, in which case the first and the last vertices in the sequence are the same. Path extraction is referred to the process of generating all paths up to a given length l$_{max}$ in a graph G. For every vertex \emph{v} in G, we execute a recursive \gls{dfs} algorithm with a bound on the size of the stack of maximum number of vertices l$_{max}$. We output the sequence of vertices currently stored in the stack after each recursive call. Every generated sequence is then fed into the \ref{alg:outputPath} procedure to derive the p-feature and store it in the index.
 
-Algorithm \ref{alg:generatePath} describes our approach. Before generatePath procedure is called, an empty stack \emph{s} is initialized (line 3). The stack is used for storing the sequence of vertices generated during depth-first search procedure. Procedure generatePath ( \textrm{Algorithm \ref{alg:generatePath}}) takes all vertices in the target graph and l$_{max}$ as parameters. It calls procedure dfsBounded for every vertex in the list as starting vertex (line 5). The start vertex is also pushed on the stack (line 4), as it is part of the path that is to be generated.
+Algorithm \ref{alg:generatePath} describes our approach. Before generatePath procedure is called, an empty stack \emph{s} is initialized (line 3). The stack is used for storing the sequence of vertices generated during \gls{dfs} procedure. Procedure generatePath ( \textrm{Algorithm \ref{alg:generatePath}}) takes all vertices in the target graph and l$_{max}$ as parameters. It calls procedure dfsBounded for every vertex in the list as starting vertex (line 5). The start vertex is also pushed on the stack (line 4), as it is part of the path that is to be generated.
 
-Algorithm \ref{alg:dfsBounded} performs a depth-first search with bound path length. Given a starting vertex \emph{v}, l$_{max}$ and stack s, Algorithm \ref{alg:dfsBounded} iterates through all neighbours of \emph{v}, adding each neighbour \emph{n} to the stack (line 10) and calling dfsBounded with \emph{n} as a starting vertex (line 11). At each call of dfsBounded, the current sequence of vertices in the stack is passed to procedure computeFeature (Algorithm \ref{alg:outputPath}) until all vertices reachable by the start vertex within distance l$_{max}$ are visited.
+Algorithm \ref{alg:dfsBounded} performs a \gls{dfs} with bound path length. Given a starting vertex \emph{v}, l$_{max}$ and stack s, Algorithm \ref{alg:dfsBounded} iterates through all neighbours of \emph{v}, adding each neighbour \emph{n} to the stack (line 10) and calling dfsBounded with \emph{n} as a starting vertex (line 11). At each call of dfsBounded, the current sequence of vertices in the stack is passed to procedure computeFeature (Algorithm \ref{alg:outputPath}) until all vertices reachable by the start vertex within distance l$_{max}$ are visited.
 
 %%% proper path extraction algorithm
 \begin{algorithm}
@@ -625,12 +652,12 @@ The rest of the subgraph query filtering process is carried out by using two alg
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Path Index}
-\label{path-index}
+\label{sec:pi}
 This Section presents PI: a technique to compute features of a graph commonly used in many filtering algorithms \cite{graphgrepsx}. Below we describe the features calculation and candidate extraction algorithms employed in PI.
 
 \subsubsection{Features}
-\label{pi:features}
-PI computes the features stored in the index using the paths extracted during the path extraction procedure outlined in Section \ref{pathsExtraction}. To store a path in $\fancyI_{D}$, we compute its unique string representation, referred to as \emph{p-feature}. The procedure to derive p-features and store them in $\fancyI_{D}$ is the following.
+\label{sec:pifeatures}
+PI computes the features stored in the index using the paths extracted during the path extraction procedure outlined in Section \ref{sec:pathsExtraction}. To store a path in $\fancyI_{D}$, we compute its unique string representation, referred to as \emph{p-feature}. The procedure to derive p-features and store them in $\fancyI_{D}$ is the following.
 \begin{enumerate}
 \item Given a sequence of vertices v$_{seq}$ (i.e. a path), replace each vertex in v$_{seq}$ with its label to obtain its \emph{p-feature}.
 \item Reverse the sequence v$_{seq}$ to obtain v$_{seq}^{\prime}$.
@@ -832,7 +859,11 @@ Let $\fancyC_{PI}$ be the candidate set retrieved by PI and let $\fancyC_{PSI}$ 
 The first filtering condition implemented by Algorithm \ref{alg:psicontainsFeature} puts an upper bound on the size of $\fancyC_{PSI}$ to be at most $|\fancyC_{PI}|$ and condition 2 gives PSI additional filtering strength by requiring an existence of matching of the neighbourhood of each pattern vertex to a neighbourhood of a vertex in the target. Therefore $\fancyC_{PSI}$ $\subseteq$ $\fancyC_{PI}$. 
 \end{proof}
 
-\section{Empirical analysis and suggestions for improvement}
+\section{Running the framework}
+To run the framework, the user specifies the names of the files containing all target and all pattern graphs, $l_{max}$ (the bound on the path length allowed to be extracted) and a bit denoting which indexing and candidates extraction technique the user wants to run. If the bit is 1, the framework will index the graphs using PSI, otherwise it will run PI. The source code can be downloaded from Github \cite{framework-github}.
+
+\section{Performance analysis and suggestions for improvement}
+\label{sec:performance}
 %%% TODO: make some small experiments and put them in the appendix, then put a reference to the appendix here.
 In this Section we discuss the performance of the framework using PI and PSI. Both of them were ran with the datasets described in Section \ref{sec:datasets} and their filtering strength and execution time was compared with CT-Index \cite{ctindex}, analyzed in Section \ref{sec:ctindex}. CT-Index results are also used as a benchmark for correctness of the implemented algorithms. We outline the strengths and weaknesses of PI and PSI and give suggestions for improvement.
 
@@ -855,6 +886,8 @@ We can represent the index using a \gls{tree} data structure similar to \gls{suf
 %- the framework provides a functionality to save the index to a file and then reuse it from the file. In practice, the way the code works at the moment is to store the target index in memory. Experiments with the datasets used by big data research community were run on a simple machine and no memory overflow was encountered.
 
 %- reduce the index size by employing the maximal features thing (cite needed papers --- graphgrepsx about the idea and the early IBM paper about the notion of descriptive feature).
+
+% TODO: write that we can represent the graphs using bitset encodings. cite the papers cited by patrick and ciaran's sip paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%------------------------------SIP Algorithms--------------------------%%%
