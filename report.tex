@@ -165,27 +165,35 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 \label{ch:introduction}
 \pagenumbering{arabic}
 
-This Chapter starts by introducing the problem statement and the aims and motivations to solve it. We then give important definitions and concepts that are used throughout the report. 
+This Chapter gives definitions and concepts used in this work and states the aims and motivations of the project. 
 
 \section{Terminology, Definitions and Notations}
 \label{sec:theory}
-In this Section, we introduce all preliminary terminology and definition used throughout the document. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
+In this Section, we introduce all preliminary terminology and definition used in this work. We start with basic introduction to graph theory, explaining the main problem that is discussed in this work, namely the subgraph isomorphism problem. Then, other concepts and notations are introduced, which are referred to later in this work.
 
 \subsection{Graph Theory}
 \label{sec:graphTheory}
-%% todo: define what is tree, it is needed for ct-index 
+%$Let \emph{V} be a finite set. Let \emph{E} be a subset of \emph{V} $\times$ \emph{V} and \emph{L} be a function, L: V $\rightarrow$ $\Lagr$, that assigns a label l $\in$ $\Lagr$ to each element in \emph{V}, where $\Lagr$ is the set of all possible labels. Then \emph{G} = (\emph{V}, \emph{E}, \emph{L}) is called a (undirected) graph if for any (\emph{v$_{1}$}, \emph{v$_{2}$}) $\in$ \emph{E} we have that (\emph{v$_{2}$}, \emph{v$_{1}$}) $\in$ \emph{E}.
 
-A graph \emph{G} consists of a set of vertices V, a set of edges E, where each edge is a pair of vertices in V, and a function L: V $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each vertex in V, where $\Lagr$ is the set of all possible labels. We write V(\emph{G}) for the vertex set of \emph{G}, E(\emph{G}) for the set of edges in \emph{G} and L(\emph{G}) for the set of labels in \emph{G}. By L(\emph{G}, \emph{v}) = l we mean that vertex \emph{v} in \emph{G} has label l.
+A graph \emph{G} consists of a set of vertices V, a set of edges E, where each edge is a pair of vertices in V, and a \emph{labeling function} L: V $\rightarrow$ $\Lagr$ that assigns a label l $\in$ $\Lagr$ to each vertex in V, where $\Lagr$ is the set of all possible labels. Therefore, the set of all labels in \emph{G} is L(V(\emph{G})). We write V(\emph{G}) for the vertex set of \emph{G} and E(\emph{G}) for the set of edges in \emph{G}. By L(\emph{G}, \emph{v}) = l we mean that vertex \emph{v} in \emph{G} has label l.
 We say that \emph{G} is \emph{undirected}, if every edge in E(\emph{G}) is an unordered pair of elements of V(\emph{G}). In this work, only undirected graphs are considered. The \emph{size} of \emph{G} is equal to the cardinality of E(\emph{G}). The \emph{order} of \emph{G} is equal to the cardinality of V(\emph{G}).
 
-A \emph{path} in a graph is a sequence of distinct vertices, such that each successive pair of vertices are adjacent (i.e. connected by an edge). A path can be from a vertex to itself, in which case the first and last vertices in the sequence are the same and we say that there is a \emph{cycle}. There may be zero, one or more distinct paths from vertex \emph{u} to vertex \emph{v} in \emph{G}. The \emph{length} of a path is equal to the number of its edges.
+\begin{example}
+An example of undirected labeled graph is graph T on Figure \ref{fig:exampleGraph2}, where the labels of T are the colors of its vertices. L(V(\emph{T})) is equal to red (R), yellow (Y) and blue (B).
+\end{example}
 
-The neighbours of a vertex \emph{v} in \emph{G} are all vertices adjacent to \emph{v}. The \emph{degree} of \emph{v} is the cardinality of its set of neighbours. By \emph{v} $\sim_{G}$ \textit{w} we mean that vertex \textit{w} is a neighbour of \emph{v} in \emph{G}. The set of neighbours of \emph{v} forms the \emph{neighbourhood} of \emph{v}, denoted as N(\emph{G}, \emph{v}). The neighbourhood degree sequence of \emph{v}, denoted nds(\emph{G}, \emph{v}), is the sequence consisting of the degrees of every neighbour of \emph{v}, from largest to smallest.
+A \emph{path} in a graph is a sequence of distinct vertices, such that each successive pair of vertices are adjacent (i.e. connected by an edge). A \emph{cycle} is a path such that the first and the last vertices are adjacent. There may be zero, one or more distinct paths from vertex \emph{u} to vertex \emph{v} in \emph{G}. The \emph{length} of a path is equal to the number of its edges and the \emph{length} of a cycle is the number of its edges incremented by 1.
+
+\begin{example}
+An example of a path in graph T on Figure \ref{fig:exampleGraph2} is the sequence \{2, 3, 4, 5\}, which is a path of length 3. The path consisting of vertices \{2, 3, 8\} is an example of a cycle also of length 3.
+\end{example}
+
+The set of neighbours of a vertex \emph{v} in \emph{G} consists of all vertices adjacent to \emph{v}. The \emph{degree} of \emph{v} is the cardinality of its set of neighbours. By \emph{v} $\sim_{G}$ \textit{w} we mean that vertex \textit{w} is a neighbour of \emph{v} in \emph{G}. The set of neighbours of \emph{v} forms the \emph{neighbourhood} of \emph{v}, denoted as N(\emph{G}, \emph{v}). The neighbourhood degree sequence of \emph{v}, denoted nds(\emph{G}, \emph{v}), is a sequence consisting of the degrees of every neighbour of \emph{v}, taken in non-increasing order.
 
 A graph \emph{G} is \emph{connected} if there exists a path between any pair of vertices in \emph{G}. An \emph{acyclic} graph has no cycles. A \emph{tree} is an acyclic connected graph. In this work, we refer to the vertices of the tree as \emph{nodes}.
 
 \begin{example}
-Figure \ref{fig:exampleGraph} shows an undirected labeled graph T, where each color represents a vertex label. For instance, vertex 2 is labeled in red (R). The degree of vertex 2 is equal to 3, because it is adjacent to three vertices (2 $\sim_{T}$ 1, 2 $\sim_{T}$ 3 and 2 $\sim_{T}$ 8). Consequently, N(\emph{T}, 2) = 1, 3, 8. The sequence of vertices \{2, 3, 4, 5\} is a path of length 3. The path consisting of vertices \{2, 3, 8, 2\} is a cycle.
+Graph T on Figure \ref{fig:exampleGraph2} is connected. Let use look at vertex 2. Its degree is equal to 3, because vertex 2 is adjacent to three vertices, namely 2 $\sim_{T}$ 1, 2 $\sim_{T}$ 3 and 2 $\sim_{T}$ 8. Consequently, N(\emph{T}, 2) = 1, 3, 8.
 \end{example}
 
 \begin{figure}[H]
@@ -200,128 +208,108 @@ Figure \ref{fig:exampleGraph} shows an undirected labeled graph T, where each co
   \centering
   \includegraphics[height=3.4cm,width=5cm]{images/graphs/exampleGraph.png}
   \caption{graph T}
-  \label{fig:exampleGraph}
+  \label{fig:exampleGraph1}
 \end{minipage}%
 \begin{minipage}[t]{.3\textwidth}
   \centering
   \includegraphics[height=3.4cm,width=3cm]{images/graphs/smalltarget.png}
   \caption{graph T1}
-  \label{fig:exampleGraph}
+  \label{fig:exampleGraph3}
 \end{minipage}%
 \caption{Instances of subgraph isomorphism problem (SIP)}
 \label{fig:SIP}
 \end{figure}
 
-%% induced : if edge in p, then edge in t, but if edge not in p then edge not in t
-%% non-induced: if edge in p, then edge in t
+The \emph{density} of a graph \emph{G} measures what is the size of E(\emph{G}) compared to the maximum possible number of edges between the vertices in V(\emph{G}). Density for undirected graphs is calculated as follows:
+\begin{equation}
+\label{eq:graphdensity}
+Density (\emph{G}) = \frac{2 \* |E(\emph{G})|}{|V(\emph{G})|(|V(\emph{G})| - 1)}
+\end{equation}
+
+This formula is derived from the fact that the maximum number of edges that \emph{G} can contain is $\frac{|V(\emph{G})|(|V(\emph{G})| - 1)}{2}$ when \emph{G} is a clique. It is easy to see that of the number of edges is increased, while fixing the number of vertices as a constant, the density of \emph{G} becomes higher.
+
+\begin{example}
+The density of graph T on Figure \ref{fig:exampleGraph2} is as follows. T has 10 edges and 8 vertices. Using the formula \ref{eq:graphdensity}, $\frac{20}{8.7}$ is equal to 2.3, which is the density of T.
+\end{example}
+
 \subsection{The Subgraph Isomorphism Problem}
 A \emph{subgraph} of \emph{G} is a graph \emph{H} whose vertices and edges are subsets of the vertices and edges of \emph{G} and the labeling on the vertices is preserved.
-
-A \emph{non-induced subgraph isomorphism} is an injective mapping \emph{i} : \emph{P} $\rightarrow$ \emph{T} from a graph \emph{P} to a graph \emph{T} that preserves adjacency and labeling on vertices. That is, if \emph{v} $\sim_{P}$ \emph{w}, then \emph{i(v)} $\sim_{T}$ \emph{i(w)} and if L(\emph{P}, \emph{v}) = l, then L(\emph{T}, \emph{i(v)}) = l. The \emph{non-induced subgraph isomorphism problem} (SIP) is to find such a mapping from a given graph \emph{P}, called a pattern, to a given graph \emph{T} referred to as a target. The \emph{induced} SIP additionally requires that if \emph{v} $\nsim_{P}$ \emph{w} then \emph{i(v)} $\nsim_{T}$ \emph{i(w)}. In this work, we discuss only the non-induced version. We say that an instance of SIP is \emph{satisfiable} (SAT) if such a mapping \emph{i} exists. Otherwise, the instance is \emph{unsatisfiable} (UNSAT).
+%%% todo : change as adam says?
+A \emph{non-induced subgraph isomorphism} is an injective mapping \emph{i} : \emph{P} $\rightarrow$ \emph{T} from a graph \emph{P} to a graph \emph{T} that preserves adjacency and labeling on vertices. That is, if \emph{v} $\sim_{P}$ \emph{w}, then \emph{i(v)} $\sim_{T}$ \emph{i(w)} and if L(\emph{P}, \emph{v}) = l, then L(\emph{T}, \emph{i(v)}) = l. The \emph{non-induced subgraph isomorphism problem} (SIP) is to find such a mapping from a given graph \emph{P}, called a pattern, to a given graph \emph{T} referred to as a target. The \emph{induced} SIP additionally requires that if \emph{v} $\nsim_{P}$ \emph{w} then \emph{i(v)} $\nsim_{T}$ \emph{i(w)}. In this work, we discuss only the non-induced version of SIP. We say that an instance of SIP is \emph{satisfiable} (SAT) if such a mapping \emph{i} exists and \emph{P} is said to be \emph{subgraph-isomorphic} to \emph{T}. Otherwise, the instance is \emph{unsatisfiable} (UNSAT).
 
 \begin{example}
 \label{ex:sip}
 Lets us consider the two graphs in Figure \ref{fig:SIP}. The SIP instance between the pattern P (in the left-hand side of the Figure) and the target T (the graph in the middle of the Figure) is SAT- the mapping from P to T maps vertex 1 to vertex 8, vertex 2 to vertex 3, vertex 3 to vertex 4 and vertex 4 to vertex 6.
 \end{example}
 
-% \gls{sip} is NP-complete, however there exist a number of different approaches to solve it, some of which are ... 
-There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010,nauty}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sipalgos}.
+There are various existing algorithms for the subgraph isomorphism problem \cite{vf2,Solnon:2010,CP2015,Larrosa:2002,Bonnici:2013,Zampelli:2010,nauty}. More thorough analysis of the problem and discussion on existing work is presented in Section \ref{sec:sippatrick}.
 
-\subsection{The Filter-Verification Paradigm}
-A \emph{database} \emph{D} is a set of target graphs. A set of pattern graphs is called a \emph{query set} or \emph{queries}, is denoted by \emph{Q}. Let \emph{S} be the Cartesian product of \emph{Q} and \emph{D}. \emph{Subgraph query processing} is the process of solving the \gls{sip} for every pair in \emph{S}.
+\subsection{The Filtering-Verification Paradigm}
+Let \emph{S} be the Cartesian product of \emph{Q} and \emph{D}. The process of solving the \gls{sip} for every pair in \emph{S} is referred to as \emph{subgraph query processing} problem. The \emph{filtering-verification paradigm} is a subgraph query processing technique that applies heavy \emph{filtering} procedures before the subgraph isomorphism algorithm execution in order to prune UNSAT instances. The paradigm is applied on a \emph{database} \emph{D} and a \emph{query set} \emph{Q}, where \emph{D} is the set of target graphs and \emph{Q} is the patterns set.
 
 \begin{example}
 \label{ex:pathIndexing}
-Let us consider again Figure \ref{fig:SIP} and assume that graph P (in the left-hand side) is the query set \emph{Q}, and graphs T (in the middle) and T1 (in the right-hand side) represent the graph database \emph{D}. Then, subgraph query processing would solve the SIP for instances (P, T) and (P, T1), where the former instance will be determined as SAT (Example \ref{ex:sip}) and the latter as UNSAT (there is no valid mapping from P to T1). 
+Let us consider Figure \ref{fig:SIP} and assume that graph P (in the left-hand side) is the query set, and graphs T (in the middle) and T1 (in the right-hand side) represent a database. Then, subgraph query processing would solve the SIP for instances (P, T) and (P, T1), where the former instance will be determined as SAT (Example \ref{ex:sip}) and the latter as UNSAT (there is no valid mapping from P to T1). 
 \end{example}
 
-%% todo: cite the np-complete part
-Another way of processing queries is the \emph{filter-verification framework}, which consists of two steps. The \emph{filter} step tries to prune targets that can not be matched to a given query. The set of targets left after this step formes the set of \emph{candidates}, denoted as $\fancyC_{p}$, where $\fancyC_{p}$ $\subseteq$ T. The following \textit{verification} step then performs \gls{sip} for every pair (G$_{p}$,$\fancyC_{G_{p}}$) $\in$ P $\times$ $\fancyC_p$. The usage of the filter-verification paradigm is motivated by the fact that subgraph isomorphism is NP-complete and reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern during the filtering step and performing \gls{sip} using the limited set of candidates would yield to significant performance improvement \cite{ctindex,foteini}.
+\subsubsection{Filtering}
 
-%%% TODO: move all definitions about filter-verif here
+The first step of the filtering-verification paradigm is \emph{filtering}. During the filtering procedure, pruning algorithms are applied on the graphs in \emph{D} using \emph{Q} in order to obtain the \emph{candidate set} \emph{C}. \emph{C} is a subset of \emph{D} and it contains all graphs that were not pruned by the applied filters. The second step, referred to as \emph{verification}, involves executing a \gls{sip} algorithm for every instance in the Cartesian product of \emph{Q} and \emph{C}.
 
-There are various subgraph query processing algorithms based on the filter-verification framework \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. This approach is discussed in more detail in Chapter \ref{ch:existingWork}, where more definitions and annotations are introduced in Section \ref{sec:filterVerificationParadigm} followed by analysis of related work in Section \ref{sec:ctindex}.
+In order to apply pruning algorithms on \emph{D}, a specific data structure has to be computed for both \emph{D} and \emph{Q}. This structure is known as \emph{index} and its definition is as follows. An \emph{index} of a set of graphs \emph{H}, denoted as $\fancyI_{H}$ is a collection of data, often stored in a file, that contains characteristics of the graphs in \emph{H}. The characteristics are called \emph{features}. Features can be represented in various ways. For instance, they could be paths, subtrees, cycles, or subgraphs. They are computed for every graph in \emph{H}. The first algorithm executed during the filtering stage is to compute such index for \emph{Q} denoted as $\fancyI_{Q}$ and \emph{D}, written as $\fancyI_{D}$\footnote{Unless it has already been computed.}. The process of computing the features of the graph to store them in the index is called \emph{feature extraction}.
 
-% how do we build the database index?
-% using a pre-built index of the database, denoted as $\fancyI_{T}$
+The main reason why indices were introduced is \emph{reusability}. For instance, if $\fancyI_{D}$ has been computed during a previous execution of subgraph query processing with a different query set \emph{Q$^{\prime}$} and \emph{D} has not been changed, then one can reuse $\fancyI_{D}$. This would reduce the running time significantly\footnote{Results in Section \ref{subsec:ctindexEval} show that the bottleneck of the filtering-verification paradigm is the database index construction}. In theory, one could also reuse $\fancyI_{Q}$, but in practice this is rarely exploited. The set of queries \emph{Q} usually consists of much smaller number of graphs of lower order and smaller size than \emph{D}. This makes index computation much less expensive. Second, subgraph query processing with repeated query set rarely happens. 
 
-% what is a candidate set?
-% graph index, features, ...
-% what is false-positive? what is false-negative, why it can't exist?
-
-% TODO
-\subsection{Filtering}
-This step consists of building an index of the database and then rejecting for verification with the query targets that can be proved not to contain the query. The process of rejecting/pruning uses the data stored in the index for the particular target and the characteristics of the query. The details follow below.
-
-\subsubsection{Database Index}
-An \emph{index} of a database D, denoted as $\fancyI_{D}$ is a collection of data, often stored in a file, that contains characteristics of the graphs in D, also known as \emph{features}. Features can be represented by paths, subtrees, cycles, or subgraphs. They are computed for every graph in the database. The index is independent of the queries so that it can be computed once and then reused for multiple queries as long as there is no change in the database. The process of computing the features of the graph to store them in the index is called \emph{feature extraction}.
+There are many existing index computation and feature extraction techniques. In order to illustrate the process of building an index, an example of such in is presented below. Most common approaches are discussed later in this work.
 
 \begin{example}
 \label{ex:index}
-Let us have a database consisting of the graph G$_{t}$ displayed on Figure \ref{fig:exampleGraph}. In this example, we want to compute the index of G$_{t}$ using paths up to maximum length 2 as features and store each unique path as a string containing the labels of the vertices in the path. Each vertex in G$_{t}$ is labeled in yellow(Y), blue(B) or red(R).
-
-An example feature extraction algorithm will derive the following paths:
-B, Y, R, B-B, B-Y, R-Y, B-R \footnote{Note that the representation of some of the paths is not unique, as G$_{t}$ is undirected. For example, path B-Y is equivalent to path Y-B. In such cases, one can impose constraints on the ordering of the paths to avoid storing repetitive features in the index.}. These paths will then be stored in the index of G$_{t}$ and used further in the filtering process to check whether G$_{t}$ could be rejected for verification with a given query.
+Let \emph{D} be the database and \emph{Q} the query set defined in Example \ref{ex:pathIndexing} with the graphs on Figure \ref{fig:SIP}. Let the features be paths of length 2 represented as strings of concatenated vertex labels (yellow(Y), blue(B) or red(R)). The features of \emph{T}, \emph{T1} and \emph{P} are B-B, B-Y, R-Y, B-R; B-Y, R-Y, B-R and B-Y, R-Y, B-R respectively. The index of \emph{D} is then the union of the features of \emph{T} and \emph{T1} and the index of \emph{Q} consists of the features of \emph{P}. Note that the reverse of each of the strings is also a valid feature, as the graphs are undirected. Therefore, storing each feature and its reverse does not give additional structural information (in this case, this is equivalent to storing feature duplicates) for the cost of doubled index size. This is the reason why feature extraction algorithms enforce specific feature ordering requirements. $\fancyI_{D}$ is then the union of the features of \emph{T} and \emph{T1} and $\fancyI_{Q}$ contains all features of \emph{P}.
+%These paths will then be stored in the index of G$_{t}$ and used further in the filtering process to check whether G$_{t}$ could be rejected for verification with a given query.
 \end{example}
 
-Computing the database index is the process is very expensive in terms of running time and data storage. However, the cost of building such structure is compensated by the fact that it can be reused and that it is query independent.
-
-\subsubsection{Candidate Set}
-The candidate set of a database D and query graph G$_{p}$, denoted as $\fancyC_{p}$ is a set of graphs that contain all features in G$_{p}$. $\fancyC_{p}$ is derived using $\fancyI_{D}$ and $\fancyF_{G_{p}}$, where $\fancyF_{G_{p}}$ contains all features in G$_{p}$, computed using the same algorithm that computed $\fancyI_{D}$. Note that unlikely $\fancyI_{D}$, $\fancyF_{G_{p}}$ is not reused\footnote{It could be useful to store the query features if large proportion the queries received were repetitive. In such cases, one could incrementally build a second index of the features. We do not know whether this has been tried so far. This can be an area of further investigation in the future.}.
-
-The purpose of filtering is to derive as small candidate set as possible in order to limit the number calls to a subgraph isomorphism algorithm during verification. Note that $\fancyC_{p}$ $\subseteq$ D. The worst case scenario is when $\fancyC_{p}$ = D, which means that filtering did not manage to prune any target graphs in the database.
+The procedure that follows after computing indices is referred to as \emph{candidates extraction}. A \emph{candidate set C} of a database \emph{D} and a query set \emph{Q} is a subset of \emph{D} that contains all graphs that were not pruned by the applied filters. 
+The purpose of filtering is to derive as small candidate set as possible in order to limit the number calls to a subgraph isomorphism algorithm during verification. Note that the candidate set is a subset of \emph{D}. The worst case scenario is when \emph{C} and \emph{D} are equal, which means that filtering did not manage to prune any target graphs in the database.
 
 \begin{example}
-Let us extend Example \ref{ex:index} by introducing a query, which is the graph G$_{p}$ on Figure \ref{fig:exampleGraph2}. Let us use the same characteristics as features as the ones used in Example \ref{ex:index}. Then, $\fancyF_{G_{p}}$ = B, Y, R, B-Y, R-Y and G$_{t}$. Therefore, $\fancyC_{G_{p}}$ = \{G$_{t}$\}, because all features in G$_{p}$ are contained by G$_{t}$.
+Taking the indices of \emph{D} and \emph{Q} computed in Example \ref{ex:index}, the candidate set \emph{C} consists of both T and T1 as each of them contains all features of \emph{P}.
 \end{example}
 
 \subsection{Verification}
-Verification is the process of applying a subgraph isomorphism problem (\gls{sip}) algorithm on every pair (G$_{p}$,t) of graphs, where p is the query and t is the target, t $\in$ $\fancyC_{G_{p}}$. The aim of verification is to return the number of graphs in D that contain G$_{p}$. All targets that do not contain the pattern, but were not rejected during the filtering step, are called \emph{false-positives}. One wants to construct a filtering technique that admits as low number of false-positives as possible. The number of false-positives is often used as a measure of effectiveness of the filtering method\cite{foteini}.
+Let \emph{S$^\prime$} be the Cartesian product of \emph{Q} and \emph{C}, where \emph{C} is the candidate set computed after the filtering stage. \emph{Verification} is the process of solving the subgraph isomorphism problem (\gls{sip}) for every pair of graphs in \emph{S$^\prime$}. All targets that do not contain the pattern, but were not rejected during the filtering step (i.e. they were included in the candidate set), are called \emph{false-positives}. The better the filtering technique, the lower number of false-positives it admits. The number of false-positives is often used as a measure of effectiveness of the filtering method\cite{foteini}.
 
-Most of the subgraph query processing methods that apply the filter-verification paradigm are mainly focused on improving the filtering stage, while reusing the same algorithm, known as VF2, for verification \cite{foteini}. 
-It is claimed that VF2 is ``state of the art''\cite{ctindex}. However, this is not the case (\cite{Solnon:2010, Larrosa:2002, Bonnici:2013, Zampelli:2010, CP2015}, Chapter \ref{ch:evaluation}). The subgraph isomorphism tests are reported as ``too time consuming''\cite{foteini} and this is explained by the nature of the complexity of the subgraph isomorphism problem\footnote{This problem is proved is NP-Complete by Stephen A. Cook in 1971 \cite{Cook:1971}}\cite{ctindex,foteini,freqStructBasedIndexing}. One can see that the reason for the reported low verification performance for some instances could be due to the poor choice of a \gls{sip} algorithm. This is further investigated and discussed later in this work. 6  
+The usage of the filter-verification paradigm is motivated by the fact that the decision version of the subgraph isomorphism problem is NP-complete \cite{Cook:1971}. Reducing the number of \gls{sip} calls by discarding targets that are \gls{unsat} for a given pattern without performing \gls{sip} call is believed to give opportunities for significant performance improvement \cite{ctindex,foteini}.
+There are various subgraph query processing algorithms based on this paradigm \cite{ctindex,gcode,graphgrepsx,tree+delta>=graph,GRAPES}. They are discussed in more detail in Chapter \ref{ch:existingWork}. A thorough analysis of one of them is presented in Section \ref{sec:ctindex}.
 
-\section{Aims and Motivations}
-The subgraph isomorphism problem involves finding a pattern graph inside a target graph, where a graph is a structure that represents schemaless data such as proteins, chemical compounds, and XML documents. Subgraph isomorphism has a wide variety of applications in many fields. For instance, finding the best treatment to fight a particular cancer involves screening a patient's tumor to search for particular set of biomarkers \cite{nature:2015}. Such tasks involve repeatedly examining a large number of graphs, typically stored in a database, comparing each of them with a pattern.
+\section{Aims of the project}
+The subgraph query processing problem has wide variety of applications in many fields, some of which include bioinformatics \cite{Bonnici:2013}, chemistry \cite{Regin:1995}, computer vision \cite{Damiand:2011,Solnon:2015}, law enforcement \cite{Coffman:2004}, model checking \cite{Calder:2015} and pattern recognition \cite{Conte:2004}. It involves repeatedly examining a large database, searching for graphs that contain particular patterns. For instance, in order to apply the best treatment for cancer, one might have to screen a patient's tumor to search for particular set of bio markers to identify the best course of treatment \cite{nature:2015}.
 
-%% patrick and ciaran's sip paper:
-Applications include bioinformatics\cite{Bonnici:2013}, chemistry\cite{Regin:1995}, computer vision\cite{Damiand:2011,Solnon:2015}, law enforcement\cite{Coffman:2004}, model checking\cite{Calder:2015} and pattern recognition\cite{Conte:2004}.
-%    Many substructure-searching problems call for repeatedly examining a large number of molecules (typically stored in a database), comparing each with a pattern. In such situations, it pays to spend some time "up front," storing the answers to specific questions for each structure in the database. Subsequent searches of the database use these pre-computed answers to vastly improve search time; the up-front computation time is paid back quickly as repeated searches are performed.
-%        \begin{itemize}
-%            \item graphs are widely used nowadays to represent data
-%            \item the graph containment problem is widely addressed in many areas of science: genetics, chemistry, XML documents, images, fraud detection and prevention (there was an article in nature about this)
-%        \end{itemize}
-        
-%        In the core of many graph-related applications, lies a common and critical problem: \textit{how to efficiently process graph queries and retrieve related graphs}. In some cases, the success of an application directly relies on the efficiency of the query processing system.  
-        
-%        Applications:
-%        \begin{itemize}
-%        \item genome sequencing: find mutations responsible for rare diseases -- nature vol 527 no 7576
-%        \item treating diseases like cancer: screen a patient's tumor for a set of biomarkers to choose the best treatment to fight the particular cancer -- nature vol 527 no 7578
-%        \end{itemize}
+Filtering-verification paradigm is a new trend in Big Data research motivated by the fact that the decision version of the subgraph isomorphism problem is NP-Complete \cite{foteini,ctindex}. The subgraph isomorphism tests are reported as ``too time consuming'' \cite{foteini} and this is explained by the nature of the complexity of the subgraph isomorphism problem \cite{ctindex,foteini,freqStructBasedIndexing1}. Spending more time upfront to build a database index and then reuse it for filtering with subsequent queries is shown in existing literature to ``... vastly improve search time and the up-front computation time is paid back quickly as repeated searches are performed'' \cite{fingerprints}.
 
-The remaining of this work is organised as follows. Section \ref{sec:graphTheory} contains terminology, definitions and notation used throughout this work. Chapter 2 presents review and analysis of existing approaches to solve the problem and properties of 4 real datasets used for testing and evaluation. An implementation and empirical analysis of two graph indexing and filtering methods is presented in Chapter 3. Chapter 4 describes a new approach to solve the problem, called Light Filters. The evaluation of Light Filters and analysis of the hardness of satisfiable and unsatisfiable subgraph isomorphism instances in the datasets are presented in Chapter 5. Chapter 6 provides a summary of this work and suggestions how to extend it in the future. 
+In this work, we study subgraph query processing methods.  We first look at the approach to solving the problem employed by already existing work, i.e. the filtering-verification paradigm. We implement a framework that supports two different filtering techniques and carry out its empirical analysis. We then designed a novel subgraph query processing approach based on the filtering-verification paradigm that does not employ an index structure, but makes use of fast simple filtering before a call to a subgraph isomorphism algorithm. Finally, we compare the performance of the light filters approach with the algorithms that use heavy index-bound filtering, make conclusions on the nature of the problem and the advantages of each method.
 
+\section{Report organisation}
+The remaining of this work is organised as follows. Chapter 2 presents review and analysis of existing approaches to solve the subgraph query processing problem and the properties of 4 datasets used for testing and evaluation. An implementation and empirical analysis of our framework consisting of two graph indexing and filtering methods is presented in Chapter 3. Chapter 4 describes a new approach to solve the subgraph query processing problem, which we call Light Filters. An evaluation of Light Filters and an analysis of the hardness of satisfiable and unsatisfiable subgraph isomorphism instances in the datasets are presented in Chapter 5. Chapter 6 provides a summary of this work and suggestions how to extend it in the future. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%% CHAPTER 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Review of existing work}
 \label{ch:existingWork}
-\section{The nature of the problem}
 
-
-%%%% datasets
 \section{Datasets}
 \label{sec:datasets}
+This Section includes the specifications and the nature of the four datasets used for performance study of existing work in Section \ref{subsec:ctindexEval} and for evaluation in Section \ref{ch:evaluation}. The datasets are obtained from \cite{datasets}. Many related research publications use them to assess the performance of their subgraph query processing methods \cite{ctindex, gcode, graphgrepsx, tree+delta>=graph, GRAPES, lindex, foteini}. Therefore, running our experiments on these datasets makes our results easier to compare with existing work.
 
-This Section includes the specifications and the nature of the four real datasets used for performance study of existing work in Section \ref{subsec:ctindexEval} and for evaluation in Section \ref{ch:evaluation}. The datasets are obtained from \cite{datasets}. Many related research publications use some of them to assess the performance of their developed subgraph query processing methods \cite{ctindex, gcode, graphgrepsx, tree+delta>=graph, GRAPES, lindex, foteini}. Therefore, running our experiments on these datasets makes our results easier to compare to existing work. Description of each dataset and its specifications are explained below.
+All four datasets consist of undirected labeled graphs. Each dataset has a set of target graphs, also called a database, and multiple sets of query graphs. Every graph has an id as well as every vertex in the graph. A description of each dataset is given below and the specifications of each dataset is shown in Table \ref{table:datasets}.
 
-All four datasets consist of undirected labeled graphs, as defined in \ref{sec:graphTheory}, that may contain cycles. Each dataset has a set of target graphs, also called a database, and a set of query graphs. Every graph and every vertex within every graph have a unique id.
+Aids is the standard database of the Antiviral Screen dataset of the National Cancer Institute. The database contains the topological structure of 40,000 chemical compounds, represented as graphs. The order of each graph is between 4 and 245. The graphs in this dataset are small and barely connected (Table \ref{table:datasets} shows that the average vertex degree is 2.1 and the average graph order is 45). This dataset has the largest number of unique labels, namely 62, and the largest database size.
 
-Aids is the standard database of the Antiviral Screen dataset of the National Cancer Insitute. The database contains the topological structure of 40,000 chemical compounds, represented as graphs. The number of vertices varies from 4 to 245. The graphs in this dataset are small and barely connected \ref{table:datasets}. Pcms contains 200 contact maps that represent relationships among amino acids. The graphs here are small and dense. Pdbs consists of 600 target graphs, which represent proteins. It contains larger graphs, each of them contains between 1,683 and 7,979 vertices. The last dataset is ppigo and it has a database that consists of 20 protein interaction networks, where networks belong to species.
+Pcms contains 200 contact maps that represent relationships among amino acids. The graphs here are with much bigger order and density than the graphs in Aids, but they are still. Table \ref{table:datasets} shows that the graphs in Pcms have the highest density, which is 0.06, where density is calculated using the Formula \ref{eq:graphdensity} defined in Chapter \ref{ch:introduction}. 
 
-The specifications of each dataset is shown in Table \ref{table:datasets}. One can see that the pcms dataset is very dense, as the average vertex degree is 23.01. Pdbs and aids are very sparse with average vertex degree of about 2. The dataset with lowest number of edges per graph is aids (46.95) and the dataset with largest number of edges per graph on average is ppigo (4,942).
+Pdbs consists of 600 target graphs, which represent proteins. The order of the graphs is 2,939 on average, where the graph with lowest order has 1,683 vertices and the graph with largest order has 7,979 vertices.
 
-Table \ref{table:dataSAT} shows the number and percent of \gls{sat} \gls{sip} instances for each dataset. For instance, pdbs consists of large number of \gls{sat} problems (77.22\%), whereas aids is the dataset with highest percent of \gls{unsat} problems (91.33\%).
+The fourth dataset is Ppigo and it has a database that consists of 20 protein interaction networks, where networks belong to species. This is the smallest dataset which also has the biggest graph order and size on average (4,942 as shown in Table \ref{table:datasets}).
+
+Table \ref{table:dataSAT} shows the number and percent of \gls{sat} \gls{sip} instances for each dataset. For instance, Pdbs consists of large number of \gls{sat} problems (77.22\%), whereas Aids is the dataset with highest percent of \gls{unsat} problems (91.33\%).
 
 \begin{table}
 \centering
@@ -336,11 +324,11 @@ Table \ref{table:dataSAT} shows the number and percent of \gls{sat} \gls{sip} in
 \hline
 \multicolumn{1}{|l|}{\# unique labels} & 62 & 21 & 10 & 46 \\
 \hline
-\multicolumn{1}{|l|}{\# vertices on average} & 45 & 377 & 2,939 & 4,942 \\
+\multicolumn{1}{|l|}{average graph order} & 45 & 377 & 2,939 & 4,942 \\
 \hline
-\multicolumn{1}{|l|}{\# edges on average} & 46.95 & 4,340 & 3,064 & 4,942 \\
+\multicolumn{1}{|l|}{average graph size} & 46.95 & 4,340 & 3,064 & 4,942 \\
 \hline
-\multicolumn{1}{|l|}{average density} & 0.0475 & 0.0612 & 0.0007 & 0.0022 \\
+\multicolumn{1}{|l|}{average density} & 0.05 & 0.06 & 0.01 & 0.01 \\
 \hline
 \multicolumn{1}{|l|}{average vertex degree} & 2.09 & 23.01 & 2.06 & 10.87 \\
 \hline
@@ -373,55 +361,56 @@ Table \ref{table:dataSAT} shows the number and percent of \gls{sat} \gls{sip} in
         \label{table:dataSAT}
     \end{table}
 
-
 \section{Filter-Verification paradigm}
 \label{sec:filterVerificationParadigm}
-This Section gives an overview of already existing algorithms based on the filter-verification paradigm, defined in Section \ref{sec:theory}.
+This Section gives an overview of already existing algorithms based on the filter-verification paradigm, defined in Section \ref{sec:theory}. Section \ref{subse:existingFVtechniques} discusses some of the existing filtering algorithms with respect to feature extraction and choice of features and Section \ref{subsec:verificationTechs} outlines the most commonly used subgraph isomorphism algorithms for verification.
 
 \subsection{Existing Filtering Techniques}
 \label{subse:existingFVtechniques}
+There are two main types of feature extraction techniques, known as graph mining and exhaustive feature enumeration.
 
-This Section discusses some of the existing filtering algorithms with respect to feature extraction and choice of features.
+To explain what is meant by a graph mining technique, we introduce the following concepts. The \emph{support ratio} of a feature \emph{f} in a database \emph{D} is equal to the number of graphs in \emph{D} that contain \emph{f} divided by the total number of graphs in \emph{D}. A feature is \emph{frequent} if its support ratio is higher or equal to a certain algorithm-specific threshold value. \emph{Graph mining} techniques store only features which are considered as frequent in the database. Common graph-mining techniques include \cite{freqStructBasedIndexing1,fg-index,closure-tree,cp-index,lindex,tree+delta>=graph,treepi}.
 
-There are two types of feature extraction techniques, known as graph mining and exhaustive feature enumeration. \emph{Graph mining} techniques (\cite{freqStructBasedIndexing,fg-index,closure-tree,cp-index,lindex,tree+delta>=graph,treepi}) store the frequent features with high enough discriminative ratio in the database. A feature is \emph{frequent} if its support ratio is higher or equal to a certain algorithm-specific threshold value. The support ratio of a feature is defined as the percentage of graphs in the database containing it. The \emph{discriminative ratio} of a feature is a metric that characterizes the filtering power of the particular feature compared to other features. There is no universal formula to calculate the discriminative ratio of a feature, every technique employs a different calculation method.
+\emph{Exhaustive feature enumeration} techniques store in the index all features of every graph in the database, regardless of their support ratio.
+%Consequently, indices produced by such techniques are much larger than indices obtained through graph-mining algorithms and it takes more time to perform filtering, since there are more features to be iterated through. Exhaustive feature enumeration indices however are faster to compute since they do not have to calculate support ratios and feature frequency metrics.
+Some well-known exhaustive feature enumeration techniques include \cite{graphgrepsx,ctindex,anotherindex,gcode}
 
-\emph{Exhaustive feature enumeration} techniques (\cite{graphgrepsx,ctindex,anotherindex,gcode}) store in the index all features of every graph in the database, regardless of their importance.  
+Choosing a feature extraction method often depends on the type of datasets one has to work with. For instance, graph mining techniques are inefficient when the data in the database is frequently being changed \cite{freqStructBasedIndexing1}. When frequently inserting and deleting graphs in the database, the support ratio of the features may change and make the index outdated. Consequently, the index becomes less reusable and thus the total execution time of subgraph query processing is highly increased. Graph-mining techniques also take longer time to built the database index since they spend additional time on calculating the support ratio of each feature. An advantage of graph mining techniques is that they require much less storage space than exhaustive feature enumeration algorithms, as only frequent features are stored in the index. This lowers the storage space requirements and makes the process of constructing the candidate set faster, since there are less features to be iterated through. 
 
-Choosing a feature extraction method often depends on the type of datasets one has to work with. For instance, graph mining techniques are inefficient when the data in the database is frequently being changed. When frequently inserting and deleting graphs in the database, the discriminative ratio of the indexes features may change so that it makes the index outdated. Consequently, the index becomes less reusable and thus the total execution time of subgraph query processing is highly increased.  Moreover, graph-mining techniques take longer time to built the database index \cite{foteini}.
+There are various structures that can be used as features. Some of them include paths \cite{graphgrepsx,GRAPES}, trees \cite{closure-tree,treepi,ctindex}, subgraphs \cite{fg-index,anotherindex,cp-index,lindex,tree+delta>=graph} of the targets, or all of the aforementioned combined \cite{ctindex,tree+delta>=graph}. The choice of features influences the filtering performance. It is often a trade off in terms of time and filtering strength \cite{foteini}. This is further investigated in Section \ref{subsec:ctindexEval}, where we report on performance results obtained from an indexing method that uses a combination of paths, trees and graph cycles as features.
 
-One of the advantages of graph mining techniques is that they require much less storage space than exhaustive feature enumeration algorithms, as one does not need to store all features of all graphs. This lowers the storage space requirements and makes the process of constructing the candidate set faster, as less number of target features have to be compared against the query features.
-
-There are various types of structures that can be used as features. Paths (\cite{graphgrepsx,GRAPES}), trees (\cite{closure-tree,treepi,ctindex}), subgraphs (\cite{fg-index,anotherindex,cp-index,lindex,tree+delta>=graph}) of the targets or all of them combined (\cite{ctindex,tree+delta>=graph}) can be extracted from the database graphs and stored in the index. Features can be derived based on the neighbours of each graph vertex \cite{gcode}. The choice of features influences the filtering performance and it is often a trade off in terms of time and filtering strength. This is further investigated in Section \ref{subsec:ctindexEval}, where we report on performance results obtained from an indexing method that uses a combination of paths, trees and graph cycles as features. A detailed review of this method is presented in the next Section.
+\subsection{Verification techniques}
+\label{subsec:verificationTechs}
+Most of the subgraph query processing methods that adopt the filtering-verification paradigm are mainly focused on improving the filtering stage, while reusing the same algorithm for verification \cite{foteini,ctindex,graphgrepsx,tree+delta>=graph}, which is commonly VF2 \cite{vf2}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                               CT-Index                               
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{CT-Index}
 \label{sec:ctindex}
 
-CT-Index is an existing subgraph query processing approach that employs the filter-verification paradigm\cite{ctindex}. This method supports undirected graphs with edge and vertex labels and also wild card patterns. Although not explicitly stated in \cite{ctindex}, CT-Index addresses the non-induced subgraph isomorphism problem defined in Section \ref{sec:theory}. In this Section, we introduce and discuss the filtering algorithm and analyze its complexity in Section \ref{subsec:ctindexF}. Section \ref{subsec:ctindexV} explains the verification algorithm. Also presented is a complexity analysis of the algorithms used by CT-Index and an empirical study of its performance (using an open-source Java implementation) in Section \ref{subsec:ctindexEval}.
+CT-Index \cite{ctindex} is an existing subgraph query processing approach that adopts the filter-verification paradigm. This method supports undirected graphs with edge and vertex labels and also wild card patterns. Although not explicitly stated in \cite{ctindex}, CT-Index addresses the non-induced subgraph isomorphism problem defined in Section \ref{sec:theory}. In this Section, we introduce and discuss the filtering algorithm and analyze its complexity in Section \ref{subsec:ctindexF}. Section \ref{subsec:ctindexV} explains the verification algorithm. Also presented is a complexity analysis of the algorithms used by CT-Index and an empirical study of its performance (using an open-source Java implementation) in Section \ref{subsec:ctindexEval}.
 
 \subsection{Filtering}
 \label{subsec:ctindexF}
-During the filtering step, the features of all graphs in the target data set are extracted and saved to a file, i.e. the target index ($\fancyI_{T}$). $\fancyI_{T}$ is used to filter out target graphs (G$_{t}$) that cannot contain the pattern (G$_{p}$). Features are specific subgraphs used to classify graphs, and are stored as hash-key fingerprints. Features may be paths, subtrees or cycles of bounded length. Since vertices and edges may contain labels, these features can be viewed as strings from a specified alphabet (where the alphabet is the labels). In \cite{ctindex} it is stated that the reason for using \glspl{tree} and cycles (as well as paths) is that ``trees capture additional structural information" and cycles ``represent the distinct characteristic of graphs, often neglected when using only trees as features".
+During the filtering step, the features of all graphs in a database \emph{D} are extracted and saved to a file, i.e. the target index $\fancyI_{D}$. Features are specific subgraphs used to classify graphs, and are stored as hash-key fingerprints. Features may be paths, subtrees and/or cycles of bounded length. Since vertices may contain labels, these features can be viewed as strings from a specified alphabet (where the alphabet is the labels). In \cite{ctindex} it is stated that the reason for using \glspl{tree} and cycles (as well as paths) is that ``trees capture additional structural information" and cycles ``represent the distinct characteristic of graphs, often neglected when using only trees as features".
 
-Although the time complexity of computing all features of a graph is not reported, it can be derived as follows. To extract a subtree of graph $G$ with e$_{max}$ number of edges, one starts with initially empty tree and repeatedly adds edges to extend the vertices that are in the current tree via the recursive function ExtendTree. We write F for the set of every edge e$_{uv}$ $\in$ G with vertices \textit{u} $\in$ G and \textit{v} $\in$ G, such that one of them (say, \textit{u}) is part of the current tree and the other (say, \textit{v}) is not. If we have \textit{n} number of vertices in the current tree, each with degree \textit{d}, then the size of F is at most n(d - 1). ExtendTree adds an edge specified as parameter to the current tree, generates F and makes a recursive call for every e$_{uv}$ $\in$ $F$, until the tree reaches size e$_{max}$.
+Although the time complexity of computing all features of a graph is not reported, it can be derived as follows. To extract a subtree of a graph \emph{G} with \emph{m} number of edges, one starts with initially empty tree and repeatedly adds edges to extend the vertices that are in the current tree via the recursive function \emph{ExtendTree}. We write \emph{F} for the set of every edge \emph{e} in \emph{G}, such that one of the vertices of \emph{e} is connected to is part of the current tree and the other is not. If we have \emph{n} number of vertices in the current tree, each with degree \emph{d}, then the size of \emph{F} is at most \emph{n(d - 1)}. \emph{ExtendTree} adds an edge specified as parameter to the current tree, generates \emph{F} and makes a recursive call for every edge in \emph{F}, until the tree reaches size \emph{m}.
 
-%%% todo for the big O
-In the start of the \gls{tree} extraction when adding the first edge to the empty tree, the vertices on both ends of the edge are also added as part of the tree. Therefore, the size of $F$ initially is 2.(d-1). After every recursive call, one more vertex is added to the tree, which introduces (d-1) new edges. That makes a total of e$_{max}$ + 1 vertices that will be added to the tree and (e$_{max}$ + 1)(d - 1) visited edges. Consequently, the complexity of extracting tree features is $\mathcal{O}(|e|(e_{max} + 1)(d - 1))$. From this formula one can see that the number of edges in the graph has significant impact on the performance of the algorithm. When increasing the graph density, the algorithm will have slower performance, caused by the degree of each vertex and the total number of edges, which both will increase.
+In the start of the \gls{tree} extraction when adding the first edge to the empty tree, the vertices on both ends of the edge are also added as part of the tree. Therefore, the size of \emph{F} is \emph{2(d-1)} initially. After every recursive call, one more vertex is added to the tree, which introduces \emph{(d-1)} new edges. That makes a total of \emph{m + 1} vertices that will be added to the tree and \emph{(m + 1)(d - 1)} visited edges. Consequently, the complexity of extracting tree features is $\mathcal{O}(|E|(m + 1)(d - 1))$, where $|\emph{E}|$ is equal to the average size of a graph in \emph{D}. From this formula one can see that the the size of the graphs in \emph{D} has significant impact on the performance of the algorithm. When the graph density is high, the algorithm will be slower because of the high degree of each vertex.
 
-CT-Index computes a unique representation of each distinct feature, its \emph{\gls{canonicalform}}, and stores its string encoding in $\fancyI_{T}$. Thus, the equality of two features can be checked by testing the equality of their canonical forms. The canonical label of a tree feature is computed as follows: (1) find the root node \emph{r} of the tree, (2) impose a unique ordering of the children of each node. Step (1) is computed by repeatedly removing all leaf nodes of a tree until a single node or two adjacent nodes remain. In the first case, \emph{r} is the last node left. In the second case the edge connecting the two remaining nodes are removed to obtain two trees, each with one of the remaining nodes as a root.
-Step (2) is based on the ordering of edge and node labels. For each node \textit{p} that is a parent of nodes \textit{u} and \textit{v}, deciding whether \textit{u} is before \textit{v} depends first on the labels of the edges e$_{pu}$ and e$_{pv}$, then on the labels of \textit{u} and \textit{v} and finally on the subtrees of \textit{u} and \textit{v}. A bottom-up approach is used (i.e. start with the nodes in the lowest level and move up towards the root) to compute this.
+CT-Index computes a unique representation of each distinct feature, its \emph{\gls{canonicalform}}, and stores its string encoding in $\fancyI_{D}$. Thus, the equality of two features can be checked by testing the equality of their canonical forms. The canonical label of a \gls{tree} feature is computed as follows: (1) find the root node \emph{r} of the tree, (2) impose a unique ordering of the children of each node. Step (1) is computed by repeatedly removing all leaf nodes of a \gls{tree} until a single node or two adjacent nodes remain. In the first case, \emph{r} is the last node left. In the second case the edge connecting the two remaining nodes are removed to obtain two \glspl{tree}, each with one of the remaining nodes as a root.
+Step (2) is based on the ordering of edge and node labels. For each node \textit{p} that is a parent of nodes \textit{u} and \textit{v}, deciding whether \textit{u} is before \textit{v} depends first on the labels of the edges (p, u) and (p, v), then on the labels of \textit{u} and \textit{v} and finally on the subtrees of \textit{u} and \textit{v}. A bottom-up approach is used (i.e. start with the nodes in the lowest level and move up towards the root) to compute this.
 
 %%%% complexity of canonical label algorithm %%%%
-Although not stated in \cite{ctindex} the complexity of their canonical labeling can be derived as follows. Step (1) is $\mathcal{O}(n)$, where $n$ is the number of nodes in the tree, as one needs to visit each node before removing it. The complexity of step (2) is as follows. We write $|p|$ for the number of interior nodes in the trees, which is equal to $n$ minus the number of leaf nodes. Step (2) visits a node, then visits its parent, and for every child of the parent node checks whether it should be first or second in the canonical label, using the vertex and edge labels conditions described above. This is repeated for every node in the tree up to the root. Therefore, the complexity of step (2) is $\mathcal{O}(|p|.|c|^{2})$, where $|c|$ denotes the number of children of a parent.
+Although not stated in \cite{ctindex} the complexity of their canonical labeling can be derived as follows. Step (1) is $\mathcal{O}(n)$, where \emph{n} is the number of nodes in the tree, as one needs to visit each node before removing it. The complexity of step (2) is as follows. We write $|p|$ for the number of interior nodes in the tree, which is equal to \emph{n} minus the number of leaf nodes. Step (2) visits a node, then visits its parent, and for every child of the parent node checks whether it should be first or second in the canonical label, using the vertex and edge labels conditions described above. This is repeated for every node in the tree up to the root. Therefore, the complexity of step (2) is $\mathcal{O}(|p|.|c|^{2})$, where $|c|$ denotes the number of children of a parent.
 
 %%% 
-In \cite{ctindex} it is claimed that step (2) is not linear time but is tolerable because ``... the trees occurring as features usually are small and vertex and edge labels are diverse and hence the order can be solved quickly". Therefore, we might assume that CT-Index is designed to support only specific types of data sets. Therefore one could expect poor performance for data sets with less label diversity and with big trees as features. More specifically, as e$_{max}$ increases, or average degree increases, so too does the cost of step (2), and performance suffers (we conduct experiments to test this hypothesis in Section \ref{subsec:ctindexEval}).
+In \cite{ctindex} it is claimed that step (2) is not linear time but is tolerable because ``... the trees occurring as features usually are small and vertex and edge labels are diverse and hence the order can be solved quickly". Therefore, we might assume that CT-Index is designed to support only specific types of data sets and one could expect poor performance for data sets with less label diversity and with big trees as features. More specifically, as \emph{m} increases, or average degree increases, so too does the cost of step (2), and performance suffers (we conduct experiments to test this hypothesis in Section \ref{subsec:ctindexEval}).
 
 \subsubsection{Fingerprints}
 
 %%%% hash-key fingerprints %%%%
-CT-Index uses a storage technique called \emph{hash-key fingerprint} to capture the features in the graph. A separate fingerprint is computed from the canonical labels for each graph in the database. A fingerprint is an array of bits and denotes whether a particular feature occurs in the graph or not. As there is no predefined set of possible features for each graph, reserving one bit for each feature in the feature set is considered infeasible\footnote{However, due to the restricted alphabet of labels it may be possible to enumerate all possible features thus avoiding some of the pitfalls of hashing, such as collisions and sensitivity to hash table size.}. A \gls{hashfunction} maps extracted features to bit positions.
+CT-Index uses a storage technique called \emph{hash-key fingerprint} to capture the features in the graph. A \emph{fingerprint} is an array of bits, also called a bitset, that denotes whether a particular feature occurs in the graph or not. A separate fingerprint is computed from the canonical labels for each graph in the database. As there is no predefined set of possible features for each graph, reserving one bit for each feature in the feature set is considered infeasible\footnote{However, due to the restricted alphabet of labels it may be possible to enumerate all possible features thus avoiding some of the pitfalls of hashing, such as collisions and sensitivity to hash table size.}. A \gls{hashfunction} maps extracted features to bit positions.
 CT-Index is not the first indexing algorithm to employ fingerprints as a storage technique. The chemical information system called Thor and developed by Daylight \cite{fingerprints} is an example of an information processing system that uses bit arrays to store the features of the graphs.
 
 %%%
@@ -436,50 +425,56 @@ The main advantage of hashing the features and storing them in arrays is that th
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Verification}
 \label{subsec:ctindexV}
-
-The verification step checks all candidates computed in the filtering step via a subgraph isomorphism test. A backtracking algorithm \cite{backtracking-algorithms}, similar to VF2 \cite{vf2} with additional heuristics, is used.  This test is theoretically NP-Complete, and is avoided as far as possible via the filtering process. CT-Index is not alone in using (essentially) the VF2 algorithm.
-For example it is used in GraphGrepSX \cite{graphgrepsx}, gCode \cite{gcode} and Tree+$\Delta$ \cite{tree+delta>=graph}. Most papers claim that VF2 is ``state of the art".  However, this is not the case (\cite{Solnon:2010,Larrosa:2002,Bonnici:2013,Zampelli:2010,CP2015}.
+The verification step checks all candidates computed in the filtering step via a subgraph isomorphism test. A backtracking algorithm \cite{backtracking-algorithms}, similar to VF2 \cite{vf2} with additional heuristics, is used. This test is theoretically NP-Complete, and is avoided as far as possible via the filtering process. CT-Index is not alone in using (essentially) the VF2 algorithm.
+For example it is used in GraphGrepSX \cite{graphgrepsx}, gCode \cite{gcode} and Tree+$\Delta$ \cite{tree+delta>=graph}. Most papers claim that VF2 is ``state of the art".  However, this is not the case \cite{Solnon:2010,Larrosa:2002,Bonnici:2013,Zampelli:2010,CP2015}.
 VF2 has been shown to perform erratically and poorly \cite{CP2015}. Therefore we might summarize CT-Index architecture as using a potentially expensive indexing and filtering stage in order to minimize the computational cost of using an outdated \gls{sip} algorithm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Performance}
 \label{subsec:ctindexEval}
+This Section presents the evaluation of CT-Index. We look at the CT-Index evaluation made by \cite{ctindex} and \cite{foteini} and at the performance results we collected when running the CT-Index source code.
 
-There is an existing work, where several well-established subgraph query processing techniques as well as CT-Index are evaluated \cite{foteini}. The experiments are conducted on the four datasets described in Section \ref{sec:datasets} using the default input parameters for each of the compared techniques. CT-Index requires five integers as an input, specified in the following order:
+The experiments described in \cite{ctindex} use two datasets and run on the same source code used by \cite{foteini} and us, but with added support for edge labels. The first dataset is Aids, the specifications of which are outlined in Section \ref{sec:datasets}. The second dataset is composed of synthetic graphs, the specification of which is not given.
+
+To overcome the fact that some of the indexing methods used in the evaluation do not support labels on edges, the authors split each edge by an additional vertex that encodes the edge label. The resulting graphs are then used as an input to all indexing methods that do not support edge labels. Let us say that the database has \emph{n} number of edges. According to the Aids properties outlined in Table \ref{table:datasets}, the average vertex degree is approximately 2. Let us say that the number of the vertices in a graph on average is \emph{n}. Therefore, the number of additional vertices introduced by splitting the edges is \emph{n} on average (one new vertex for each edge) and the new graphs have \emph{2n} edges and \emph{2n} vertices on average, which is twice as much as the original graphs. From the empirical analysis of CT-Index it follows that the size of the graphs and the number of their edges influences the performance of the indexing technique. Therefore, it is unclear how fair it is to compare results obtained by running the same experiments using two types of datasets: one that is modified with graphs size and order twice as much as the size and order of the graphs in the second one, which is the original.
+ 
+ %% todo rephrase this
+The authors state that they ``... removed 40 graphs with more than 255 edges because these graphs tend to cause problems with the implementation of gIndex'' \cite{ctindex}. From the specifications of Aids in Table \ref{table:datasets}, one can see that the graphs that were removed have the biggest size in his dataset. According to the empirical analysis of the filtering methods implemented by CT-Index, the size of the graphs in the dataset influences the running time of the algorithms. Not running experiments with graphs of larger size and/or order does not show to what extend the performance of the algorithm suffers.
+
+Following from the previous two paragraphs, we might summarize the experiments conducted by \cite{ctindex} as not complete, leading to inaccurate results. We now look at a second evaluation attempt made by \cite{foteini}, but first introduce the CT-Index input parameters and default settings, which are referred to in the remaining of this Section.
+
+CT-Index requires five integers as an input, specified in the following order:
 \begin{enumerate}
-\item Fingerprint size. This indicates the number of bits allowed to store the features of each graph in the index. The specified fingerprint size must be equal to 2$^{n}$ for some integer n.
+\item Fingerprint size. This indicates the number of bits allowed to store the features of each graph in the index. The specified fingerprint size must be equal to 2$^{n}$ for some integer n. No information on why this is the case is specified in \cite{ctindex}. We were also unable to understand when looking at the source code.
 \item Maximum path length. Indicates the maximum length of a path that is allowed to be extracted. If we specify -1, then no paths are extracted.
 \item Maximum subtree length. Same as 2, but for subtrees.
 \item Maximum cycle length. Same as 2 and 3, but for cycles.
 \end{enumerate}
-%The main conclusions that were made after the experiments are as follows.
-%\begin{enumerate}
-%\item Datasets with increased number of distinct labels are easier and faster to filter and verify.
-%\item The size of the query affects performance, especially when the datasets contain graphs of high density.
-%\item CT-Index has relatively small index size, compared to other indexing techniques.
-%\item There is no universal subgraph query processing method that is guaranteed to be the best one across different datasets.
-%\end{enumerate}
 
-The default input parameters of CT-Index are $<$4096, -1, 4, 4 $>$ \cite{ctindex, foteini}. No information on why exactly these parameters should be used is given. For each of the four datasets, the indexing algorithm is run, putting a time limit of 8 hours\footnote{When the algorithm did not finish it execution within the time limit, the authors waited for more than 24 hours, but to no avail.}. The obtained results are presented in four Diagrams, showing filtering time, index size, verification time and false positive ratio (FP ratio). The FP ratio is calculated using formula (2.1) and its purpose is to indicate how many of the \gls{unsat} instances are filtered without using a \gls{sip} algorithm. \textit{$|A\{p\}|$} denotes the number of \gls{sat} instances for a pattern p $\in$ P and \textit{$|\fancyC\{p\}|$} is the cardinality of the candidate set for p.
+The default input parameters of CT-Index are $<$4096, -1, 4, 4 $>$ \cite{ctindex, foteini}. No information on why exactly these parameters should be used is given.
+
+The experiments in \cite{foteini} are conducted on the four datasets described in Section \ref{sec:datasets} and compare six well established filtering-verification methods, one of which is CT-Index, using the default input parameters of each method. The indexing algorithms are run for each of the four datasets, putting a time limit of 8 hours. The measured performance metrics are filtering time, index size, verification time and false positive ratio (FP ratio). To calculate the FP ratio, the authors propose formula \ref{eq:fpratio}. The formula is supposed to indicate how many of the unsatisfiable (\gls{unsat}) instances are filtered without using a \gls{sip} algorithm. In the formula, \emph{$|A\{p\}|$} denotes the number of satisfiable (\gls{sat}) instances for a pattern \emph{p} in a query set \emph{Q} and \emph{$|\fancyC\{p\}|$} is the cardinality of the candidate set for \emph{p}.
 \begin{equation}
 \label{eq:fpratio}
-FP Ratio = \frac{1}{|P|} \sum_{p \in P} \frac{|\fancyC\{p\}| - |A\{p\}|}{|\fancyC\{p\}|}
+FP Ratio = \frac{1}{|Q|} \sum_{p \in Q} \frac{|\fancyC\{p\} \setminus A\{p\}|}{|\fancyC\{p\}|}
 \end{equation}
 
-One can notice that when the value of \textit{$|A\{p\}|$} becomes closer to the value of \textit{$|\fancyC\{p\}|$} (filtering has managed to discard most of the \gls{unsat} instances), the FP ratio approaches 0. Whenever there is a big difference between \textit{$|\fancyC\{p\}|$} and \textit{$|A\{p\}|$} (filtering did not discard many \gls{unsat} instances, the size of the candidate set is close to the size of the database)  the formula approaches 1. We can deduce that the closer to 1 this formula is, the less successful filtering was. Similarly, when the formula approaches 0, this indicates high filtering performance.
+If a perfect indexing technique is achieved that manages to prune all UNSAT instances, $|\fancyC\{p\} \setminus A\{p\}|$ equals 0. Therefore, the value of FP ratio is 0. If the indexing technique does not filter any graph, the size of the candidate set is equal to the size of the database. In this case, the FP ratio depends on the number of SAT instances in the database and the number of queries in \emph{Q}. For instance, if no subgraph isomorphism exists from any pattern to any target in the dataset (i.e. $|A\{p\}|$ is 0), $\frac{|\fancyC\{p\} \setminus A\{p\}|}{|\fancyC\{p\}|}$ is equal to 1 and the FP ratio is then equal to $\frac{1}{|Q|}$. If all instances in the dataset are SAT, then $|\fancyC\{p\} \setminus A\{p\}|$ is equal to 0, therefore the value of FP ratio becomes 0. If one assumes a constant value of $|A\{p\}|$, the value of FP ratio grows when the size of the candidate set is increased. It converges to 1 when the size of $\fancyC\{p\}$ becomes closer to the size of the database. Similarly, when the size of $\fancyC\{p\}$ is decreased, the FP ratio converges to 0. Therefore, there is an upper and a lower bound on the value of FP, which also depends on the value of $|A\{p\}|$.
+
+The previous paragraph shows that the value of the FP ratio computed by formula \ref{eq:fpratio} is strongly influenced by the number of SAT instances in the dataset. For instance, the value of FP ratio computed for an indexing algorithm \emph{A} executed for a query set \emph{Q} and a database \emph{D} may be equal to the value of FP ratio computed for another indexing algorithm \emph{B} when executed with a query set \emph{Q$^\prime$} and \emph{D}. However, from this it does not follow that the filtering power of \emph{A} and \emph{B} is the same. For example, the equality of the FP ratio of \emph{A} and \emph{B} may be caused by the fact that the number of SAT instances for \emph{Q} and \emph{D} may be bigger/smaller than the number of SAT instances for \emph{Q$^\prime$} and \emph{D}. 
+
+We might conclude that formula \ref{eq:fpratio} should not be used for comparing FP ratios obtained after running different filtering techniques on different datasets and that a certain value of FP ratio might in some cases mean decent filtering performance and in others - poor, depending on the number of SAT instances for a given query set and a database. This formula can give us accurate understanding of the performance of a given filtering algorithm only when different values of FP obtained when using the same dataset are compared.
  
-The results obtained by \cite{foteini} using these parameters for each dataset are as follows.
+Below are some of the main results obtained by the evaluation in \cite{foteini} the conclusions that can be made from these results.
 \begin{itemize}
-\item For datasets ``pcm'' and ``ppigo'', CT-Index never manages to complete execution of the filtering step. Therefore, no verification is done.
-\item For the ``aids'' dataset, CT-Index performs best. Filtering takes about 80 seconds and verification: about 0.7 seconds. The FP ratio is 0.8.
-\item CT-Index takes about 9,000 seconds for filtering graphs in ``pdbs'' and about 1 second to execute the verification step. The FP ratio is 0.2.
+\item For datasets Pcms and Ppigo, CT-Index never manages to complete execution of the filtering step and no verification is performed \cite{foteini}. Pcms and Ppigo are of largest size among the four compared datasets. Ppigo also has largest order and Pcms has highest graph density (Table \ref{table:datasets}). This suggests that the performance of CT-Index does indeed suffer when the dataset is composed of larger graphs of high density, as conjectured earlier in our empirical evaluation, and backs up our claim that the evaluation in \cite{ctindex} is incomplete.
+\item For the Aids dataset, CT-Index performs best. Filtering takes about 80 seconds and verification: about 0.7 seconds \cite{foteini}. The FP ratio is one of the highest for both Aids and Pdbs datasets among the six evaluated techniques. This suggests that the algorithm has relatively poor filtering performance. A reason for this could be that the number of collisions when computing the fingerprints (hash tables) is high.
 \end{itemize}
 
-We decided to conduct experiments to investigate in more depth the performance of the algorithms implemented in CT-Index depending on the input parameters. We used an open source java implementation of CT-Index written by its authors and we ran the software with the ``aids'' dataset using alternative to the default set of parameters. For our experiments, we chose a fixed size of parameter set\footnote{This was done due to the large number of possible input values.} the purpose of which is to identify how the change of one parameter changes the performance of the algorithms implemented in CT-Index. As in \cite{foteini}, we measured the filtering and verification time, the FP ratio using formula (2.1) and calculated the total time, that is the sum of the filtering and the verification time. For the size of the fingerprints (2$^{n}$ for some integer \textit{n}), we varied \textit{n} from 0 to 16. Note that when n is 0, no index can be created (all features of every graph have to be stored in a bitset of size 1) and verification is computed for every pair (G$_{p}$, G$_{t}$) $\in$ P$x$. The values of path, subtree and cycle maximum length are a permutation of combination of -1 and 5. Here, -1 tells us how much the effective rate of filtering drops when a feature is switched off, and 5 shows the performance of filtering when the feature is on (i.e -1 and 5 play the role of binary to indicate for each feature that it is either off or on). For every \textit{n}, we executed the algorithm with all permutations of every combination of assignment of -1 and 5.
+These results give a basic idea of the performance of CT-Index compared to other techniques considered as ``state of the art'' in subgraph query processing \cite{foteini}. However, they do not investigate the performance of CT-Index depending on the type of features stored in the index and the size of the fingerprints (i.e. the hastable size). We report on the results obtained by our experiments, that were conducted in order to find out more about that. We use the open source java implementation of CT-Index written by its authors. Experiments are run on the Aids dataset \footnote{As the purpose of our experiments is to test the change of performance of CT-Index depending on the input parameters (fingerprint size, types of extracted features), that there is no need to experiment on more than one dataset.} using input parameters that are different from the default ones. For our experiments, we choose a fixed size of parameter set \footnote{This was done due to the large number of possible input values.} the purpose of which is to identify how the change of one parameter changes the performance of the algorithms implemented in CT-Index.  As in \cite{foteini}, we measure the filtering and verification time, the FP ratio using formula \ref{eq:fpratio} \footnote{Note that the FP ratio obtained by this formula can be used as a measurement for filtering performance, because we use the same database and query set for all experiments.} and calculate the total time, that is the sum of the filtering and the verification time. The size of the fingerprints (2$^{n}$ for some integer \emph{n}) is from 1 to 16384. Note that when n is 0, no index can be created (all features of every graph have to be stored in a bitset of size 1) and verification is computed for every pair (\emph{P}, \emph{T}), where \emph{P} is a pattern in \emph{Q} and \emph{T} is a target in \emph{D}. The values of the maximum length of paths, subtrees and cycles are permutations of combinations of -1 and 5. Here, -1 tells about the influence on the performance of CT-Index when a feature is switched off, and 5 shows the change of performance when the feature is turned on (i.e -1 and 5 play the role of binary 0 and 1 to indicate for each feature that it is either off or on). For every fingerprint size, we executed the algorithm with all permutations of every combination of assignment of -1 and 5.
 
-Table \ref{table:runningTime} shows a selection of our results that aids to illustrate best the change of performance depending on the input parameters. The first 10 rows show the changes in running time and FP-ratio depending on the size of the fingerprints. The values of all parameters are fixed. As expected, the FP ratio goes down with the increase of the fingerprint size. We also notice significant decrease in the verification running time when we allow bigger bitset size. The reason for these results is the fact that the number of collisions when hashing the features to places in the bitset is lower when the bitset has bigger size. Then, more targets can be rejected during filtering and less number of \gls{sip} tests have to be computed during verification.
+Table \ref{table:runningTime} shows a selection of our results. The first 10 rows show the changes in running time and FP-ratio depending on the size of the fingerprints. The values of all other parameters are fixed. As expected, the FP ratio goes down with the increase of the fingerprint size, that is - filtering performance becomes better. We also notice significant decrease in the verification running time when we allow for bigger fingerprint size. The two results follow from the fact that the number of collisions decreases with the increased fingerprint size, as we allow for each fingerprint to denote the existence/absence of more features. Consequently, more targets can be rejected during filtering and less number of \gls{sip} tests have to be computed during verification.
 
-%%%% big table with ct-index running times and results on the AIDS dataset %%
 \newcommand\TstrutT{\rule{0pt}{2.6ex}}         % = `top' strut
 \newcommand\Bstrut{\rule[-1ex]{0pt}{0pt}} 
 
@@ -488,95 +483,96 @@ Table \ref{table:runningTime} shows a selection of our results that aids to illu
 \begin{center}
 \renewcommand{\arraystretch}{1.2}% Spread rows out...
 \begin{tabular}{ |c|r|r|r|r|r|}\hline
- Row \# & Input & Filtering T[sec]& Verification T[sec]& Total T[sec] & FP Ratio\\
+ Row \# & Input & Filtering T& Verification T& Total T& FP Ratio\\
  \hline
-  1 & 1 5 \,\,5 \,\,5 & 108.934  & 67.395 & 176.329 & 0.913 \\
+  1 & 1 5 \,\,5 \,\,5 & 108.9  & 67.4 & 176.3 & 0.91 \\
  \hline
-  2 & 64 5 \,\,5 \,\,5 & 110.797 & 59.622 & 170.419 & 0.85 \\
+  2 & 64 5 \,\,5 \,\,5 & 110.8 & 59.6 & 170.4 & 0.85 \\
  \hline
-  3 & 128 5 \,\,5 \,\,5 & 110.9 & 31.711 & 142.611 & 0.87 \\
+  3 & 128 5 \,\,5 \,\,5 & 110.9 & 31.7 & 142.6 & 0.87 \\
  \hline
-  4 & 256 5 \,\,5 \,\,5 & 104.586 & 22.373 & 126.959 & 0.81 \\
+  4 & 256 5 \,\,5 \,\,5 & 104.5 & 22.4 & 126.9 & 0.81 \\
  \hline
-  5 & 512 5 \,\,5 \,\,5 & 104.883 & 17.008 & 121.891 & 0.69 \\
+  5 & 512 5 \,\,5 \,\,5 & 104.9 & 17 & 121.9 & 0.69 \\
  \hline
-  6 & 1024 5 \,\,5 \,\,5 & 112.132 & 15.477 & 127.609 & 0.64 \\
+  6 & 1024 5 \,\,5 \,\,5 & 112.1 & 15.5 & 127.6 & 0.64 \\
  \hline
-  7 & 2048 5 \,\,5 \,\,5 & 107.024 & 14.693 & 121.717 & 0.63 \\
+  7 & 2048 5 \,\,5 \,\,5 & 107 & 14.7 & 121.7 & 0.63 \\
  \hline
-  8 & 4096 5 \,\,5 \,\,5 & 106.136 & 13.006 & 119.142 & 0.60 \\
+  8 & 4096 5 \,\,5 \,\,5 & 106.1 & 13 & 119.1 & 0.60 \\
  \hline
-  9 & 8192 5 \,\,5 \,\,5 & 107.625 & 12.337 & 119.962 & 0.62 \\
+  9 & 8192 5 \,\,5 \,\,5 & 107.6 & 12.3 & 119.9 & 0.62 \\
  \hline
-  10 & 16384 5 \,\,5 \,\,5 & 107.991 & 14.083 & 122.074 & 0.61 \\
+  10 & 16384 5 \,\,5 \,\,5 & 108 & 14 & 122 & 0.61 \\
  \hline
-  11 & 4096 5 \,\,5 -1 & 105.441 & 12.926 & 118.367 & 0.62 \\
+  11 & 4096 5 \,\,5 -1 & 105.4 & 12.9 & 118.3 & 0.62 \\
  \hline
-  12 & 4096 5 -1 \,\,5 & 39.743 & 32.068 & 71.811 & 0.88 \\
+  12 & 4096 5 -1 \,\,5 & 39.7 & 32.1 & 71.8 & 0.88 \\
  \hline
-  13 & 4096 -1 \,\,5 -1 & 81.826 & 12.785 & 94.611 & 0.62 \\
+  13 & 4096 -1 \,\,5 -1 & 81.8 & 12.8 & 94.6 & 0.62 \\
  \hline
-  14 & 4096 -1 -1 \,\,5 & 6.234 & 61.346 & 67.580 & 0.913 \\
+  14 & 4096 -1 -1 \,\,5 & 6.2 & 61.3 & 67.5 & 0.91 \\
  \hline 
-  15 & 4096 -1 \,5 \,5  & 82.376 & 5.896 & 88.272 & 0.62\\ 
+  15 & 4096 -1 \,5 \,5  & 82.4 & 5.9 & 88.3 & 0.62\\ 
  \hline
-  16 & 4096 \,\,5 -1 -1 & 37.621  & 7.929 & 45.550 & 0.88 \\ 
+  16 & 4096 \,\,5 -1 -1 & 37.6  & 7.9 & 45.5 & 0.88 \\ 
  \hline 
 \end{tabular}
-\caption{CT-Index: Running time and results depending on the specified parameters}
+\caption{CT-Index: Running time in seconds for filtering and verification and the FP ratio depending on the specified parameters}
 \label{table:runningTime}
 \end{center}
 %\end{minipage}
 \end{table}
 %%%
 
-The last 7 rows of Table \ref{table:runningTime} show the performance of CT-Index depending on the other 3 parameters. The input with the worst verification run time is in row 14. No target was rejected during the filtering stage for each of the patterns, as indicated by the high FP ratio value. This data shows that extracting only cycles as features is not effective in pruning and it is almost equivalent to not having an index structure at all. A reason for this can be that the graphs in the datasets don`t' have many cycles.
+The last 6 rows of Table \ref{table:runningTime} show the performance of CT-Index depending on the other 3 parameters. The input with the worst verification run time is in row 14. Few targets were rejected during the filtering stage, as indicated by the high FP ratio. The data shows that extracting only cycles as features is not effective in proving SIP instances as UNSAT and it is almost equivalent to not having an index structure at all. A reason for this can be that the graphs in the datasets do not have many cycles. The verification time in row 14 also shows that the SIP algorithm used by CT-Index is indeed very inefficient. We will see later in this work that 61.3 seconds for running a SIP algorithm on the instances of the Aids dataset is extremely poor result (Chapter \ref{ch:evaluation}).
 
-Comparing the results from rows 8 and 15, one can see that extracting paths and subtrees as features for this dataset gives worse performance in both filtering and verification steps. The reason for this could be that subtrees and cycles are descriptive enough to be used as the only types of features.
+Using only paths as features shows best performance in terms of running time (row 16). Adding subtree extraction (row 11) takes about 60 seconds more and gives better filtering ratio and slightly worse verification run time. From this we can see that the algorithm for subtree extraction significantly lowers the filtering run time, as derived during the empirical analysis in \ref{subsec:ctindexF}. One can reach the same conclusion when comparing rows 15 and 16. The options in row 15 give better performance during verification time, but they result in more than twice slower filtering time.
 
-Using only paths as features is the option that shows best performance (row 16). Subtree extraction for this dataset takes about 60 seconds more, it gives better filtering ratio, however slightly worse verification run time(rows 16 and 11). From this we can see that the algorithm for subtree extraction significantly lowers the filtering run time, as derived during the empirical analysis in \ref{subsec:ctindexF}. One can reach the same conclusion when comparing rows 15 and 16. The options in row 15 give better performance during verification time, but they result in more than twice slower filtering time.
+%%% todo: write a summary of the performance evaluation
 
-We tried running similar experiments with the other datasets discussed in \ref{sec:datasets}. However, as also observed in \cite{foteini}, most of the experiments finished computation within matter of days.
-
-
-\section{Subgraph Isomorphism with Constraint Programming}
-\label{sec:sipalgos}
+\section{Subgraph Isomorphism Problem algorithms}
 % todo: patrick's algorithm is not solved with constraint programming
-Subgraph isomorphism problem (\gls{sip}) can be solved using tools of constraints programming. This constraint-based search approach dates back to works by Ullmann\cite{Ullmann:1976}. We can model it as a CSP by creating a variable \emph{x$_{u}$} for every vertex \emph{u} in the pattern graph. The domain of \emph{x$_{u}$} denoted as \emph{D$_{u}$} is the set of vertices in the target graph. A global \emph{AllDiff} constraint \cite{Regin:1994} ensures that no two pattern vertices are matched with the same vertex from the target. In addition, a binary constraint is introduced for each edge in the pattern to guarantee that every edge in the pattern graph is associated to an edge in the target graph. The set of solution of SIP is equal to the set of all valid assignments of target vertices to pattern vertices. The initial size of the search space is the Cartesian product of the initial domains of all variables. 
+This Section reports on analysis of existing methods to solve the subgraph isomorphism problem. A common way to model SIP for a pattern \emph{P} and a target \emph{T} is to represent each vertex in \emph{P} as a variable that can take as value one of the vertices in \emph{T}. It has to be ensured that every vertex in \emph{P} is matched to one unique vertex in \emph{T}. During a recursive search procedure, values are repeatedly tried to be assigned to variables, following an algorithm-specific heuristics until valid mapping from \emph{P} to \emph{T} is found or it is proven that no such mapping exists.
+ 
+There are various algorithms in the literature that employ a variation of this model \cite{Solnon:2010, Ullmann:1976, Regin:1995, Larrosa:2002, Solnon:2010a, CP2015}. We study in more detail one of them, namely \cite{CP2015} in the next section.
 
-There are various pieces of existing work that employ this model \cite{Solnon:2010, Ullmann:1976, Regin:1995, Larrosa:2002, Solnon:2010a, CP2015}, where the exact constraints and the level of filtering varies. The algorithm presented in \cite{CP2015} is bit- and thread parallel and introduces the use of supplemental graphs to create implied constraints. It is discussed in more detail in Section \ref{sec:sippatrick}.% In \cite{Solnon:2010}, an iterative labeling is introduced to associate a global label for each vertex based on its neighbourhood. This algorithm is discussed in Section \ref{sec:sipchristine}.
-
-\subsection{Partick and Ciaran's paper}
+\subsection{Glasgow Subgraph Isomorphism Problem Algorithm}
 \label{sec:sippatrick}
 %% what SIP, what types of graphs?
-The paper discusses the non-induced version of the subgraph isomorphism problem for finite, undirected graphs that do not have multiple edges between pairs of vertices, but may have loops. Although the algorithm does not consider labels, it can be easily adjusted to take into account labeled vertices and/or edges by adding additional constraints. In fact, adding labeling support would make the algorithm faster, as follows from a result proved in \cite{Ciaran:2016}. Unlikely most recent work in subgraph isomorphism\cite{Solnon:2010a,SND}, this algorithm replaces strong inference with cheaper techniques and shows that they can be beneficial. The algorithm exploits parallelism for both pre-processing and search and introduces a novel usage of backjumping that does not need maintaining conflict sets. 
+This algorithm, referred to as CP15 discusses the non-induced version of the subgraph isomorphism problem for finite, undirected graphs that do not have multiple edges between pairs of vertices, but may have loops \cite{CP2015}. Although CP15 does not consider labels, it can be easily adjusted to take into an account labeled vertices and/or edges by adding additional constraints. In fact, adding labeling support would make the algorithm faster, as follows from a result proved in \cite{Ciaran:2016}. Unlike most recent work in subgraph isomorphism \cite{Solnon:2010a,SND}, this algorithm replaces strong inference with cheaper techniques and shows that they can be beneficial \cite{CP2015}. The algorithm exploits parallelism for both pre-processing and search and introduces a novel usage of backjumping \cite{Prosser:1993} that does not need maintaining conflict sets \cite{CP2015}. 
 
 %% graph representation
-The algorithm uses bitset encodings: graphs are represented as bit sets, each pattern vertex has a domain which is a bit set. This representation allows for fast execution of operations. For instance, the neighbourhood intersections discussed shortly are bitwise-and operations, the unions of domains used during alldifferent propagation and nogood values discovered during search are computed using bitwise-or operations, and cardinality checks involve computing the Hamming weight (also known as population count) of the set \cite{Reed:1954}, which is a single instruction in modern CPUs \cite{CP2015}.  
+The algorithm uses bitset encodings: graphs are represented as bit sets, each pattern vertex has a domain which is a bit set. This representation allows for fast execution of operations. For instance, the neighbourhood intersections discussed shortly are bitwise-and operations, the unions of domains used during alldifferent propagation, nogood values discovered during search are computed using bitwise-or operations, and cardinality checks involve computing the Hamming weight (also known as population count) of the set \cite{Reed:1954}, which is a single instruction in modern CPUs \cite{CP2015}.  
 
 %% explain supplemental graphs
 The supplemental graph G$^{[c,l]}$ is a graph that has at least \emph{c}
-number of paths of length exactly \emph{l} between two vertices \emph{v} and \emph{w} in G\cite{CP2015}. Supplemental graphs are based on the idea that \emph{i}: \emph{P} $\rightarrow$ \emph{T} is a subgraph isomorphism with target \emph{T} and pattern \emph{P}, then F(\emph{i}): F(\emph{P}) $\rightarrow$ F(\emph{T}) is a subgraph isomorphism for certain functions F. Supplemental graph pairs are constructed from the pattern and the target with bound on the path distance 3\footnote{The bound is chosen after an observation that distances greater than 3 rarely give additional filtering power and their construction is computationally very expensive \cite{CP2015}}. The intuition behind their usage is to put a restriction that vertices of distance \emph{x} apart must be mapped to vertices that are within distance \emph{x}. This also implies that adjacent vertices in the pattern must be mapped to adjacent vertices in the target. These restrictions are put on top of the search during the initialization of domains in order to perform initial filtering at the top of the search.
+number of paths of length exactly \emph{l} between two vertices \emph{v} and \emph{w} in G. Supplemental graphs are introduced by the authors of this algorithm and they are based on the idea that \emph{i} is a valid mapping from a pattern \emph{P} to a target \emph{T}, then F(\emph{i}) is also a valid mapping from \emph{P} to \emph{T} for certain functions F. Supplemental graph pairs are constructed from the pattern and the target with bound on the path distance 3 \footnote{The bound is chosen after an observation that distances greater than 3 rarely give additional filtering power and their construction is computationally very expensive \cite{CP2015}}. The intuition behind their usage is to put a restriction that vertices of distance \emph{x} apart must be mapped to vertices that are within distance \emph{x}. This also implies that adjacent vertices in the pattern must be mapped to adjacent vertices in the target. These restrictions are put on top of the search during the initialization of domains in order to perform initial filtering at the top of the search.
 
-The initial filtering on top of the search also checks for compatibility of neighbourhood degree sequences of the pattern and target vertices, based on the fact that a vertex \emph{v} can only be mapped to a vertex \emph{w} if the sequence consisting of the degrees of every neighbour of \emph{w} is bigger or equal to the sequence consisting of the degrees of every neighbour of \emph{v} \cite{Solnon:2010}. Neighbourhood degree sequence compatibility was introduced by \cite{Solnon:2010} and is used in the Light filters approach introduced later in this work in Chapter \ref{ch:sip1}. 
+The initial filtering on top of the search also checks for compatibility of neighbourhood degree sequences of the vertices in \emph{P} and \emph{T}, based on the fact that a vertex \emph{v} can only be mapped to a vertex \emph{w} if the sequence consisting of the degrees of every neighbour of \emph{w} is bigger or equal to the sequence consisting of the degrees of every neighbour of \emph{v} \cite{Solnon:2010}. Neighbourhood degree sequence compatibility was introduced by \cite{Solnon:2010} and is used in the Light filters approach discussed later in this work in Chapter \ref{ch:sip1}. 
 
 %% explain search
 The algorithm employs a recursive search procedure that repeatedly picks a variable with the smallest domain to branch on, breaking ties on descending static degree in the original pattern graph. The values of the domain of each variable are ordered by descending static degree in the target graph. If the assigned value to a variable is in conflict with the current partial solution or does not obey certain constraints, then the search returns a nogood set of variables. In such case, the algorithm can perform a variation of conflict directed backjumping \cite{Prosser:1993} without explicitly maintaining conflict sets. On success of value assignment of a variable, the algorithm updates the partical solution and makes recursive call until every variable is assigned (success) or no solution is proved to exist. 
 
 %% explain the counting based alldifferent
-A variable assignment algorithm is called every time a variable \emph{v} is to be given a value \emph{e} from its domain \emph{D$_{v}$}. The algorithm assigns \emph{e} to \emph{v} and then infers which values may be eliminated from the remaining domains. It removes \emph{e} from the domains of all other variables and eliminates any detected \glspl{hallset} from future variables\footnote{The algorithm may fail to identify some Hall sets if the initial ordering of domains is imperfect. However, it gives big pay off in terms of running time, as validated experimentally in the paper}, thus detecting that an assignment is impossible even if values remain in each variable`s domain.
+A variable assignment algorithm is called every time a variable \emph{v} is to be given a value \emph{e} from its domain \emph{D$_{v}$}. The algorithm assigns \emph{e} to \emph{v} and then infers which values may be eliminated from the remaining domains. It removes \emph{e} from the domains of all other variables and eliminates any detected \glspl{hallset} \footnote{A set of \emph{n} whose domains include only \emph{n} values between them. Finding a Hall set allows for removing the values part of the hall set from the domains of variables that are not part of the Hall set.} from future variables \footnote{The algorithm may fail to identify some Hall sets if the initial ordering of domains is imperfect. However, it gives big pay off in terms of running time, as validated experimentally in the paper}, thus detecting that an assignment is impossible even if values remain in each variable`s domain.
 
 %% explain the parallelism bit
 The SIP algorithm achieves \gls{simd}-like parallelism from the bitset encodings. The algorithm also allows for parallel supplemental graphs construction, neighbourhood degree sequence calculation, graph construction and domain initialization. In addition, the subtrees created by recursive calls made during search can be explored in parallel by multiple threads using early diversity work-stealing approach, where a single thread always preserves the sequential search order, finding states of the search space that are to be explored. The rest of the threads take work from the main thread, trying to steal early in the search tree, because value-ordering heuristics are expected to be weakest early in the search \cite{Harvey:1995}.
 
 %% evaluation and performance
-Both the sequential and the threaded version of the algorithm was compared with an implementation of SND \cite{SND}, LAD\cite{Solnon:2010a} and VF2\cite{vf2}. The properties of the hardware, implementation-specific details, the nature of the datasets used in the experiments and the results from the evaluation are presented in the paper\cite{CP2015}. Below are highlights of the results obtained after the experiments:
+Both the sequential and the threaded versions of the algorithm were compared with an implementation of SND \cite{SND}, LAD\cite{Solnon:2010a} and VF2\cite{vf2}. The properties of the hardware, implementation-specific details, the nature of the datasets used in the experiments and the results from the evaluation are presented in the paper\cite{CP2015}. Below are highlights of the results obtained after the experiments:
 \begin{itemize}
 \item The algorithm is the single best among the evaluated approaches for non-trivial instances. VF2 is stronger on trivial instances. The reason for this the time needed to instantiate domains, generate supplemental graphs and perform the inference on top of the search. These results show that there is no single algorithm that performs best on all instances and suggests for taking more flexible future approach that allows for instance-specific configuration. For example, for trivial problems one may not need to create supplemental graphs.
 \item Except at very low sequential runtimes, parallelism results in general improvement of speed. For exceptionally hard satisfiable instances, parallelism results to superlinear speedup. This shows that the early work stealing approach is able to recover from early mistakes of value ordering heuristic choices by avoiding strong commitment to such choices.
 \item Backjumping always either pays for itself or gives slight improvement. For some instances, that constitute of highly structured data, it makes an improvement of several orders of magnitude.
-\item The last part of the 
 \end{itemize}
+
+CP15 might be summarized as a novel method that is specialized in solving hard instances of the SIP problem. From the experiment results reported in \cite{CP2015}, one can see that it is the best solver for non-trivial SIP instances. Furthermore, it can be adjusted for solving trivial instances faster by adjusting the algorithm not to create supplemental graphs. This suggests that current subgraph query processing methods that count entirely on verification without performing filtering could be faster than current methods based on the filtering-verification paradigm even if one compares only the verification stages without counting the cost of filtering. Consequently, we might conclude that the research in the current area of research in filtering-verification algorithms is too focused on improving quality of filtering, while neglecting verification by using an outdated SIP algorithm.
+
+%The datasets used for experiments in CP15 contain graphs of much bigger order and size \cite{CP2015} than the Aids dataset, and yet the 
+
+%Therefore, we might expect in the future that more and more attention will be paid on this algorithm.  
 
 %%%%%%%%%%%%%%%%%% the path-based indexes %%%%%%%%%%%%%%%%%%%%
 \chapter{Framework for graph indexing and filtering}
@@ -900,11 +896,12 @@ We can represent the index using a \gls{tree} data structure similar to \gls{suf
 \label{ch:sip1}
 This section describes the study of a simple subgraph isomorphism problem(\gls{sip}) algorithm, called SIP1, that implements a fast filter that does not employ an index structure.
 
-Light Filters is an algorithm for subgraph query processing and it is based on a modified version of the filter-verification paradigm. Here, filtering and verification steps are applied separately for each \gls{sip} instance. This approach uses simple filtering tests that require much less computational effort (i.e. lighter filtering). More importance is placed on the quality of the \gls{sip} algorithm than on the filters, because the major computational effort goes for solving the non-filtered \gls{sip} instances. 
+Light Filters is an algorithm for subgraph query processing that is based on a modified version of the filter-verification paradigm. This approach uses simple filtering tests that require much less computational effort. 
+Given a database \emph{D} and a query set \emph{Q}, subgraph query processing for \emph{D} and \emph{Q} takes every instance, executes filtering procedures, and if the instance is not proved as (unsatisfiable) \gls{unsat}, a subgraph isomorphism problem (SIP) test is called to solve it. Unlike classical filtering-verification model, no candidate set is computed, because if a target \emph{T} is candidate for a pattern \emph{P}, SIP is carried out immediately. Additionally, here more importance is placed on the quality of the \gls{sip} algorithm. 
 
-Algorithm \ref{algo:roughSIP} is a pseudocode of our method. Given a file with targets T and a file with patterns P, we first read in each graph (lines 2, 3). Filtering is performed for every (G$_{p}$, G$_{t}$) pair and if the instance is not rejected, a call to \gls{sip} algorithm is made (line 7). The filter step consists of 5 naive tests, performed before the call to SIP1. If the conditions of any of the tests are not met, search does not proceed and we consider this to be a \textit{trivial fail}. 
+Algorithm \ref{algo:roughSIP} gives an outline of our approach. We first read in each graph in \emph{D} and \emph{Q} and initialize graph objects (lines 2, 3). Filtering is performed for every (\emph{P}, \emph{T}) pair,  and if the instance is not pruned, a call to a \gls{sip} algorithm is made (line 7). The filtering step consists of 5 simple tests, performed before the call to SIP1. If the conditions of any of the tests are not met, search does not proceed, we call this a \emph{trivial fail} and carry on with the next instance. 
 
-Each step of the Light Filters algorithm is explained thoroughly. First, we introduce the theory behind the trivial fails and their implementation in Section \ref{sec:trivialFails}. We then introduce the SIP algorithm called SIP1 and discuss its implementation in Section \ref{sec:sip1}. Evaluation of the light filters approach is described in Chapter \ref{ch:evaluation}.
+The remaining of this Chapter gives an explanation of each step of the Light Filters algorithm. First, we introduce the theory behind the trivial failures and their implementation in Section \ref{sec:trivialFails}. We then introduce the subgraphs isomorphism problem algorithm called SIP1 and discuss its implementation in Section \ref{sec:sip1}. We give an empirical analysis of each of the algorithms implemented in our subgraph query processing approach. Evaluation of Light Filters and discussion of our experimental results is described in the next Chapter.
 
 %%% light filters sip algorithm
 \begin{algorithm}
@@ -912,13 +909,13 @@ Each step of the Light Filters algorithm is explained thoroughly. First, we intr
 \caption{Light filters algorithm}
 \label{algo:roughSIP}
 \begin{algorithmic}[1]
-\Procedure{Process }{File p, File t} \Comment{\textit{file with patterns and file with targets}}
-\State T$_{list}$ $\gets$ read in all targets from file, initialize objects
-\State P$_{list}$ $\gets$ read in all patterns from file, initialize objects
-\For{G$_{p}$ in P$_{list}$}
-	\For{G$_{t}$ in T$_{list}$}
-		\If{!\Call{Filter }{G$_{p}$, G$_{t}$}} \Comment{\textit{If the instance is not rejected during filtering, perform verification}}
-    		\State{\Call{SIP1}{G$_{p}$, G$_{t}$}}
+\Procedure{Compute }{\emph{Q}, \emph{D}}
+\State targets $\gets$ read in all targets from \emph{D}, initialize objects
+\State patterns $\gets$ read in all patterns from \emph{Q}, initialize objects
+\For{P $\in$ patterns}
+	\For{T $\in$ targets}
+		\If{!\Call{Filter }{P, T}} \Comment{\textit{If the instance is not rejected during filtering, perform verification}}
+    		\State{\Call{SIP1}{P, T}}
     	\EndIf
     \EndFor
 \EndFor
@@ -930,124 +927,113 @@ Each step of the Light Filters algorithm is explained thoroughly. First, we intr
 \section{Trivial Failures}
 \label{sec:trivialFails}
 
-This Section introduces the five trivial failure tests, implemented as part of the filtering stage of SIP1.
+This Section introduces the five trivial failure tests, implemented as part of the filtering stage of SIP1. The tests are based on the notion of neighbourhood degree sequence, a concept also used in \cite{Solnon:2010}. First, we introduce definitions and notations that complement the theory section in Chapter \ref{ch:introduction}. We then prove the correctness of our approach and outline its implementation and give an empirical analysis of each of the tests.
 
-\subsection{Neighborhood Degree Sequence}
-\label{sec:nds}
-The neighbourhood degree sequence of G and the degree sequence of labels in G correspond to four of the trivial tests. Very similar approach of using the degree sequence of vertices to reject \gls{unsat} \gls{sip} instances is used in the filtering part of the algorithm presented in \cite{Solnon:2010}.
- 
-\begin{definition}[Label Degree Sequence]
-The \textit{\gls{lds}} of \textit{l} $\in$ L$_{G}$, denoted as $\gls{lds}$(G, \textit{l}) is the non-increasingly ordered list of the degrees of all vertices in V$_{G}$ that have \textit{l} assigned as their label.    
-\end{definition}
+The \emph{label neighbourhood degree sequence} (LNDS) of label \emph{l} in L(\emph{G}) for a graph \emph{G}, denoted as LNDS (\emph{G}, \emph{l}) is the sequence of the degrees of all vertices in \emph{G} that have \emph{l} assigned as their label, taken in non-increasing order.
 
-\begin{definition}[Neighborhood Degree Sequence]
-The \textit{\gls{nds}} of G, written as $\gls{nds}$(G), is the list of tuples (\textit{l}, $\gls{nds}$(\textit{l})) for every \textit{l} $\in$ L$_{G}$.
-\end{definition}
+Let \emph{A} and \emph{B} be sequences of integers. We say that \emph{B} is a \emph{subsequence} of \emph{A} if \emph{B} can be derived from \emph{A} by deleting zero or more elements in \emph{A}. An element of a sequence \emph{A} at index \emph{i} is the \emph{i}-th element of \emph{A}, denoted by \emph{A$_{i}$}. 
+
+We say that \emph{A} \emph{subsumes} \emph{B}, \emph{A} $\succeq$ \emph{B}, if there exists a subsequence \emph{A$^\prime$} of \emph{A} with length equal to the length of \emph{B}, such that \emph{B$_{i}$} is less than or equal to \emph{A$_{i}^\prime$} for all indices \emph{i} for \emph{A$^\prime$}, \emph{B}.
 
 \begin{example}
-Let us have a graph G with two labels: A and B, where \gls{lds}(A) = \{5, 4, 3, 2, 2\} and \gls{lds}(B) = \{4, 3, 3, 1\}. This shows us that the order of G is 9, where 4 vertices with degrees 4, 3, 3 and 1 are labeled as B and 5 vertices with degrees 5, 4, 3, 2 and 2 are labeled as A. Using \gls{lds}, we derive that \gls{nds}(G) = \{\{A, \{5, 4, 3, 2, 2\}\}, \{B, \{4, 3, 3, 1\}\}\}.
+Let \emph{A} be the sequence of integers \{4, 3, 2\} and let \emph{B} be the sequence of integers \{2, 2\}. Then, \emph{A} $\succeq$ \emph{B} and an example of sequence \emph{A$^\prime$} from the definition is \{4, 3\}.
 \end{example}
 
-\begin{definition}[G$_{t}$ subsumes G$_{p}$]
-\label{def:subsumes}
-We say that G$_{t}$ subsumes G$_{p}$ if for each label l both in G$_{p}$ and G$_{t}$, the length of the \gls{lds}(l$\in G_{p}$) is smaller or equal to the length of \gls{lds}(l$\in G_{t}$), and the degree on i$^{th}$ position in \gls{lds}(l$\in G_{p}$) is less than or equal to \gls{lds}(l$\in G_{t}$) for each i between 0 and $|\gls{lds}(l\in G_{p})|$.
-\end{definition}
+\begin{figure}
+\centering
+\begin{minipage}[t]{.3\textwidth}
+  \centering
+  \includegraphics[height=2.1cm,width=2.3cm]{images/graphs/exampleGraph2.png}
+  \caption{graph P}
+  \label{fig:P}
+\end{minipage}%
+\begin{minipage}[t]{.4\textwidth}
+  \centering
+  \includegraphics[height=3.4cm,width=5cm]{images/graphs/exampleGraph.png}
+  \caption{graph T}
+  \label{fig:T}
+\end{minipage}
+\caption{Instances of subgraph isomorphism problem (SIP)}
+\label{fig:lightFiltersExample}
+\end{figure}
 
-The notion of \gls{nds} lets us define several simple tests for incompatibility between \gls{pattern} and \gls{target}, based on checking whether \gls{nds}(G$_{p}$) is a subset of \gls{nds}(G$_{t}$). \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) if all following conditions are true:
-\begin{enumerate}
-\item the order of G$_{p}$ is less than or equal to the order of G$_{t}$
-\item the number of unique labels in G$_{p}$ is less than or equal to the number of unique labels in G$_{t}$
-\item every label in G$_{p}$ is also in G$_{t}$
-\item G$_{t}$ subsumes G$_{p}$
-\end{enumerate}
+By abuse of notation, we say that a graph \emph{T} \emph{subsumes} a graph \emph{P}, \emph{T} $\succeq$ \emph{P}, if for every label \emph{l} in \emph{P}, LNDS (\emph{T}, \emph{l}) $\succeq$ LNDS (\emph{P}, \emph{l}).
 
 \begin{example}
-Let us have \gls{nds}(G$_{p}$) = \{\{A, \{3, 2, 1\}\}, \{B, \{4\}\}\} and
-\gls{nds}(G$_{t}$) = \{\{A, \{5, 4, 3, 2, 2\}\}, \{B, \{4, 3, 3, 1\}\}, \{C, \{5, 4, 2, 1\}\}\}.
+Let us look at graphs \emph{T} and \emph{P} on Figure \ref{fig:lightFiltersExample}. Both of them consist of three labels: yellow (Y), red (R) and blue (B). Let us compute LNDS of every label in \emph{T} and \emph{P}. LNDS (\emph{T}, Y) = \{4, 3, 1\}, LNDS (\emph{T}, R) = \{3, 2\} and LNDS (\emph{T}, B) = \{4, 2, 1\}. Similarly, LNDS (\emph{P}, Y) = \{2, 2\}, LNDS (\emph{P}, R) = \{2\} and LNDS (\emph{P}, B) = \{2\}. Clearly, \emph{T} subsumes \emph{P}, as for every label \emph{l} in \emph{P}, LNDS (\emph{T}, \emph{l}) $\succeq$ LNDS (\emph{P}, \emph{l}).
+\end{example}
 
-In this example, \gls{nds}(G$_{p}$) is a subset of \gls{nds}(G$_{t}$), because each of the four conditions is true. In particular:
-\begin{enumerate}
-\item The order of G$_{p}$ (4) is less than the order of G$_{t}$ (13).
-\item The number of unique labels in G$_{p}$ = 2 and the number of unique labels in G$_{t}$ is 3. 3 is clearly bigger than 2.
-\item G$_{p}$ has labels A and B which are both in G$_{t}$.
-\item The \gls{lds} of every label in G$_{p}$ is clearly contained in the \gls{lds} of the same label in G$_{t}$.
-\end{enumerate}
-\end{example} 
+Let $\Lagr$ be the labeling function in \emph{G} and let us define a label counting function for \emph{G}, $\lambda_{G}$ : $\Lagr$ $\rightarrow$ $\mathbb{N}$ as follows:
+for any \emph{l} $\in$ $\Lagr$ if there is no vertex in \emph{G} with label \emph{l}, $\lambda_{G}$(\emph{l}) = 0. Otherwise $\lambda_{G}$(\emph{l}) is equal to $|L^{1}(l)|$, that is the number of vertices in \emph{G} which are assigned \emph{l} as their label.
 
-\begin{theorem}
-\label{th:nds}
-If \gls{nds}(G$_{p}$) $\nsubseteq$ \gls{nds}(G$_{t}$), then \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat}.
-\end{theorem}
+\begin{example}
+Let us consider graph \emph{P} in Figure \ref{fig:P} that is assigned three labels: red (R), yellow (Y) and blue (B). The counting function of each of them is the following: $\lambda_{P}$(R) = 1, $\lambda_{P}$(Y) = 2 and $\lambda_{P}$(B) = 1.
+\end{example}
 
-\begin{proof}
-Suppose that \gls{sip} (G$_{p}$, G$_{t}$) is \gls{sat} and that \gls{nds}(G$_{p}$) $\nsubseteq$ \gls{nds}(G$_{t}$). Then, at least one of the conditions for \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) is not true.
-\begin{enumerate}
-\item Suppose that the first condition is false. Then, G$_{p}$ must have at least one vertex more than G$_{t}$, i.e. at least one vertex $\in$ G$_{p}$ will be unmatched. Therefore, \gls{sip} (G$_{p}$, G$_{t}$) is \gls{unsat} if the order of G$_{p}$ is bigger than the order of G$_{t}$ and we reach a contradiction. Therefore, this condition must always hold.
-\item Suppose that the second condition is false so that there exists a label l$^{\prime}$ $\in$ L$_{G_{p}}$ with l$^{\prime}$ $\notin$ L$_{G_{t}}$. Therefore, there exists a vertex \textit{v} $\in$ G$_{p}$ that is assigned the label l$^{\prime}$ and there is no vertex in G$_{t}$ with label l$^{\prime}$. From this follows that \textit{v} can not be matched to any vertex in G$_{t}$ and \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat}, which leads to a contradiction. Therefore, condition 2 must hold.
-\item Suppose that the third condition is false. Then, there exists a label l$^{\prime}$ $\in$ L$_{G_{p}}$ and l$^{\prime}$ $\notin$ L$_{G_{t}}$. As proved before, this is a contradiction, therefore condition 3 must hold.
-\item Suppose that previous three conditions hold and G$_{t}$ does not subsume G$_{p}$.
-
-First, suppose that for each label l both in G$_{p}$ and G$_{t}$, the length of the \gls{lds}(l$\in G_{p}$) is smaller or equal to the length of \gls{lds}(l$\in G_{t}$). Then, there exists a degree value \textit{deg$_{pi}$} $\in$ \gls{lds}(l$\in G_{p}$) at position \textit{i} in the list for \textit{i} between 1 and $| \gls{lds}(l\in G_{p})|$ such that \textit{deg$_{pi}$} $>$ \textit{deg$_{ti}$}, where \textit{deg$_{ti}$} $\in$ \gls{lds}(l$\in G_{t}$). Then, there is a vertex \textit{v} $\in$ G$_{p}$ with label l and degree \textit{deg$_{pi}$} that will not be matched to any vertex in G$_{t}$. Therefore \gls{sip} (G$_{p}$, G$_{t}$) is \gls{unsat} which is a contradiction, therefore the degree of the \textit{i$^{th}$} element in \gls{lds} of each label in G$_{p}$ has to be smaller or equal to the degree of the \textit{i$^{th}$} element for the corresponding label in G$_{t}$ for every \textit{i} between 0 and the length of \gls{lds} of every label in G$_{p}$.
-
-Second, suppose that there exists a label l both in G$_{p}$ and G$_{t}$ such that the length of the \gls{lds}(l$\in G_{p}$) is bigger than the length of \gls{lds}(l$\in G_{t}$). Then, the number of vertices with label l in G$_{p}$ is bigger than the number of vertices with label l in G$_{t}$ and it is impossible to match each vertex in G$_{p}$ to a different vertex in G$_{t}$ which leads to contradiction.
-
-Therefore both conditions of subsumption must hold and G$_{t}$ subsumes G$_{p}$. This is a contradiction, therefore condition 4 must be true.
-\end{enumerate} 
-
-All four conditions must hold. It follows that \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) which is a contradiction. Therefore, if \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$), then \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat}.
-\end{proof}
-
-The four conditions for \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$) are the first four of the trivial failures added to SIP1, also displayed on Table \ref{table:failures}. Their implementation is discussed in Section \ref{sec:trivialFailsImplementation}.
-
-\subsection{Domain wipe out}
-\label{sec:domainWipeout}
-This is the fifth of the trivial failures implemented as light filtering on top of the search. Every pattern vertex \textit{v} has a bitset domain \textit{dom$_{v}$}. The size of \textit{dom$_{v}$} is equal to the order of the target, where every bit corresponds to a vertex in the target. For every vertex \textit{w} $\in$ G$_{t}$, if L(\textit{w}) is equal to L(\textit{v}) and the degree of \textit{v} is smaller or equal to the degree of \textit{w}, we set the bit for \textit{w} in \textit{dom$_{v}$} to true, i.e. \textit{v} can be mapped to \textit{w}. Whenever no bit in \textit{dom$_{v}$} is set to 1, it means that no target vertex exists that can be mapped to \textit{v} i.e. no valid mapping from all vertices in G$_{p}$ to a different vertex in G$_{t}$ can exist and \gls{sip} (G$_{p}$, G$_{t}$) is \gls{unsat}. The algorithm returns false without proceeding to search.
-
-Table \ref{table:failures} shows the trivial failures discussed. They are executed as tests in the same hierarchy as shown in the Table. The first four failures are namely the conditions for \gls{nds}(G$_{p}$) $\subseteq$ \gls{nds}(G$_{t}$). If either of these tests fails, then \gls{sip}(G$_{p}$, G$_{t}$) is \gls{unsat} (Theorem \ref{th:nds}).
-
-\subsection{Order of Tests}
-
-Tests follow a strict hierarchy, where test 1 performs the cheapest and most trivial task and test 5 is the most expensive and its filtering is based on the least trivial test. The cost of each test in terms of complexity is discussed in Section \ref{sec:trivialFailsImplementation}.
-
-%%% todo: make a discussion about the dependency between these failures, i.e. what happens if we switch off one failure or not. Write an informal proof about it?
-
-%\begin{itemize}
-%\item Filter 2 and 3 filter differently. Ex: p = \{A,B,B,C\} and t=\{A,B,C\}. Test 2 passes, but test 3 fails
-%\end{itemize}
+We can now introduce several simple filtering tests for incompatibility between graphs \emph{P} and \emph{T}. If either of the tests is not true, \emph{P} is not subgraph isomorphic to \emph{T} and we say that we have encountered a \emph{trivial fail}. If an instance causes a trivial fail, we do not have to test for subgraph isomorphism, because in such case this instance is UNSAT. The filtering tests are shown on Figure \ref{table:failures}. Their execution follows a strict hierarchy based on the expected cost of their execution, starting with the test which is shown to require least computational effort (test 1). Analysis of the complexity of each test is given later in this Section. Every test is executed only if all previous tests succeeded. Below follows a proof of the correctness of first four filtering tests. The fifth test is discussed shortly. 
 
 %%%% table about failures %%%%
-\begin{table}
+\begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{1.5}% Spread rows out...
 \begin{tabular}{ >{\centering\bfseries}m{1in} >{\centering\arraybackslash}m{2.3in}} 
 \toprule
   Trivial Fail & Meaning\\
 \midrule
- \textbf{1} & G$_{t}$.order $\geq$ G$_{p}$.order\\
+ \textbf{1} & $|V (T)|$ $\geq$ $|V (P)|$\\
  \rowcolor{Gray}
- \textbf{2} & G$_{t}$ unique labels $\geq$ G$_{p}$ unique labels\\
- \textbf{3} & G$_{p}$ labels $\subseteq$ G$_{t}$ labels\\
+ \textbf{2} & $|L(V(\emph{T}))|$ $\geq$ $|L(V(\emph{P}))|$\\
+ \textbf{3} & $\forall$ \emph{l} $\in$ $\Lagr$: $\lambda_{P}(l)$ $\leq$ $\lambda_{T}(l)$\\
  \rowcolor{Gray}
- \textbf{4} & G$_{t}$ subsumes G$_{p}$\\
- \textbf{5} & \textit{dom$_{v}$}, \textit{v} $\in$ G$_{p}$ not empty\\
+ \textbf{4} & \emph{T} $\succeq$ \emph{P}\\
+ \textbf{5} & $\forall$ \emph{v} $\in$ V(\emph{P}), domv $\neg$  $\varnothing$\\
  \bottomrule
 \end{tabular}
-\caption{Specification of the measured failure types}
+\caption{Failure tests hierarchy}
 \label{table:failures}
 \end{table}        
 %%%%
 
-\subsection{Implementation}
+\begin{theorem}
+\label{th:nds}
+Let \emph{T} and \emph{P} be graphs. If either of the following failure tests:
+\begin{enumerate}
+\item \label{test1} $|V(T)|$ $\leq$ $|V(P)|$
+\item \label{test2} $|L(V(T))|$ $\leq$ $|L(V(P))|$
+\item \label{test3} T $\succeq$ P
+\item \label{test4} $\forall$ \emph{l} $\in$ $\Lagr$: $\lambda_{P}(l)$ $\leq$ $\lambda_{T}(l)$
+\end{enumerate}
+is false, then \emph{P} is not subgraph-isomorphic to \emph{T}.
+\end{theorem}
+
+\begin{proof}
+By contradiction. Suppose that \gls{sip} (\emph{P}, \emph{T}) is \gls{sat}.
+Suppose that test \ref{test1} is false. Then, \emph{P} must have at least one vertex more than \emph{T}, which means that this vertex would be unmatched. Therefore, from the definition of subgraph isomorphism, \emph{P} is not isomorphic to \emph{T}. Test 1 must be true.
+
+Suppose that test \ref{test2} is false so that there exists a label \emph{l} in L(\emph{P}) that does not belong to L(\emph{T}). Therefore, there exists a vertex \emph{v} in \emph{P} with label \emph{l} that would be left unmatched.  Therefore, from the definition of subgraph isomorphism, \emph{P} is not isomorphic to \emph{T}. Test 2 must hold.
+
+Suppose that test 3 is false and there exists a label \emph{l} both in L(\emph{P}) and L(\emph{T}) that is assigned to \emph{m} number of vertices in V(\emph{T}) and to at least \emph{m + 1} vertices in V(\emph{P}). That means that either at least one pattern vertex would be left unmatched, or at least two pattern vertices would be matched to the same target vertex. Either of these cases would violate the necessary conditions for \emph{P} to be subgraph isomorphic to \emph{T}. This is a contradiction, therefore test 3 must hold.
+
+Suppose that \emph{T} does not subsume \emph{P}. Therefore, there exists label \emph{l} both in \emph{P} and \emph{T} such that LNDS (\emph{T}, \emph{l}) $\npreceq$ LNDS (\emph{P}, \emph{l}). From the proof that the previous three conditions must hold, it follows that LNDS (\emph{T}, \emph{l}) $\npreceq$ LNDS (\emph{P}, \emph{l}), because there exists at least one vertex \emph{v} whose degree is in LNDS (\emph{P}, \emph{l}) with higher degree than the degree of the corresponding vertex  in LNDS (\emph{T}, \emph{l}). A matching, of \emph{v} a vertex in V(\emph{T}) that preserves adjacency does not exists and \emph{P} is not subgraph isomorphic to \emph{T}, which is a contradiction. Test 4 must be true. 
+
+We can deduce that if \emph{P} is subgraph isomorphic to \emph{T}, then each of the first four trivial tests must hold. From the rules of classical logic it follows that if either of the tests is false, then \emph{P} is not subgraph isomorphic to \emph{T}.
+\end{proof}
+
+The fifth trivial failure is based on the choice of model for our subgraph isomorphism algorithm (SIP1). Given a pattern \emph{P} and a target \emph{T}, we represent each vertex \emph{v} in V(\emph{P}) as a variable that can accept one of the vertices in V(\emph{T}) as a value. The set of all possible values of \emph{v} is called the \emph{domain} of \emph{v}, \emph{domv}. It is represented as a bit array (bitset) of size equal to the order of \emph{T}, where each entry maps to a target vertex. domv[i] is equal to 1 if \emph{v} can be mapped to the i$^{th}$ vertex in V(\emph{T}), or 0 otherwise. If every bit in domv is 0, this means that no valid mapping from \emph{v} to any vertex in V(\emph{T}) exists. In such case \emph{v} has a \emph{domain wipe out}. During search, domain wipe out of \emph{v} indicates that the current partial mapping can not be a subgraph isomorphism from \emph{P} to \emph{T}. During initialization, domain wipe out of \emph{v} indicates that \emph{P} is not subgraph isomorphic to \emph{T}. Test 5 checks whether domv experiences a domain wipe out. If there exists an empty domain, the test fails and the instance does not proceed to search.
+%% todo wirte that domain wipeout is a common test
+
+\subsection{Implementation and complexity analysis}
 \label{sec:trivialFailsImplementation}
-Algorithm \ref{algo:filters} describes the implementation of the 5 trivial failures from Table \ref{table:failures} as part of the filtering stage. Procedure ``filter'' is executed for every \gls{sip} instance before the verification stage. If any of the if statements (lines 2, 4, 6, 8 and 17) is false, the procedure returns false and the verification for the corresponding instance is not executed. Otherwise, if all 5 tests are true, the procedure makes a call to SIP1, i.e proceeds to the verification step. Pseudocode for SIP1 is shown in Algorithm $say where$ and discussed in the next Section.
+Algorithm \ref{algo:filters} describes the implementation of the 5 trivial failures from Table \ref{table:failures} as part of the filtering stage. If any of the if statements (lines 2, 4, 7, 10 and 21) is false, the procedure returns false and verification is not executed. Otherwise, if all 5 tests are true, the procedure makes a call to SIP1 (Algorithm \ref{algo:sip1}), which is discussed in the next Section.
 
 %% comment on the expensiveness of each trivial failure
-Failures 1 and 2 are the fastest: each of them takes time $\mathcal{O}(1)$ to compute. For failure 1, one needs only to return the sizes of the number of vertices in G$_{p}$ and in G$_{t}$. For failure 2, for every graph G, we have an array that stores all unique labels that occur in G. The size of this array is known after the graph is read from the file. To check whether test 2 is true, one needs to compare the size of the labels array d$_{p}$ of G$_{p}$ with the size of the labels array d$_{t}$ of G$_{t}$. Finding the values of d$_{t}$ and d$_{p}$ takes time $\mathcal{O}(1)$.
+Now follows a discussion about the cost of each failure test.
+Failures 1 and 2 are the fastest: each of them takes $\mathcal{O}(1)$ time to compute. For failure 1, one needs only to return the sizes of the number of vertices in \emph{P} and in \emph{T}, which is computed while initializing the graphs. For failure 2, for every graph \emph{G}, we have an array that stores all unique labels that occur in \emph{G}. The size of this array is known after the initialization of \emph{G}. To check whether test 2 is true, one needs to compare the size of the labels array of \emph{P} with the size of the labels array of \emph{T},  which takes $\mathcal{O}(1)$ time.
 
-Failures 3 and 4 have slower running time. For every label l $\in$ G$_{p}$, failure 3 occurs if l is not a label in G$_{t}$. Checking whether l is a label in G$_{t}$ involves iterating over the labels in G$_{t}$, which is of time $\mathcal{O}(d_{t})$ worst case, if l is the last label in G$_{t}$ or it is not present. Therefore, the overall complexity of failure 3 is $\mathcal{O}(d_{p}.d_{t})$. Algorithm \ref{algo:subsumes} shows the pseudo code for the ``subsumes'' procedure. Its complexity is $\mathcal{O}(plds)$, where plds is the \gls{lds} of label \textit{l} $\in$ G$_{p}$. Therefore, the overall complexity of failure 4 is $\mathcal{O}(plds.d_{p})$.
+%% todo there is something wrong on lines 4, 5 here
+Failures 3 and 4 have slower running time. Checking whether $\lambda_{P}(l)$ is bigger than $\lambda_{T}(l)$ involves iterating over all labels in L(V(\emph{P})), and for each of them checking $\lambda_{T}(l)$, which can be found in constant time by taking the size of the pre-computed LNDS(\emph{T}, \emph{l}). Therefore, the overall complexity of failure 3 is $\mathcal{O}(|L(V(\emph{P}))|)$. Algorithm \ref{algo:subsumes} shows the pseudo code of the fourth failure test, called in line 10 in Algorithm \ref{algo:filters}. Test 4 iterates over the LNDS of every label \emph{l} in L(V(\emph{P})) and checks whether LNDS (\emph{T}, \emph{l}) $\succeq$ LNDS (\emph{P}, \emph{l}) (lines 5, 6). The correctness of the implementation follows from the fact that the elements in LNDS are ordered in non-increasing order. The complexity of test 4 is therefore $\mathcal{O}$($|$L(V(\emph{P}))$|.|$LNDS (\emph{T}, \emph{l})$|$).
 
-Failure 5 is the most expensive one. It takes time $\mathcal{O}(m.n)$, where n is the order of G$_{p}$ and m is the order of G$_{t}$. Algorithm \ref{algo:filters} has to visit each vertex \textit{v} $\in$ G$_{p}$, initialize dom$_{v}$ and for every \textit{w} $\in$ G$_{t}$, check whether \textit{w} can be mapped to \textit{v}. The two checks (line 13) take time $\mathcal{O}(1)$.
-
+Failure 5 visits each vertex \emph{v} in V(\emph{P}) (line 13), initializes domv (line 14) and for every \emph{w} in V(\emph{T}), checks whether \emph{w} can be mapped to \emph{v} (lines 15, 16). The complexity of this test is therefore equal to $\mathcal{O}(|V(P)|.|V(T)|)$.
 %% failures algorithm
 \begin{algorithm}
 \centering
@@ -1055,29 +1041,25 @@ Failure 5 is the most expensive one. It takes time $\mathcal{O}(m.n)$, where n i
 \label{algo:filters}
 \begin{algorithmic}[1]
 \Procedure{Filter }{G$_{p}$, G$_{t}$}
-\If {\textbf{not} G$_{t}$.order $\geq$ G$_{p}$.order} \Return false \Comment{\textit{trivial failure 1}}
+\If {$\neg$ $|V(T)|$ $\geq$ $|V(P)|$} \Return false \Comment{\textit{trivial failure 1}}
 \EndIf
-\If {\textbf{not} G$_{t}$ unique labels $\geq$ G$_{p}$ unique labels} \Return false \Comment{\textit{trivial failure 2}}
+\If {$\neg$ $|L(V(T))|$ $\geq$ $|L(V(P))|$} \Return false \Comment{\textit{trivial failure 2}}
 \EndIf
-\For {\textit{l} in L$_{G_{p}}$}
-%\State{
-	\If {\textbf{not} \textit{l} in L$_{G_{t}}$} \Return false \Comment{\textit{trivial failure 3}}
-	\EndIf
-	\If {\textbf{not}  \Call{subsumes }{G$_{p}$, G$_{t}$, \textit{l}}} \Return false \Comment{\textit{trivial failure 4}}
-	\EndIf
-%}
+\For {\textit{l} $\in$ $|L(V(P))|$} %% todo write it with lambda
+	\If {$\lambda_{P}(l)$ $>$ $\lambda_{T}(l)$} \Return false \EndIf \Comment{\textit{trivial failure 3}}
 \EndFor
-\State alldoms $\gets$ initialize \Comment{\textit{An array of size the order of G$_{p}$ that contains the domain of each vertex in G$_{p}$}}
-\For{every \textit{v} $\in$ G$_{p}$}
+\If {$\neg$\Call{subsumes }{T, P}} \Return false \EndIf \Comment{\textit{trivial failure 4}}
+\State alldoms $\gets$ initialize \Comment{\textit{An array of size the order of G$_{p}$ that contains the domain of each vertex in P}}
+\For{every \textit{v} $\in$ V(\emph{P})}
 \State{
-	dom$_{v}$ = new BitSet(G$_{t}$.order) \Comment{\textit{initialize dom$_{v}$ to bitset of size the order of the target}}
-	\For{every \textit{w} $\in$ G$_{t}$}
-    	\If {\textit{v}.label == \textit{w}.label \textbf{and} \textit{v}.degree $\leq$ \textit{w}.degree}
-        \State {set dom$_{v}$[\textit{w}] to 1}
+	domv $\gets$ new BitSet($|V(T)|$) \Comment{\textit{initialize domV to bitset of size the order of the target}}
+	\For{$\forall$ \textit{w} $\in$ V(\emph{T})}
+    	\If {L(P, \emph{v}) = L(T, \emph{w}) $\land$ \textit{v}.degree $\leq$ \textit{w}.degree}
+        \State {domv[\textit{w}] $\gets$ 1}
         \EndIf
-	\EndFor \\
-    alldoms[v] $\gets$ dom$_{v}$
-	\If {empty \textit{dom$_{v}$}} \Return false \Comment{\textit{trivial failure 5}}
+	\EndFor
+    \State {alldoms[v] $\gets$ domv}
+	\If {domv = $\varnothing$} \Return false \Comment{\textit{trivial failure 5}}
 }
 \EndFor \\
 \Call{sip1}{alldoms} \Comment{\textit{if no failures occurred, call SIP1 algorithm}}
@@ -1089,17 +1071,19 @@ Failure 5 is the most expensive one. It takes time $\mathcal{O}(m.n)$, where n i
 %%% subsumes
 \begin{algorithm}
 \centering
-\caption{G$_{t}$ Subsumes G$_{p}$}
+\caption{Graph T subsumes graph P}
 \label{algo:subsumes}
 \begin{algorithmic}[1]
-\Procedure{subsumes }{G$_{p}$, G$_{t}$, \textit{l}}
-\State plds $\gets$ lds(l) in G$_{p}$ \Comment{\textit{the label degree sequence of l in G$_{p}$}}
-\State tlds $\gets$ lds(l) in G$_{t}$ \Comment{\textit{the label degree sequence of l in G$_{t}$}}
-\For{i between 0 and pSeq.length - 1}
-\If {plds[i] $>$ tlds[i]} \Return false \Comment{\textit{exists vertex in G$_{p}$ that can`t' be matched to any vertex G$_{t}$}}
-\EndIf
+\Procedure{subsumes }{T, P}
+\For {\textit{l} $\in$ $|L(V(P))|$} %% todo write it with lambda
+	\State{B $\gets$ LNDS (P, \emph{l})}
+    \State{A $\gets$ LNDS (T, \emph{l})}
+    \For{i in range (0, $|A|$)}
+		\If {B[i] $>$ A[i]} \Return false
+		\EndIf
+	\EndFor
 \EndFor \\
-return true
+\Return true
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -1107,19 +1091,19 @@ return true
 For the implementation of the filtering, the following classes are introduced.
 
 \begin{itemize}
-\item Class Graph\\
-Creates \gls{graph} from a file. A Graph object has size, order, id, array of the degree of each vertex, bitset array of the neighbours of each vertex, where the i$^{th}$ element in the array contains the neighbours of vertex i in the graph and array of labels, where similarly, the element in position i contains the label of vertex i. While reading in the graph, we initialize each field, which takes time $\mathcal{O}(size+order)$. When the array of labels is built, a new object for each unique label \textit{l} is created and the \gls{nds} of the graph is computed.
-\item Class Label\\
-This class represents a label in a Graph object. A Label has a name and \gls{lds} which is an array of integers, sorted in non-increasing order. The degree sequence array is built using insertion sort algorithm which is of complexity $\mathcal{O}(n^{2})$, where n is the size of \gls{lds} \cite{Cormen:2001:IA:580470}.
-\item Class SIP1\\
+\item Class \emph{Graph}
+It creates graph objects, given a file with graphs represented in a certain format. A graph object \emph{G} has size, denoted as \emph{m}, order, denoted as \emph{n}, \emph{id}, array of the degree of each vertex, called \emph{deg}, bitset array of the neighbours of each vertex, called \emph{N}, and array, called \emph{labels}, that stores all labels assigned to vertices in \emph{G}. \emph{N}$_{i}$ contains a bitset of the neighbours of the i-th vertex in \emph{G} and \emph{labels}$_{i}$ contains the label of the i-th vertex in \emph{G}, for every i between 0 and \emph{n}. Initialization of each of the aforementioned properties takes $\mathcal{O}$(m + n) time. When \emph{labels} is constructed, a new object for each unique label \emph{l} is created and LNDS (\emph{G}, \emph{l}) is computed.
+
+\item Class \emph{Label}
+This class represents a label \emph{l} in \emph{G}. \emph{l} has a \emph{name}, and an array of integers, sorted in non-increasing order that represents LNDS (\emph{G}, \emph{l}). It is built using insertion sort algorithm which is of complexity $\mathcal{O}(|LNDS (\emph{G}, \emph{l})|^{2})$ \cite{Cormen:2001:IA:580470}.
+
+\item Class \emph{SIP1}
 This class implements the light filtering procedure displayed in Algorithm \ref{algo:filters} as well as the \gls{sip} algorithm, which is explained in more detail in the next Section.
 \end{itemize}
 
 \section{SIP1 Implementation}
 \label{sec:sip1}
-SIP1 is based on the simplest of the Glasgow algorithms \cite{CP2015}. Given a \gls{pattern} and \gls{target}, SIP1 has a variable for each vertex in \gls{pattern}, each with domain that is the set of compatible vertices in \gls{target} (alldoms, Algorithm \ref{algo:sip1}, initialized in Algorithm \ref{algo:filters}). Compatible vertices have the same labels and the degree of the target vertex is greater than or equal to the degree of the pattern vertex. Bit sets are used to represent the domains and the adjacency matrices of the graphs. When a pattern variable $u$ is instantiated with a target value $i$ (Algorithm \ref{algo:sip1}, line 7), all uninstatiated (future) variables have $i$ removed from their domains (Algorithm \ref{algo:sip1}, line 12). If a future variable $v$ is adjacent to $u$ in \gls{pattern} then the domain of $v$ becomes the intersection of the current domain of $v$ with the neighborhood of vertex $i$ in \gls{target}. This constraint is enforced by applying a logical $and$ operation between the two bit sets (Algorithm \ref{algo:sip1}, line 14). SIP1 uses \gls{forwcheck} with fail first heuristic \cite{haralickElliot:1980}: for all uninstantiated variables representing pattern vertices, it selects to explore the one that has the smallest domain before the others (Algorithm \ref{algo:sip1}, line 4).
-
-Class SIP1 contains the implementation of the verification step. For every \gls{sip}(G$_{p}$, G$_{t}$) instance, if it is not discarded after filtering, it goes to the SIP1 procedure (line 21, Algorithm \ref{algo:filters}). Algorithm \ref{algo:sip1} is a pseudocode of the implementation.
+SIP1 is a subgraph isomorphism algorithm, based on the simplest of the Glasgow algorithms \cite{CP2015}. Algorithm \ref{algo:sip1} shows a pseudocode of SIP1. It takes the domains of all vertices in the pattern \emph{P}, initialized in Algorithm \ref{algo:filters}), and repeatedly tries to assign to each variable (pattern vertex) a value (target vertex). If current assignment is compatible with the partial solution, the algorithm makes a recursive call (line 19) otherwise it backtracks. When a pattern variable \emph{u} is instantiated with a target value \emph{i} (line 9), all uninstatiated (future) variables have \emph{i} removed from their domains (line 12). If a future variable \emph{v} is adjacent to \emph{u} in \emph{P} then domv becomes the intersection of domv with the neighborhood of vertex \emph{i} in \emph{T}. This constraint is enforced by applying a logical \emph{and} operation between the two bit sets (line 14). SIP1 uses \gls{forwcheck} with fail first heuristic \cite{haralickElliot:1980}: for all uninstantiated variables representing pattern vertices, it selects to explore the one that has the smallest domain before the others (line 4).
 
 %%% SIP1 pseudocode
 \begin{algorithm}
@@ -1128,25 +1112,26 @@ Class SIP1 contains the implementation of the verification step. For every \gls{
 \label{algo:sip1}
 \begin{algorithmic}[1]
 \Procedure{SIP1 }{alldoms}
-\If{alldoms is empty} \Return solution \Comment{\textit{true or false}}
+\If{alldoms = $\varnothing$} \Return solution \Comment{\textit{solution is either true or false}}
 \EndIf
-\State dom$_{u}$ $\gets$ smallest(alldoms) \Comment{\textit{select vertex u with the smallest domain first}}
-\State newAlldoms $\gets$ initialize with size=(alldoms.size - 1)
-\For{i in dom$_{u}$.getNextSetBit} \Comment{\textit{for each entry in u with bit set to 1}}
-	\State assign i as a value of vertex u
-	\For{(dom$_{v}$ in alldoms) $\land$ (dom$_{v}$ != dom$_{u}$)} \Comment{\textit{the domain of each vertex}}
-		\If{!consistent} \Return consistent $\land$ \Call{SIP1}{newAlldoms} 
+\State domu $\gets$ smallest(alldoms) \Comment{\textit{select vertex u with the smallest domain first}}
+\State consistent $\gets$ false
+\State newAlldoms $\gets$ initialize with size = ($|$alldoms$|$ - 1)
+\For{i $\in$ domu.nextSetBit $\land$ $\neg$consistent} \Comment{\textit{for each entry in position i that could be assigned to u}}
+	\State consistent $\gets$ true
+	\State u $\gets$ i \Comment{\textit{assign i as a value of vertex u}}
+	\For{(domv $\in$ alldoms) $\land$ (domv $\neg$= domu) $\land$ consistent} \Comment{\textit{iterate through the domain of each vertex while the current assignment is consistent}}
+        \State newdomv $\gets$ domv
+        \State newdomv[i] $\gets$ 0 \Comment{\textit{cannot take value assigned to u}}
+        \If{(u, v) $\in$ E(\emph{P})} \Comment{\textit{If u is adjacent to v in \emph{P}}}
+        	\State newdomv $\land$ neighbours of i $\in$ \emph{T} \Comment{\textit{v can only take vertices in G$_{t}$ adjacent to i}}
         \EndIf
-        \State newdom$_{v}$ $\gets$ dom$_{v}$
-        \State set i$^{th}$ entry of newdom$_{v}$ to false \Comment{\textit{cannot take value assigned to u}}
-        \If{u is adjacent to v in G$_{p}$}
-        	\State (newdom$_{v}$)AND(neighbours of i in G$_{t}$) \Comment{\textit{v can only take vertices in G$_{t}$ adjacent to i}}
-        \EndIf
-        \State add newdom$_{v}$ to newAlldoms
-        \State consistent $\gets$ !(newdom$_{v}$ == 0) \Comment{\textit{if there is a domain wipe out, consistent becomes false}}
+        \State newAlldoms $\gets$ newAlldoms + newdomv \Comment{\textit{add newdomv to newAlldoms}}
+        \State consistent $\gets$ (newdomv = 1) \Comment{\textit{if there is a domain wipe out, consistent becomes false}}
 	\EndFor
-    \State consistent $\land$ \Call{SIP1}{newAlldoms}
+    \State consistent $\gets$ consistent $\land$ \Call{SIP1}{newAlldoms} \Comment{\textit{call SIP1 if current assignment is consistent}}
 \EndFor
+\State \Return consistent
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -1155,26 +1140,6 @@ In the worst case, SIP1 will assign all values from the domain of each pattern v
 
 \chapter{Evaluation}
 \label{ch:evaluation}
-
-%\section{Empirical study of path-based filtering}
-%\subsection{Performance}
-%TODO \\
-%       - the index file is bigger, but the candidate set is smaller\\
-%       - put the table with results\\
-%       - explain the results and why they are like this\\
-%	   - complexity?\\
-% 	   - what could be done better and how?\\
-
-%\subsection{Variants of Path-Subtree index}
-%TODO \\
- %- use neighborhood of length 2, 3 ...
- %- this will result in bigger index, but even stronger filtering strength, which means
-
-%\subsection{Advantages and Limitations}
-%TODO \\
-% - very easy to implement, especially when we have index-1 implementation ready\\
- %- the index file is even bigger --- this is  bad\\
- 
 
 %%% TODO make graphs with the running time in milliseconds
 \section{Light Filters}
