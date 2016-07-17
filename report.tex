@@ -1,8 +1,3 @@
-%%%%%% TODOs:
-% put instructions on how to run my code (2 projects)
-% put instructions on how to run the experiments?
-%
-%
 
 \pdfoutput=1
 
@@ -84,20 +79,7 @@
 
 \interfootnotelinepenalty=1000
 %%%%%%%%% glossary entries and acronyms %%%%%%%%%%%%%%%%%%%%
-
-%%% The glossary entry the acronym links to   
-\newglossaryentry{apig}{name={API},
-    description={An Application Programming Interface (API) is a particular set
-of rules and specifications that a software program can follow to access and
-make use of the services and resources provided by another particular software
-program that implements that API}}
-%%%%%%%%%%%
-%%% define the acronym and use the see= option
-\newglossaryentry{api}{name={API}, description={Application
-Programming Interface}, first={Application
-Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
-%
-\newglossaryentry{sip}{type=\acronymtype, name={SIP}, description={subgraph isomorphism problem}, first={Subgraph Isomorphism Problem (SIP)}}
+\newglossaryentry{sip}{type=\acronymtype, name={SIP}, description={Subgraph Isomorphism Problem}, first={Subgraph Isomorphism Problem (SIP)}}
 %
 \newglossaryentry{sat}{type=\acronymtype, name={SAT}, description={Satisfiable}, first={satisfiable (SAT)}}
 %
@@ -121,8 +103,6 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 %
 \newglossaryentry{sn}{name={search node}, description={A search node denotes the number of recursive calls to the SIP algorithm taken to find a solution}}
 
-\newglossaryentry{c}{name={candidate set ($\fancyC)$}, first={candidate set ($\fancyC$)}, description={todo}}
-
 \newglossaryentry{tree}{name={tree}, description={A tree is an undirected graph such that any two vertices are connected by exactly one path. In this work, we refer to the vertices of the tree as \emph{nodes}.}}
 
 \newglossaryentry{sufftree}{name={suffix tree}, description={A suffix tree S is a compressed trie containing all the suffixes of the given text as their keys and positions in the text as their values. It has the following properties: the tree has exactly n leaves numbered from 1 to n; except for the root, every internal node has at least two children; each edge is labeled with a non-empty substring of S; no two edges starting out of a node can have string-labels beginning with the same character; the string obtained by concatenating all the string-labels found on the path from the root to leaf i spells out suffix S[i..n], for i from 1 to n.}}
@@ -142,7 +122,7 @@ Programming Interface (API)\glsadd{apig}}, see=[Glossary:]{apig}}
 \begin{document}
 \title{Investigations of Subgraph Query Processing}
 \author{Iva Stefanova Babukova}
-\date{March 20, 2016}
+\date{June 3, 2016}
 \maketitle
 
 \begin{abstract}
@@ -179,7 +159,6 @@ We say that \emph{G} is \emph{undirected}, if every edge in E(\emph{G}) is an un
 An example of undirected labeled graph is graph T on Figure \ref{fig:graphT}, where the labels of T are the colors of its vertices. L(V(\emph{T})) is equal to red (R), yellow (Y) and blue (B).
 \end{example}
 
-%% todo put these into an appropriate place
 A \emph{sequence} is an ordered collection of objects in which repetitions are allowed. The \emph{length} of a sequence is equal to the number of its objects. The position \emph{i} of an element in a sequence  \emph{A} is called its index, denoted by \emph{A}[i]. 
 
 \begin{example}
@@ -246,7 +225,7 @@ The density of graph T, with 10 edges and 8 vertices, on Figure \ref{fig:graphT}
 
 \subsection{The Subgraph Isomorphism Problem}
 A \emph{subgraph} of \emph{G} is a graph \emph{H} whose vertices and edges are subsets of the vertices and edges of \emph{G} and the labeling on the vertices is preserved.
-%%% todo : change as adam says?
+
 A \emph{non-induced subgraph isomorphism} is an injective mapping \emph{i} : \emph{P} $\rightarrow$ \emph{T} from a graph \emph{P} to a graph \emph{T} that preserves adjacency and labeling on vertices. That is, if \emph{v} $\sim_{P}$ \emph{w}, then \emph{i(v)} $\sim_{T}$ \emph{i(w)} and if L(\emph{P}, \emph{v}) = l, then L(\emph{T}, \emph{i(v)}) = l. The \emph{non-induced subgraph isomorphism problem} (SIP) is to find such a mapping from a given graph \emph{P}, called a pattern, to a given graph \emph{T} referred to as a target. The \emph{induced} SIP additionally requires that if \emph{v} $\nsim_{P}$ \emph{w} then \emph{i(v)} $\nsim_{T}$ \emph{i(w)}. In this work, we discuss only the non-induced version of SIP. We say that an instance of SIP is \emph{satisfiable} (SAT) if such a mapping \emph{i} exists and \emph{P} is said to be \emph{subgraph-isomorphic} to \emph{T}. Otherwise, the instance is \emph{unsatisfiable} (UNSAT).
 
 \begin{example}
@@ -433,7 +412,7 @@ CT-Index is not the first indexing algorithm to employ fingerprints as a storage
 Information on the implementation of the hash function is not specified in the paper. Depending on the quality of the hash function, the size of the bitset and the size of the fingerprint, collisions may occur, i.e. different features may map to the same bitset position, introducing false-positives. The \cite{ctindex} paper briefly discusses some optimization techniques that could be used to minimize the influence of collisions, but it is unclear whether CT-Index employs them. 
 It is stated that ``... the loss of information caused by the use of hash-key fingerprints seems to be justifiable by the compact nature and convenient processing of bit arrays as long as the amount of false positives does not increase significantly due to collisions".
 
-Collisions can occur also if the size of the fingerprint is too small for the particular data, i.e. there is bigger number of features than the number of spaces in the array to store them. However, making the fingerprint size too big introduces additional overhead by requiring more memory storage space that is not used. The paper does not specify the hash function used or how to decide on the size of bitsets (feature hash tables). 
+Collisions can occur also if the size of the fingerprint is too small for the particular data. However, making the fingerprint size too big introduces additional overhead by requiring more memory storage space that is not used. The paper does not specify the hash function used or how to decide on the size of bitsets (feature hash tables). 
 
 %%%% advantages %%%%
 The main advantage of hashing the features and storing them in arrays is that this makes certain operations much cheaper. For example, checking whether a pattern fingerprint is included in a target fingerprint involves inexpensive bit operations. In particular, one only needs to compute a bitwise AND-operation with the two fingerprints to determine if features in the pattern exist within the target. If this test returns false then the target cannot be a candidate for that pattern. However, if it returns true then the target \emph{may} be a candidate and subgraph isomorphism must be verified.
@@ -545,11 +524,12 @@ The last 6 rows of Table \ref{table:runningTime} show the performance of CT-Inde
 Using only paths as features shows best performance in terms of running time (row 16). Adding subtree extraction (row 11) takes about 60 seconds more and gives better filtering ratio and slightly worse verification running time. Therefore, the algorithm for subtree extraction significantly lowers the filtering run time, as derived during the complexity analysis in \ref{subsec:ctindexF}. One can reach the same conclusion when comparing rows 15 and 16. The options in row 15 give better performance during verification time, but they result in more than twice slower filtering time.
 
 %%% todo: write a summary of the performance evaluation
+To summarize, the empirical analysis of CT-Index shows that this subgraph query processing technique is most effective for datasets that contain mostly UNSAT SIP instances and are composed of small graphs with low density. For more complex datasets, like Pcms and Ppigo, CT-Index does not finish execution for days \cite{foteini}. CT-Index implements complex time-consuming filtering techniques and neglects the importance of verification by reusing an outdated SIP algorithm. If no filtering is performed, the SIP algorithm takes more than 70 seconds to solve all instances for the easiest dataset, which is an extremely poor performance (\cite{CP2015,Solnon:2010}, Section \ref{ch:evaluation}). The setup of the CT-Index input parameters is crucial for its performance. The subgraph query processing technique performs best when it uses a combination of paths as features and fingerprint size equal to 4096. 
 
 \section{Subgraph Isomorphism Problem algorithms}
-This Section presents an analysis of existing methods to solve the subgraph isomorphism problem (SIP). A common way to model SIP for a pattern \emph{P} and a target \emph{T} is to represent each vertex in \emph{P} as a variable that has a set of possible value assignments, referred to as its \emph{domain}, where the values are vertices in \emph{T}. It has to be ensured that every vertex in \emph{P} is matched to one unique vertex in \emph{T}. During a recursive search procedure, values are repeatedly tried to be assigned to variables, following an algorithm-specific heuristics until valid mapping from \emph{P} to \emph{T} is found or it is proven that no valid subgraph isomorphism mapping exists.
+This Section presents an analysis of an existing method to solve the subgraph isomorphism problem (SIP). A common way to model SIP for a pattern \emph{P} and a target \emph{T} is to represent each vertex in \emph{P} as a variable that has a set of possible value assignments, referred to as its \emph{domain}, where the values are vertices in \emph{T}. It has to be ensured that every vertex in \emph{P} is matched to one unique vertex in \emph{T}. During a recursive search procedure, values are repeatedly tried to be assigned to variables, following an algorithm-specific heuristics until valid mapping from \emph{P} to \emph{T} is found or it is proven that no valid subgraph isomorphism mapping exists.
  
-There are various algorithms in the literature that employ a variation of this model \cite{Solnon:2010, Ullmann:1976, Regin:1995, Larrosa:2002, Solnon:2010a, CP2015}. We study in more detail one of them, namely \cite{CP2015} in the next section.
+There are various algorithms in the literature that employ a variation of this model \cite{Solnon:2010, Ullmann:1976, Regin:1995, Larrosa:2002, Solnon:2010a, CP2015}. We study in more detail one of them, namely \cite{CP2015}.
 
 \subsection{Glasgow Subgraph Isomorphism Problem Algorithm}
 \label{sec:sippatrick}
@@ -582,11 +562,7 @@ Both the sequential and the threaded versions of the algorithm were compared wit
 \item Backjumping always either pays for itself or gives slight improvement. For some instances that constitute of highly structured data, it makes an improvement of several orders of magnitude.
 \end{itemize}
 
-CP15 might be summarized as a novel method that is specialized in solving hard instances of the SIP problem, but it could be adjusted to be fast for easy instances as well. From the experiment results reported in \cite{CP2015}, one can see that it is the best solver for non-trivial SIP instances. This suggests that current subgraph query processing methods that count entirely on verification could be faster than current methods based on the filtering-verification paradigm even if one compares only the verification stages without counting the cost of filtering. Consequently, it can be concluded that the research focused on the filtering-verification algorithms is too committed on improving the quality of filtering, while neglecting verification by using an outdated SIP algorithm.
-
-%The datasets used for experiments in CP15 contain graphs of much bigger order and size \cite{CP2015} than the Aids dataset, and yet the 
-
-%Therefore, we might expect in the future that more and more attention will be paid on this algorithm.  
+CP15 might be summarized as a novel method that is specialized in solving hard instances of the SIP problem, but it could be adjusted to be fast for easy instances as well. From the experiment results reported in \cite{CP2015}, one can see that it is the best solver for non-trivial SIP instances. This suggests that current subgraph query processing methods that count entirely on verification could be faster than current methods based on the filtering-verification paradigm even if one compares only the verification stages without counting the cost of filtering. The performance of CP15 shows again that the research focused on the filtering-verification algorithms is too committed on improving the quality of filtering, while neglecting the importance of verification. 
 
 %%%%%%%%%%%%%%%%%% the path-based indexes %%%%%%%%%%%%%%%%%%%%
 \chapter{Framework for graph indexing and filtering}
@@ -904,23 +880,20 @@ To run the framework, the user specifies the names of the files containing the d
 
 \section{Performance analysis and suggestions for improvement}
 \label{sec:performance}
-This Section discusses the performance of the framework with PI and PSI. Both techniques were ran with the Aids dataset, described in Section \ref{sec:datasets}. We outline the strengths and weaknesses of PI and PSI and give suggestions for improvement.
+This Section discusses the performance of the framework with PI and PSI, where running time is measured in milliseconds. Both techniques were ran with the Aids dataset (Section \ref{sec:datasets}). We outline the strengths and weaknesses of PI and PSI and give suggestions for improvement.
 
 Let us denote the index and the candidate set obtained with PI as $\fancyI_{PI}$ and $\fancyC_{PI}$ respectively, and the index and the candidate set obtained with PSI as $\fancyI_{PSI}$ and $\fancyC_{PSI}$. 
 
-PSI requires significantly more storage space than PI, due to the fact that it uses n-labels to encode features. The length of the n-label of a vertex is equal to its degree, incremented by 1. In particular, if we assume that the average vertex degree in the target database is \emph{d}, the p-feature of each path computed using PSI will be \emph{d} times bigger than the p-feature of the same path computed using PI due to the size of the nlabel of each vertex. Therefore, the size of $\fancyI_{PSI}$ is \emph{d} times bigger than the size of $\fancyI_{PI}$.
+Consider Table \ref{table:PIandPSI}. It shows the performance of the framework with PI (Table \ref{table:PI}) and PSI (Table \ref{table:PSI}). The data on the two tables is obtained after running database \emph{D} with query \#0 from the query set \emph{Q}, where \emph{D} and \emph{Q} belong to the Aids dataset. The size of \emph{D} is equal to 40,000 and the number of SAT SIP instances between pattern \#0 and \emph{D} is 8,042 \cite{datasets}. The first column of each Table shows the maximum bound on the path length, \emph{k}, the second column denotes the number of candidates obtained for each \emph{k}, and the third column shows the framework running time. The fourth column shows the FP ratio for each \emph{k}, where the FP ratio is calculated using formula \ref{eq:fpratio} (Section \ref{subsec:ctindexEval}).
 
-Consider Table \ref{table:PIandPSI} that shows the performance of the framework when run with PI (Table \ref{table:PI}) and PSI (Table \ref{table:PSI}). The data on the two tables is obtained after running the database \emph{D} with query \#0 from the query set \emph{Q}, where \emph{D} and \emph{Q} are from the Aids dataset. The size of \emph{D} is equal to 40,000 and the number of SAT SIP instances between pattern \#0 and \emph{D} is 8,042 \cite{datasets}. The first column of each table shows the maximum bound on the path length, \emph{k}, the second column denotes the number of candidates obtained for each \emph{k}, and the third column shows the framework running time. The fourth column shows the FP ratio for each \emph{k}, where the FP ratio is calculated using formula \ref{eq:fpratio}, discussed in Section \ref{subsec:ctindexEval}.
-
-Note that the maximum value of \emph{k} is equal to 5. This is due to the fact that when \emph{k} is bigger than 5, the framework for PSI does not finish execution for hours. This follows from the complexity analysis of the algorithms that are implemented in the framework, which was carried out earlier. 
+Note that there are no experiment results for \emph{k} bigger than 5. The reason is that when \emph{k} is bigger than 5, the framework does not finish execution for hours. This result follows from the complexity analysis of the algorithms implemented in the framework, which was carried out earlier. 
 
 Theorem \ref{psiisbettertheorem} states that the filtering performance of PSI is not worse than the filtering performance of PI. Our experiments show that for the Aids dataset, the size of $\fancyC_{PSI}$ is rarely close to the size of $\fancyC_{PI}$. Comparing the second column of Table \ref{table:PI} with the second column of Table \ref{table:PSI}, one can see that $\fancyC_{PI}$ is more than twice bigger than $\fancyC_{PSI}$ for each \emph{k}. The increase of \emph{k} increases the difference between the size of $\fancyC_{PI}$ and $\fancyC_{PSI}$, and when \emph{k} equals 5, PSI prunes 31,760 targets and $\fancyC_{PSI}$ contains only 198 false-positives. This shows that n-labels manage to capture substantially more information about the structure of the graphs and lead to several times better filtering performance.
 
 It is interesting to observe that the difference of the size of $\fancyC_{PSI}$ is very small for \emph{k} equal to 4 and 5 (Table \ref{table:PSI}). However, the running time of PSI for \emph{k} = 5 is 3 times bigger than the running time of PSI for \emph{k} = 4. This suggests that the filtering power does not increase linearly with the running time with increasing \emph{k} and there exists a maximum value of \emph{k} = $\lambda$, when the trade off between filtering power and running time is good. Then, for \emph{k} $>$ $\lambda$, there is almost no filtering gain, but only significantly increased computation and storage overhead. Similar observation can be made for PI (Table \ref{table:PI}).
 
-PSI is several times slower than PI. Comparing the third column of Table \ref{table:PI} with the third column of Table \ref{table:PSI}, one can see that for each \emph{k}, the running time of PI is much better than the running time of PSI. Their difference increases with increasing \emph{k}. There are several reasons for these results. One of them is that the size of $\fancyI_{PI}$ is several times smaller than the size of $\fancyI_{PSI}$. The size of the index plays major role in the complexity of the candidates extraction procedure for both PI and PSI, as shown previously. A second reason is that computing the n-labels of the vertices of each graph requires additional running time.
+PSI is several times slower than PI (Table \ref{table:PI} and  Table \ref{table:PSI}, third columns). Their difference increases when increasing \emph{k}. The main reason for this is that the size of $\fancyI_{PI}$ is several times smaller than the size of $\fancyI_{PSI}$, due to the fact that PSI uses n-labels to encode features. The length of the n-label of a vertex is equal to its degree, incremented by 1. Therefore, for a database \emph{D} with average vertex degree \emph{d}, the size of $\fancyI_{PSI}$ is \emph{d} times bigger than the size of $\fancyI_{PI}$. The index size plays major role in the complexity of the candidates extraction procedure for both PI and PSI, as shown previously.
 
-%% todo: write the number of real sat sip
 \begin{table}
 \renewcommand{\arraystretch}{1.2}
 \parbox{.45\linewidth}{
@@ -951,28 +924,22 @@ PSI is several times slower than PI. Comparing the third column of Table \ref{ta
 \end{tabular}
 \caption{PSI}\label{table:PSI}
 }
-\caption{Performance of PI and PSI depending on the maximum path length bound (\emph{k}). The number of SAT SIP instances of \emph{D} and \emph{Q} is 8,042}
+\caption{Performance of PI and PSI depending on the maximum path length bound (\emph{k}). The number of SAT SIP instances of \emph{D} and \emph{Q} is 8,042. The running time is measured in milliseconds.}
 \label{table:PIandPSI}
 \end{table}
 %%%
 
-%Both PI and PSI are much slower than CT-Index. In particular, increasing the maximum path length bound significantly increases the algorithms computation time. This stems from the fact that maximum path length makes great impact on the complexity of the path extraction algorithm and on the size of the index. PSI is slower than PI both during index computation and candidates extraction time. Looking at the difference in their time complexities, this result is not surprising.
+The framework has slower running time than CT-Index, but much better filtering capability, when used with PSI (Table \ref{table:runningTime}, Table \ref{table:PIandPSI}). This shows that PSI could be a competitive indexing approach, if it was made more efficient. Below, we suggest possible improvement techniques.
 
-%The filtering power of PSI and PI does increase linearly when increasing the maximum path length bound. There exists a bound \emph{m} on the maximum path length after which there is almost no filtering gain, but only significantly increased computation and storage overhead. The value of \emph{m} is usually smaller for PSI than for PI. For instance, when PSI is ran with instances from the AIDS dataset, \emph{m} is equal to 5. This is the peak when the algorithm performs best. Any value larger than 5 results in much worse computation speed and almost unchanged filtering performance.
+The index of the database is represented as the union of the indices of all targets. Naively, it does not take into an account the fact that a feature can be present in more than one graph. When working with datasets where the graphs are similarly structured, removing repetitive features results in significant decrease of the index size. The following strategies can be employed to decrease the size of the index without lowering its filtering capability.
 
-The performance results show that the framework has slow running time that makes it hard to be used in practice. However, they also show that PSI has very strong filtering capability. Below, we suggest possible techniques for running time improvement of the framework.
+The index can be represented using a \gls{tree} data structure, similar to \gls{sufftree} \cite{weiner:1973}, to store all extracted features from the database as strings. The number of leaf nodes of the tree denotes the number of features. The tree is similar to \glspl{sufftree}, except from the construction of leaf nodes and the feature suffixes insertion procedures. Each leaf node is a list of all graphs that contain the corresponding feature. The full feature without its suffixes is inserted, because each label/nlabel, part of a feature, is a feature on its own and it will be extracted from the path extraction algorithm. This removes the need to insert unique termination character at the end of a feature, as done with classical \glspl{sufftree}. The tree can be built incrementally during features extraction in $\mathcal{O}(n.log(n))$ time on average, where \emph{n} is the length of the string that results when appending all features in the database, and worst-case time complexity $\mathcal{O}(n^{2})$. More efficient suffix tree construction algorithms exist \cite{weiner:1973, McCreight:1976, Ukkonen:1995}. They could be adjusted to work for the tree. Searching for a feature \emph{F} of length \emph{m} in the suffix tree requires following a path from the root matching characters until reaching the leaf node and can be done in $\mathcal{0}(m)$ time. Similar index structure is employed by GraphGrepSX \cite{graphgrepsx}.
 
-The index of the database is represented as the union of the indices of all targets. Naively, it does not take into an account the fact that a feature can be present in more than one graph. When working with datasets where the graphs are similarly structured like Aids, removing repetitive features results in significant decrease of the index size. The following strategies can be employed to decrease the size of the index without lowering its filtering capability.
-
-We can represent the index using a \gls{tree} data structure similar to \gls{sufftree} \cite{weiner:1973} that stores all extracted features from the database as strings and number of leaf nodes of the tree denotes the number of features. The representation of strings in the tree is the same as the representation employed by \glspl{sufftree} except from the construction of leaf nodes and the feature suffixes insertion. Each leaf node is a list of the ids of all graphs that contain the corresponding feature. We insert the full feature without inserting its suffixes. This is because each label/nlabel part of a feature is a feature on its own and it will be extracted from the path extraction algorithm. Therefore, there is no need to insert unique termination character at the end of a feature, as it is done with \glspl{sufftree}. The tree can be built incrementally during features extraction in $\mathcal{O}(n.log(n))$ time on average, where \emph{n} is the length of the string that results when appending all features in the database, and worst-case time complexity $\mathcal{O}(n^{2})$. More efficient suffix tree construction algorithms exist \cite{weiner:1973, McCreight:1976, Ukkonen:1995} that could be adjusted to work for the tree. Searching for a feature \emph{F} of length \emph{m} in the suffix tree requires following a path from the root matching characters until reaching the leaf node and can be done in $\mathcal{0}(m)$ time. %Therefore, candidates extraction with pattern index with \emph{n$_{p}$} number of features of average length \emph{m$_{p}$} and target index with \emph{n$_{d}$} number of features of average length \emph{m$_{d}$} would take $\mathcal{O}(n)$ has time complexity $\mathcal{O}()$
+An alternative approach to decrease the index size and to lower the complexity of candidates extraction is to represent the set of features of each graph as bit array, similarly to CT-Index (Section \ref{subsec:ctindexF}). This would also make the candidates extraction procedure faster- checking whether a target \emph{T} is a candidate of a pattern \emph{P} would consist of executing a bitwise AND operation between the bit arrays of \emph{P} and \emph{T}.
 
 %Alternative way is to represent the index as a dictionary. - having a dictionary structure to keep every feature and the number of times it occurs in the particular graph. Analyze what the complexity of this would be, would it be better and why.
 
 %- the framework provides a functionality to save the index to a file and then reuse it from the file. In practice, the way the code works at the moment is to store the target index in memory. Experiments with the datasets used by big data research community were run on a simple machine and no memory overflow was encountered.
-
-%- reduce the index size by employing the maximal features thing (cite needed papers --- graphgrepsx about the idea and the early IBM paper about the notion of descriptive feature).
-
-% TODO: write that we can represent the graphs using bitset encodings. cite the papers cited by patrick and ciaran's sip paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%------------------------------SIP Algorithms--------------------------%%%
@@ -983,14 +950,14 @@ We can represent the index using a \gls{tree} data structure similar to \gls{suf
 %% make the graphs be in log scale
 \chapter{Light Filters}
 \label{ch:sip1}
-This section describes the study of a simple subgraph isomorphism problem(\gls{sip}) algorithm, called SIP1, that implements a fast filter that does not employ an index structure.
+%This section describes the study of a simple subgraph isomorphism problem(\gls{sip}) algorithm, called SIP1, that implements a fast filter that does not employ an index structure.
 
 Light Filters is an algorithm for subgraph query processing that is based on a modified version of the filter-verification paradigm. This approach uses simple filtering tests that require much less computational effort. 
-Given a database \emph{D} and a query set \emph{Q}, subgraph query processing for \emph{D} and \emph{Q} takes every instance, executes filtering procedures, and if the instance is not proved as (unsatisfiable) \gls{unsat}, a subgraph isomorphism problem (SIP) test is called to solve it. Unlike classical filtering-verification model, no candidate set is computed, because if a target \emph{T} is candidate for a pattern \emph{P}, SIP is carried out immediately. Additionally, here more importance is placed on the quality of the \gls{sip} algorithm. 
+Given a database \emph{D} and a query set \emph{Q}, Light Filters takes every SIP instance of \emph{D} and \emph{Q}, executes filtering procedures, and if the instance is not proved as (unsatisfiable) \gls{unsat}, a subgraph isomorphism problem (SIP) test is called to solve it. Unlike the classical filtering-verification model, no candidate set is computed, because if a target \emph{T} is candidate for a pattern \emph{P}, the SIP algorithm is called immediately. Light Filters places more importance on the quality of the \gls{sip} algorithm. 
 
-Algorithm \ref{algo:roughSIP} gives an outline of our approach. We first read in each graph in \emph{D} and \emph{Q} and initialize graph objects (lines 2, 3). Filtering is performed for every (\emph{P}, \emph{T}) pair,  and if the instance is not pruned, a call to a \gls{sip} algorithm is made (line 7). The filtering step consists of 5 simple tests, performed before the call to SIP1. If the conditions of any of the tests are not met, search does not proceed, we call this a \emph{trivial fail} and carry on with the next instance. 
+Algorithm \ref{algo:roughSIP} gives an outline of our filtering-verification approach. We first read in each graph in \emph{D} and \emph{Q} and initialize graph objects (lines 2, 3). Filtering is performed for every (\emph{P}, \emph{T}) pair,  and if the instance is not pruned, a call to a \gls{sip} algorithm is made (line 7). The filtering step consists of 5 simple tests, performed before the call to SIP1. If the conditions of any of the tests are not met, search does not proceed, we call this a \emph{trivial fail} and carry on with the next instance. 
 
-The remaining of this Chapter gives an explanation of each step of the Light Filters algorithm. First, we introduce the theory behind the trivial failures and their implementation in Section \ref{sec:trivialFails}. We then introduce the subgraphs isomorphism problem algorithm called SIP1 and discuss its implementation in Section \ref{sec:sip1}. We give an empirical analysis of each of the algorithms implemented in our subgraph query processing approach. Evaluation of Light Filters and discussion of our experimental results is described in the next Chapter.
+The remaining of this Chapter explains each step of the Light Filters algorithm. First, we introduce the theory behind the trivial failures and their implementation in Section \ref{sec:trivialFails}. We then introduce the SIP algorithm called SIP1 and discuss its implementation in Section \ref{sec:sip1}. We give an empirical analysis of each of the algorithms implemented in Light Filters. The evaluation of Light Filters and a discussion of our experimental results is described in the next Chapter.
 
 %%% light filters sip algorithm
 \begin{algorithm}
@@ -1059,7 +1026,7 @@ for any \emph{l} $\in$ $\Lagr$ if there is no vertex in \emph{G} with label \emp
 Let us consider graph \emph{P} in Figure \ref{fig:P} that is assigned three labels: red (R), yellow (Y) and blue (B). The counting function of each of them is the following: $\lambda_{P}$(R) = 1, $\lambda_{P}$(Y) = 2 and $\lambda_{P}$(B) = 1.
 \end{example}
 
-We can now introduce several simple filtering tests for incompatibility between graphs \emph{P} and \emph{T}. If either of the tests is not true, \emph{P} is not subgraph isomorphic to \emph{T} and we say that we have encountered a \emph{trivial fail}. If an instance causes a trivial fail, we do not have to test for subgraph isomorphism, because in such case this instance is UNSAT. The filtering tests are shown on Figure \ref{table:failures}. Their execution follows a strict hierarchy based on the expected cost of their execution, starting with the test which is shown to require least computational effort (test 1). Analysis of the complexity of each test is given later in this Section. Every test is executed only if all previous tests succeeded. Below follows a proof of the correctness of first four filtering tests. The fifth test is discussed shortly. 
+We can now introduce several simple filtering tests for incompatibility between graphs \emph{P} and \emph{T}. If either of the tests is not true, \emph{P} is not subgraph isomorphic to \emph{T} and we have encountered a \emph{trivial fail}. If an instance causes a trivial fail, no test for subgraph isomorphism is performed, because in such case this instance is UNSAT. The filtering tests are shown on Figure \ref{table:failures}. Their execution follows a strict hierarchy based on the expected cost of their execution, starting with the test which is shown to require least computational effort (test 1). Analysis of the complexity of each test is given later in this Section. Every test is executed only if all previous tests have succeeded. Below follows a proof of the correctness of first four filtering tests. The fifth test is discussed shortly. 
 
 %%%% table about failures %%%%
 \begin{table}[H]
@@ -1106,8 +1073,7 @@ Suppose that \ref{test3} is false and there exists a label \emph{l} both in L(\e
 Suppose that \emph{T} does not subsume \emph{P}. Therefore, there exists label \emph{l} both in \emph{P} and \emph{T} such that LNDS (\emph{T}, \emph{l}) $\npreceq$ LNDS (\emph{P}, \emph{l}). From the proof of \ref{test1}, \ref{test2}, \ref{test3}, it follows that LNDS (\emph{T}, \emph{l}) $\npreceq$ LNDS (\emph{P}, \emph{l}), because there exists at least one vertex \emph{v} whose degree is in LNDS (\emph{P}, \emph{l}) with higher degree than the degree of the corresponding vertex  in LNDS (\emph{T}, \emph{l}). A matching, of \emph{v} a vertex in V(\emph{T}) that preserves adjacency does not exists and \emph{P} is not subgraph isomorphic to \emph{T}, which is a contradiction.
 \end{proof}
 
-The fifth trivial failure test is based on the choice of model for our subgraph isomorphism algorithm (SIP1). Given a pattern \emph{P} and a target \emph{T}, we represent each vertex \emph{v} in V(\emph{P}) as a variable that can accept one of the vertices in V(\emph{T}) as a value. The set of all possible values of \emph{v} is called the \emph{domain} of \emph{v}, \emph{domv}. It is represented as a bit array (bitset) of size equal to the order of \emph{T}, where each entry maps to a target vertex. domv[i] is equal to 1 if \emph{v} can be mapped to the i$^{th}$ vertex in V(\emph{T}), or 0 otherwise. If every bit in domv is 0, this means that no valid mapping from \emph{v} to any vertex in V(\emph{T}) exists. In such case \emph{v} has a \emph{domain wipeout}. During search, domain wipeout of \emph{v} indicates that the current partial mapping can not be a subgraph isomorphism from \emph{P} to \emph{T}. During initialization, domain wipeout of \emph{v} indicates that \emph{P} is not subgraph isomorphic to \emph{T}. Test 5 checks whether domv experiences a domain wipeout. If there exists an empty domain, the test fails and the instance does not proceed to search.
-%% todo wirte that domain wipeout is a common test
+The fifth trivial failure test is based on the choice of model for the subgraph isomorphism algorithm (SIP1). Given a pattern \emph{P} and a target \emph{T}, each vertex \emph{v} in V(\emph{P}) is represented as a variable that can accept one of the vertices in V(\emph{T}) as a value. The set of all possible values of \emph{v} is the \emph{domain} of \emph{v}, \emph{domv}. It is represented as a bit array (bitset) of size equal to the order of \emph{T}, where each entry corresponds to a target vertex. domv[i] is equal to 1 if \emph{v} can be mapped to the i$^{th}$ vertex in V(\emph{T}), or 0 otherwise. If every bit in domv is 0, then no valid mapping from \emph{v} to any vertex in V(\emph{T}) exists. In such case \emph{v} has a \emph{domain wipeout}. During search, domain wipeout of \emph{v} indicates that the current partial mapping is not a subgraph isomorphism from \emph{P} to \emph{T}, and the algorithm \emph{backtracks}. During initialization, domain wipeout of \emph{v} indicates that \emph{P} is not subgraph isomorphic to \emph{T}. Test 5 checks whether domv experiences a domain wipeout. If this is the case, the test fails and the instance does not proceed to search.
 
 \subsection{Implementation and complexity analysis}
 \label{sec:trivialFailsImplementation}
@@ -1117,7 +1083,6 @@ Algorithm \ref{algo:filters} describes the implementation of the 5 trivial failu
 Now follows a discussion about the cost of each failure test.
 Failures 1 and 2 are the fastest: each of them takes $\mathcal{O}(1)$ time to compute. For failure 1, one needs only to return the sizes of the number of vertices in \emph{P} and in \emph{T}, which is computed while initializing the graphs. For failure 2, for every graph \emph{G}, we have an array that stores all unique labels that occur in \emph{G}. The size of this array is known after the initialization of \emph{G}. To check whether test 2 is true, one needs to compare the size of the labels array of \emph{P} with the size of the labels array of \emph{T},  which takes $\mathcal{O}(1)$ time.
 
-%% todo there is something wrong on lines 4, 5 here
 Failures 3 and 4 have slower running time. Checking whether $\lambda_{P}(l)$ is bigger than $\lambda_{T}(l)$ involves iterating over all labels in L(V(\emph{P})), and for each of them checking $\lambda_{T}(l)$, which can be found in constant time by taking the size of the pre-computed LNDS(\emph{T}, \emph{l}). Therefore, the overall complexity of failure 3 is $\mathcal{O}(|L(V(\emph{P}))|)$. Algorithm \ref{algo:subsumes} shows the pseudo code of the fourth failure test, called in line 10 in Algorithm \ref{algo:filters}. Test 4 iterates over the LNDS of every label \emph{l} in L(V(\emph{P})) and checks whether LNDS (\emph{T}, \emph{l}) $\succeq$ LNDS (\emph{P}, \emph{l}) (lines 5, 6). The correctness of the implementation follows from the fact that the elements in LNDS are ordered in non-increasing order. The complexity of test 4 is therefore $\mathcal{O}$($|$L(V(\emph{P}))$|.|$LNDS (\emph{T}, \emph{l})$|$).
 
 Failure 5 visits each vertex \emph{v} in V(\emph{P}) (line 13), initializes domv (line 14) and for every \emph{w} in V(\emph{T}), checks whether \emph{w} can be mapped to \emph{v} (lines 15, 16). The complexity of this test is therefore equal to $\mathcal{O}(|V(P)|.|V(T)|)$.
@@ -1132,7 +1097,7 @@ Failure 5 visits each vertex \emph{v} in V(\emph{P}) (line 13), initializes domv
 \EndIf
 \If {$\neg$ $|L(V(T))|$ $\geq$ $|L(V(P))|$} \Return false \Comment{\textit{trivial failure 2}}
 \EndIf
-\For {\textit{l} $\in$ $|L(V(P))|$} %% todo write it with lambda
+\For {\textit{l} $\in$ $|L(V(P))|$}
 	\If {$\lambda_{P}(l)$ $>$ $\lambda_{T}(l)$} \Return false \EndIf \Comment{\textit{trivial failure 3}}
 \EndFor
 \If {$\neg$\Call{subsumes }{T, P}} \Return false \EndIf \Comment{\textit{trivial failure 4}}
@@ -1162,7 +1127,7 @@ Failure 5 visits each vertex \emph{v} in V(\emph{P}) (line 13), initializes domv
 \label{algo:subsumes}
 \begin{algorithmic}[1]
 \Procedure{subsumes }{T, P}
-\For {\textit{l} $\in$ $|L(V(P))|$} %% todo write it with lambda
+\For {\textit{l} $\in$ $|L(V(P))|$}
 	\State{B $\gets$ LNDS (P, \emph{l})}
     \State{A $\gets$ LNDS (T, \emph{l})}
     \For{i in range (0, $|A|$)}
@@ -1228,10 +1193,9 @@ In the worst case, SIP1 will assign all values from the domain of each pattern v
 \chapter{Evaluation}
 \label{ch:evaluation}
 
-This Section presents the results of the empirical analysis of Light Filters, a subgraph query processing technique described in Chapter \ref{ch:sip1}. Light Filters was run with each of the Big Data datasets, discussed in Section \ref{sec:datasets}. The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, which is the same machine used by \cite{foteini}. Run time is measured in milliseconds from when the process starts until it completes, including the time to read in all the graphs, to perform filtering and verification for each instance and to write out all results to a file.
-% todo: write about the organisation of this chapter and write that evaluation of the framework is not done, but only empirical analysis
+This Section presents the results of the empirical analysis of Light Filters (Chapter \ref{ch:sip1}). Light Filters was run with each of the Big Data datasets, discussed in Section \ref{sec:datasets}. The experiments are conducted on a Windows 7 SP1 host with 2 Intel Xeon E5-2660 CPUs (2.20GHz, 20MB Cache, 8 cores/16 threads per CPU) and 128GB of RAM, which is the same machine used by \cite{foteini}. Run time is measured in milliseconds from when the process starts until it completes, including the time to read in all the graphs, to perform filtering and verification for each instance and to write out all results to a file.
 
-This Chapter is organised as follows. First, we evaluate the filtering performance of Light Filters in Section \ref{sec:sip1filterseval}. Section \ref{sec:sip1verificationeval} analyses the hardness of the problems in the four datasets for the SIP algorithm implemented in Light Filters. Section \ref{sec:SATvsUNSAT} investigates the hardness of SAT and UNSAT SIP instances and attempts to find out which of them is more challenging for the Light Filters SIP solver. Section \ref{sec:bigDataCompare} compares Light Filters with six well-established subgraph query processing techniques, based on the filtering-verification paradigm.
+This Chapter is organised as follows. Section \ref{sec:sip1filterseval} presents the evaluation of the filtering performance of Light Filters. Section \ref{sec:sip1verificationeval} analyses the hardness of the problems in the four datasets for the SIP algorithm implemented in Light Filters. Section \ref{sec:SATvsUNSAT} investigates the hardness of SAT and UNSAT SIP instances and attempts to find out which of them is more challenging for the Light Filters SIP solver. Section \ref{sec:bigDataCompare} compares Light Filters with six well-established subgraph query processing techniques, based on the filtering-verification paradigm. Section \ref{sec:summaryEval} is a summary of the evaluation results.
 
 \section{Filtering performance}
 \label{sec:sip1filterseval}
@@ -1249,10 +1213,13 @@ Note that all SAT SIP instances had to go through verification as well as all UN
 \item 100\% of the instances in Pdbs underwent verification. Similarly, only 3.75\% of the targets were filtered in Ppigo. Most of the instances of Pdbs and Ppigo are \gls{sat} (77.22\% and 61\% respectively) and they had to go through verification to be solved. Here, a perfect filtering technique would filter no more than 22.78\% and 39\% of the instances Pdbs and Ppigo respectively. In such cases, a subgraph query processing method that puts low effort in filtering and implements an efficient verification algorithm will have much higher performance than a method that employs heavy filtering approach and naive \gls{sip} algorithm. This hypothesis is confirmed by the results of the study presented in \cite{foteini}, where some of the evaluated indexing techniques, considered as state of the art, never terminate for Pcms and Ppigo. This was also noted during the performance analysis of CT-Index in Section \ref{subsec:ctindexEval}.
 
 \item There are duplicate target graphs in the Pcms and Pdbs. For instance, Pcms is supposed to contain 200 targets \cite{datasets}. In practice, there are only 50 unique graphs and each of them is added 4 times. Pdbs is composed of 600 targets \cite{datasets}, but out of them only 30 are unique, each of them duplicated 20 times.
+
+\item Each of the four datasets can be kept in memory memory of a standard laptop without the usage of additional hardware.
+
 \end{itemize}
 
-One of the main points made above identifies the existence of a maximum bound on the effectiveness of all filtering techniques, that is the number of UNSAT instances for the given dataset. Unlike filtering, verification does not have such effectiveness limits.
-%% todo write a second main point that the datasets are crap and this is the reason why we don't make any major conclusions about the filtering performance. We make conclusions only after wecompare them with big data
+%One of the main points made above identifies the existence of a maximum bound on the effectiveness of all filtering techniques, that is the number of UNSAT instances for the given dataset. Unlike filtering, verification does not have such effectiveness limits.
+
 %%% 
 \begin{figure}
 \centering
@@ -1358,11 +1325,11 @@ As Light Filters method is evaluated only with the Big Data datasets, we can mak
 
 \section{Are UNSAT SIP instances generally harder to solve than SAT SIP instances?}
 \label{sec:SATvsUNSAT}
-The observation that the hardest instance of each dataset is UNSAT raises the following question: are \gls{unsat} \gls{sip} instances generally harder to solve than SAT SIP instances? The experiments described in this Section intend to investigate this.
+The observation that the hardest instance of each dataset is UNSAT raises the following question: are \gls{unsat} \gls{sip} instances generally harder to solve than SAT SIP instances? The experiments described in this Section investigate this.
 
-The following eight plots below break each of the plots discussed in Section \ref{subsec:hardnessVerifcNodes} (namely \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}) further down in terms of whether the SIP instances are \gls{sat} or \gls{unsat}. The blue plots represent all satisfiable SIP pairs for a dataset \emph{D}. Similarly, the red plots represent all unsatisfiable SIP instances of \emph{D}. For each \emph{D} (namely, for Aids, Pcms, Pdbs and Ppigo), the union of the blue plot (\gls{sat} \gls{sip}, left-hand side) and the red plot (\gls{unsat} \gls{sip}, right-hand side) gives the plot for the corresponding dataset discussed in Section \ref{subsec:hardnessVerifcNodes}.
+The following eight plots below break each of the plots discussed in Section \ref{subsec:hardnessVerifcNodes} (namely \ref{aidsNodes}, \ref{pcmsNodes}, \ref{pdbsNodes} and \ref{ppigoNodes}) further down in terms of whether the SIP instances are \gls{sat} or \gls{unsat}. The blue plots represent all SAT SIP pairs for a dataset \emph{D}. Similarly, the red plots represent all UNSAT SIP instances of \emph{D}. For each \emph{D} (Aids, Pcms, Pdbs and Ppigo), the union of the blue plot (\gls{sat} \gls{sip}, left-hand side) and the red plot (\gls{unsat} \gls{sip}, right-hand side) gives the plot for the corresponding dataset discussed in Section \ref{subsec:hardnessVerifcNodes}.
 
-Note that the plots on Figure \ref{fig:ppigoSatUnsat} contain only 4 bars each, i.e. the data is divided into quartiles instead of percentile. Here, each bar represents 25\% of all instances of a category (\gls{sat}/\gls{unsat}). For example, the left plot shows that the lowest quartile of the \gls{sat} \gls{sip} calls takes no more than 4 nodes to solve, as it is also true for the second quartile. We changed the percentile representation for this dataset, because the number of \gls{sat} and \gls{unsat} \gls{sip} (61 and 39 respectively, Table \ref{table:dataSAT}) instances is too small to be scaled to percentiles.
+Note that the plots on Figure \ref{fig:ppigoSatUnsat} contain only 4 bars each, i.e. the data is divided into quartiles instead of percentile. Here, each bar represents 25\% of all instances of a category (\gls{sat}/\gls{unsat}). For example, the left plot shows that the lowest quartile of the \gls{sat} \gls{sip} calls takes no more than 4 search nodes to solve, as it is also true for the second quartile. We changed the percentile representation for this dataset, because the number of \gls{sat} and \gls{unsat} \gls{sip} (61 and 39 respectively, Table \ref{table:dataSAT}) instances is too small to be scaled to percentiles.
 %%% SAT vs UNSAT in terms of search nodes
 \begin{figure}
 \centering
@@ -1421,17 +1388,16 @@ Note that the plots on Figure \ref{fig:ppigoSatUnsat} contain only 4 bars each, 
 Table \ref{table:SATUNSATnodes} presents statistics in terms of number of search nodes for \gls{sat} (blue columns) and \gls{unsat} (red columns) instances. For instance, the Table shows that for Aids, the total number of search nodes taken to solve all \gls{sat} \gls{sip} instances is 437,108, and the total number of search nodes taken to solve all \gls{unsat} \gls{sip} instances is 2,295,724. Using these Figures, we derive that the total number of search nodes taken to solve all \gls{sip} instances in Aids is the sum of those two numbers, which is equal to 2,732,832. Table \ref{table:dataSAT} also shows the number of instances and percent from each category(SAT/UNSAT). The Table tells us that the reason for the large difference in terms of search effort between SAT and UNSAT instances is that 91\% of all instances are UNSAT (almost ten times more than SAT). The two tables and the 8 figures show that:
 
 \begin{itemize}
-\item In Aids, Pcms and Ppigo, the easiest percentile of \gls{unsat} \gls{sip} instances requires less number of search nodes than the easiest percentile of \gls{sat} \gls{sip} instances. The hardest percentile of \gls{unsat} \gls{sip} takes bigger number of search nodes than the hardest percentile of \gls{sat} \gls{sip} instances.
+\item In Aids, Pcms and Ppigo, the easiest percentile of \gls{unsat} \gls{sip} instances requires less number of search nodes than the easiest percentile of \gls{sat} \gls{sip} instances. The hardest percentile of \gls{unsat} \gls{sip} takes more search nodes to be solved than the hardest percentile of \gls{sat} \gls{sip} instances.
 
-\item In Pdbs, there is a big difference in terms of search effort between SAT and UNSAT problems. For example, \gls{sat} instances are easier for every percentile of the targets (\ref{fig:pdbsSatUnsat}). The tabulated results on Figure \ref{table:SATUNSATnodes} confirm this observation. On average, SAT instances are 3 times easier than UNSAT, the SAT instances median is more than 4 times smaller than the UNSAT instances median and the number of search nodes taken to solve the hardest SAT instance (2,845) is much less than the number of search nodes taken to solve the hardest UNSAT instance (7,152).
+\item In Pdbs, there is a substantial difference in terms of search effort between SAT and UNSAT problems. For example, \gls{sat} instances are easier for every percentile of the dataset (\ref{fig:pdbsSatUnsat}). The tabulated results on Figure \ref{table:SATUNSATnodes} confirm this observation. On average, SAT instances are 3 times easier than UNSAT, the SAT instances median is more than 4 times smaller than the UNSAT instances median and the number of search nodes taken to solve the hardest SAT instance (2,845) is much less than the number of search nodes taken to solve the hardest UNSAT instance (7,152).
 
-\item Table \ref{table:SATUNSATnodes} shows that in Pdbs, the total search effort taken to solve UNSAT problems is bigger (894,260 search nodes taken in total for SAT and 854,720 search nodes in total taken for UNSAT problems). However, Table \ref{table:dataSAT} shows that \gls{sat} \gls{sip} consists of 77.22\% of all instances in Pdbs. Therefore, the large search effort of SAT SIP problems for pdbs is due to their substantially larger number compared to UNSAT problems and in practice, \gls{unsat} \gls{sip} was much more difficult to solve than \gls{sat} \gls{sip} for this dataset. This is confirmed by the average search nodes figures (the second row in Table \ref{table:SATUNSATnodes}), where a SAT instance is on average 3 times easier to solve than an UNSAT instance.
+\item Table \ref{table:SATUNSATnodes} shows that in Pdbs, UNSAT SIP instances are harder than SAT SIP instances (894,260 search nodes taken in total for SAT and 854,720 search nodes in total taken for UNSAT problems). However, Table \ref{table:dataSAT} shows that \gls{sat} \gls{sip} consists of 77.22\% of all instances in Pdbs. Therefore, the reason why large search effort spent for solving SAT SIP instances for Pdbs is that this dataset is mainly composed of SAT SIP instances. In practice, \gls{unsat} \gls{sip} instances are much harder to solve than \gls{sat} \gls{sip} instances for this dataset. This is confirmed in the second row in Table \ref{table:SATUNSATnodes}.
 
-\item Pcms is composed of mostly \gls{unsat} \gls{sip} instances (\ref{table:dataSAT}, \ref{averageFailures}). Similarly to Aids, this is the reason why the total number of search nodes for all \gls{unsat} problems is considerably larger than the number of search nodes for all \gls{sat} problems (\ref{table:SATUNSATnodes}). However, the hardest \gls{sat} problem is substantially easier than the hardest \gls{unsat}. The difference is 10,092 search nodes, where the SAT problem takes 378 search nodes to be solved (\ref{table:SATUNSATnodes}) and it is \gls{sip} (``\#32\_1CY1.cm.A.out'', ``\#1CY0.cm.A.cmap''), solved for 4 milliseconds. Average search nodes figures also show that a SAT instance is on average 5 times easier to solve than an UNSAT instance(the second row in Table \ref{table:SATUNSATnodes}).
+\item Pcms is composed of mostly \gls{unsat} \gls{sip} instances (\ref{table:dataSAT}, \ref{averageFailures}). Similarly to Aids, this is the reason why the total number of search nodes for all \gls{unsat} problems is larger than the number of search nodes for all \gls{sat} problems (\ref{table:SATUNSATnodes}). However, the hardest \gls{sat} SIP is substantially easier than the hardest \gls{unsat} SIP. The difference is 10,092 search nodes, where the SAT SIP takes 378 search nodes to be solved (\ref{table:SATUNSATnodes}) and it is \gls{sip} (``\#32\_1CY1.cm.A.out'', ``\#1CY0.cm.A.cmap''), solved for 4 milliseconds. Average search nodes figures also show that a SAT SIP instance is on average 5 times easier to solve than an UNSAT SIP instance(the second row in Table \ref{table:SATUNSATnodes}).
 
-\item 61\% of all instances in Ppigo are \gls{sat} (\ref{table:dataSAT}, \ref{averageFailures}) and this is the main reason why the total SAT SIP search effort is larger than the UNSAT SIP search effort. The average search effort displayed in Table \ref{table:SATUNSATnodes} shows that SAT and UNSAT SIP instances are similarly hard on average for this dataset.
+\item 61\% of all instances in Ppigo are \gls{sat} (\ref{table:dataSAT}, \ref{averageFailures}) and this is the main reason why the total search effort for SAT SIP is larger than the UNSAT SIP search effort. The average search effort displayed in Table \ref{table:SATUNSATnodes} shows that SAT and UNSAT SIP instances are similarly hard on average for this dataset.
 \end{itemize}
-
 
 \newcolumntype{g}{>{\columncolor{red!15}}r}
 \newcolumntype{b}{>{\columncolor{blue!15}}r}
@@ -1456,13 +1422,13 @@ Table \ref{table:SATUNSATnodes} presents statistics in terms of number of search
             \multicolumn{1}{|c|}{\textbf{Ppigo}} &714      &312       &6.932  &5.8    &6   &2   &5  &0  &30    &65 \\
             \hline
         \end{tabular}
-        \caption{Number of nodes of search effort for each dataset. Blue for solvable and red for unsolvable SIP instances}
+        \caption{Number of search nodes taken to solve the SIP instances for each dataset. Blue for SAT and red for UNSAT SIP}
         \label{table:SATUNSATnodes}
     \end{table}
 
 \section{Comparison with Big Data algorithms}
 \label{sec:bigDataCompare}
-We make a comparison of Light Filters with a selection of ``well-established'' subgraph query processing algorithms, namely CT-Index \cite{ctindex}, gCode \cite{gcode}, Grapes \cite{GRAPES}, tree+$\Delta$ \cite{tree+delta>=graph}, GGSX \cite{graphgrepsx} and gIndex \cite{freqStructBasedIndexing1}. Their evaluation is described in \cite{foteini}. All of these algorithms implement the filtering-verification framework with heavy filtering approach, using an index structure, and run \gls{sip} algorithm during verification, that is VF2 \cite{vf2} or a modification of it. The work in \cite{foteini} uses the same datasets and the same machine as us for its experiments. The comparison is made first with respect to running time and then with respect to filtering strength.
+We make a comparison of Light Filters with a selection of ``well-established'' subgraph query processing algorithms, namely CT-Index \cite{ctindex}, gCode \cite{gcode}, Grapes \cite{GRAPES}, tree+$\Delta$ \cite{tree+delta>=graph}, GGSX \cite{graphgrepsx} and gIndex \cite{freqStructBasedIndexing1}. Their evaluation is described in \cite{foteini}. All six algorithms implement the filtering-verification framework with heavy filtering approach using an index structure and run a VF2 \cite{vf2} or similar \gls{sip} algorithm for verification. The work in \cite{foteini} runs experiments using the same datasets and the same machine as us. The comparison is made first with respect to running time and then with respect to filtering strength.
 
 For Aids, the fastest of the evaluated algorithms is Grapes \cite{GRAPES}. Filtering took 8 seconds and verification- about 600 milliseconds. It took us 2,569 milliseconds for filtering (\ref{table:cpuTime}), but verification was four times slower (2,687 milliseconds). Light Filters approach has slower verification than CT-Index, but much faster filtering. The algorithms with slowest filtering and verification time, evaluated in \cite{foteini}, are gIndex and tree+$\Delta$ (15000 and 1500 seconds for filtering, 8 and 40 seconds for verification respectively \cite{foteini}). Light Filters is several times better than them on each stage. 
 
@@ -1484,10 +1450,10 @@ To make the filtering performance of Light Filters comparable with the results i
 
 First, we can deduce that formula \ref{eq:fpratio} behaves as we discussed in Section \ref{subsec:ctindexEval}. For datasets where filtering removed 0 or close to 0 instances, like Pdbs and Ppigo, the value of FP ratio depends only on the number of SAT instances in the dataset and it does not show that the filtering performed poorly. Figure \ref{averageFailures} shows that filtering removed 0 instances from the Pdbs dataset, however, the FP ratio for Pdbs shows great filtering performance of 0.23 (Table \ref{table:FPratioLightFilters}). Filtering was most successful for Aids (Figure \ref{averageFailures}), but according to Table \ref{table:FPratioLightFilters}, it is worst for Aids. This data further supports our observations in Section \ref{subsec:ctindexEval} that formula \ref{eq:fpratio}, used to evaluate the filtering power of some filtering-verification algorithms \cite{foteini}, can be used only in order to compare performance of different filtering methods, executed on the same datasets, and the FP ratio values on their own do not suggest anything accurate about the effectiveness of a given filtering algorithm. 
 
-According to the results, published in \cite{foteini}, the five simple failure tests do not perform worse than the studied filtering-verification techniques in that publication (which are considered to be ``well established indexing methods'' \cite{foteini}). For instance, the best FP ratio for Aids was obtained by tree+$\Delta$ with value 0.2 \cite{foteini} and the worst FP ratio is achieved by 3 algorithms (Grapes, CT-index, gCode) with value 0.8 \cite{foteini}. The FP ratio of Light Filters for Aids is 0.73 (Table \ref{table:FPratioLightFilters}). The best FP ratio for Pdbs in \cite{foteini} is obtained by Grapes and has the value 0.04 \cite{foteini}, the worst value is 0.3 \cite{foteini}, which is slightly worse than the FP ratio obtained by Light Filters of value 0.23 (Table \ref{table:FPratioLightFilters}). For Pcms and Ppigo, we can compare only two algorithms with Light Filters, because only they finished execution. Here, Light Filters is significantly better than the worst of the algorithms (Table \ref{table:FPratioLightFilters}), that has FP ratio equal to 0.7 \cite{foteini}, but worse compared to the best algorithm that has FP ratio equal to 0.2 \cite{foteini}. The results are similar when comparing results from the Ppigo results of \cite{foteini} and the figures in Table \ref{table:FPratioLightFilters}.
+According to the results, published in \cite{foteini}, the five simple failure tests do not perform worse than six of the best indexing methods \cite{foteini}. For instance, the best FP ratio for Aids was obtained by tree+$\Delta$ with value 0.2 \cite{foteini} and the worst FP ratio is achieved by 3 algorithms (Grapes, CT-index, gCode) with value 0.8 \cite{foteini}. The FP ratio of Light Filters for Aids is 0.73 (Table \ref{table:FPratioLightFilters}). The best FP ratio for Pdbs in \cite{foteini} is obtained by Grapes and has the value 0.04 \cite{foteini}, the worst value is 0.3 \cite{foteini}, which is slightly worse than the FP ratio obtained by Light Filters of value 0.23 (Table \ref{table:FPratioLightFilters}). For Pcms and Ppigo, we can compare only two algorithms with Light Filters, because only they finished execution. Here, Light Filters is significantly better than the worst of the algorithms (Table \ref{table:FPratioLightFilters}), that has FP ratio equal to 0.7 \cite{foteini}, but worse compared to the best algorithm that has FP ratio equal to 0.2 \cite{foteini}. The results are similar when comparing the results in \cite{foteini} with our results presented in Table \ref{table:FPratioLightFilters} for Ppigo.
 
 \begin{itemize}
-\item The comparison of the filtering methods implemented in Light Filters with six well-established filtering-verification methods \cite{foteini} using the same four datasets, shows that small, easy to compute filtering mechanisms (Light Filters) can in some cases give better filtering performance than subgraph query processing methods that employ heavy index structures. %If one looks at the running time of filtering, Light Filters beats each of the other algorithms by several orders of magnitude.
+\item The comparison of Light Filters with the filtering-verification methods in \cite{foteini} shows that small and easy to compute filtering mechanisms can give better filtering strength and are much faster than subgraph query processing methods that employ heavy index structures.
 \end{itemize}
 
 \begin{table}
@@ -1511,20 +1477,32 @@ According to the results, published in \cite{foteini}, the five simple failure t
 \end{table}
 
 %It was discovered that the Big Data datasets are of poor quality. Two of the datasets have targets that are copied multiple times each. All four datasets contain very easy \gls{sip} instances. The hardest of the datasets is pdbs. Even with the hardest dataset, a \gls{sip} instance took only 4.47 milliseconds to be solved on average. Verification for 50\% of the instances in pdbs took much less than 90 \glspl{sn}, the most expensive \gls{sip} problem costs 10,470 \glspl{sn}. Surprising finding was that the datasets can be easily kept in memory. Big Data is much smaller than what we initially expected. Beneficial future work in this area would be to develop better quality, much bigger and harder datasets. 
-   
+
+\section{Summary of findings}
+\label{sec:summaryEval}
+The evaluation of Light Filters and its comparison with a selection of six well-established filtering techniques revealed several results.
+
+We observed an existence of a maximum bound on the effectiveness of all filtering techniques, equal to the number of UNSAT SIP instances of the dataset. This has implications on the performance of subgraph query processing techniques that put main emphasis on the filtering algorithms and neglect verification. This result can be empirically observed from the results in \cite{foteini}, where it is reported that for the datasets consisting of mainly UNSAT SIP instances (Pcms, Ppigo), most of the algorithms do not finish execution for days. 
+
+Both filtering and verification techniques implemented in Light Filters are several times faster in terms of running time than other filtering-verification based approaches. Filtering is equally good or better in terms of filtering power. This shows that subgraph query processing techniques based on computationally cheap filtering and good SIP algorithm could be the future of subgraph query processing. 
+
+We investigated the difference in difficulty of solving a SIP instance, depending on whether it is SAT or UNSAT. No definite conclusion on this matter was reached. An interesting observation is that the easiest and and the hardest instance of all 4 evaluated datasets is UNSAT.
+
+It was discovered that the Big Data benchmark datasets are of questionable quality. Two of the datasets have targets that are copied multiple times each. All 4 datasets contain very easy SIP instances. All 4 datasets can be loaded into memory without the need of specialized hardware. These results put into question the performance of most of the existing filtering-verification based techniques, as the majority of them is tested with these datasets.
+
 \chapter{Conclusion and Future work}
 This Chapter presents a summary of this work. It starts by outlining the major steps carried out and what each of them suggests. The second part of the Chapter, discusses opportunities for future work, which could follow on from the project. 
 
 \section{Project Summary}
 We investigated the subgraph query processing problem and we looked at two currently existing methods to solve it: the filtering-verification paradigm, considered very effective among the area of Big Data research, and directly solving the subgraph isomorphism problem for every instance without the use of computationally expensive filtering methods before search.
 
-Well-established filtering-verification technique, called CT-Index \cite{ctindex}, and CP15 \cite{CP2015}- a new subgraph isomorphism problem algorithm that is shown to be one of the fastest, were analysed. After review of the literature, we observed that all filtering-verification based techniques are mainly focused in developing new filtering methods, while reusing the same subgraph isomorphism algorithm for verification, which was proved to be of substandard performance.
+Well-established filtering-verification technique, called CT-Index \cite{ctindex}, and CP15 \cite{CP2015}- a new subgraph isomorphism problem algorithm that is shown to be one of the fastest, were analysed. After review of the literature, it was observed that all filtering-verification based techniques are mainly focused in developing new filtering methods, while reusing the same subgraph isomorphism algorithm for verification, which was proved to be of substandard performance.
 
-We investigated the area of developing filtering methods by designing and implementing a filtering framework with two methods for filtering and candidates extraction, namely Path Index and Path-Subtree Index. Path Index follows a common feature construction algorithm and Path-Subtree Index is a new technique. Theoretical and empirical analysis showed that Path-Subtree Index prunes at least as many instances as Path Index, but has higher complexity and storage requirements than Path Index. Both techniques were shown to be effective, but too slow to be used in practice. Possible ways to lower their complexity were suggested.
+We investigated the area of developing filtering methods by designing and implementing a filtering framework with two methods for filtering and candidates extraction, namely Path Index and Path-Subtree Index. Path Index follows a common feature construction algorithm and Path-Subtree Index implements a novel technique. Theoretical and empirical analysis showed that Path-Subtree Index was strong filtering capability, which is paid by high complexity and storage requirements. PI and PSI were shown to be effective, but too slow to be used in practice. Possible ways to lower their complexity were suggested.
 
 A new subgraph query processing technique, called Light Filters, was introduced. It implements a modification of the filtering-verification paradigm that does not employ any index structure. Filtering consists of 5 simple failure tests and verification is performed by a subgraph isomorphism algorithm, based on the simplest of the Glasgow algorithms \cite{CP2015}. The empirical study of Light Filters was carried out using the same datasets and setup as in \cite{foteini}. This allowed for a comparison between Light Filters and a selection of the best existing filtering-verification techniques, evaluated in \cite{foteini}. With respect to filtering performance, the results showed that some of these techniques were outperformed by Light Filters. In terms of both filtering and verification running time, Light Filters is the fastest. Although Light Filters uses very simple filtering tests, it has better filtering strength than some of the indexing techniques it was compared with. This shows that Light Filters can be a good alternative to existing expensive filtering strategies.
 
-The 4 Big Data benchmark datasets were discovered to be of dubious quality. They contain easy instances, which puts into question the performance of all filtering-verification based algorithms, that are evaluated only with these datasets, on hard subgraph isomorphism problem instances. The datasets can also be easily kept in memory of a standard laptop without the usage of additional hardware. This shows that Aids, Pcms, Pdbs and Ppigo are not adequate representatives of Big Data datasets, nonetheless they are treated as such. It also raises the question of how Big Data filtering-verification algorithms, would behave when evaluated with bigger and more complex datasets.
+The 4 Big Data benchmark datasets were discovered to be of dubious quality. They contain easy instances, which puts into question the performance of all filtering-verification based algorithms that are evaluated only with these datasets on hard subgraph isomorphism problem instances. The datasets can also be easily kept in memory of a standard laptop without the usage of additional hardware. This shows that Aids, Pcms, Pdbs and Ppigo are not adequate representatives of Big Data datasets, nonetheless they are treated as such. It also raises the question of how Big Data filtering-verification algorithms would behave when evaluated with bigger and more complex datasets.
 
 We observed that for datasets that are composed of mainly SAT SIP instances, indexing methods are not only highly inefficient (typically never finish execution), but also bound to be of less effectiveness. For such datasets, it is better to use approaches like Light Filters that emphasize on verification and use fast and simple filtering techniques.
 
@@ -1533,15 +1511,14 @@ We observed that for datasets that are composed of mainly SAT SIP instances, ind
 We did experiments to find out whether \gls{sat} problems are generally easier than \gls{unsat} problems that were not rejected by filtering. The results vary depending on the dataset and no definite conclusion can be made. What was observed for each of the datasets is that the hardest and the easiest instances in terms of \glspl{sn} are both \gls{unsat}.  
 
 \section{Future Work}
-This work puts into question the performance of subgraph query processing methods based on the filtering-verification paradigm, mainly because of the dubious quality of the benchmarks datasets. This leads to several possible extensions of this work. %Filtering-verification based algorithms could be tested with datasets that are good representatives of the real demand of Big Data in terms of size and complexity.
-One could develop new datasets that consist of harder subgraph isomorphism problem instances. Existing work shows how to generate ``really hard'' random instances for subgraph isomorphism problem \cite{patrick:2015}. A future project could focus on creating large datasets with this methodology and then conduct experimental evaluation of filtering-verification based algorithms (including Light Filters) with these datasets. This could give better understanding of the performance of subgraph query processing methods with datasets that are possibly better representatives of the real demand of Big Data in terms of size and complexity.
+This work puts into question the performance of subgraph query processing methods based on the filtering-verification paradigm, mainly because of the dubious quality of the benchmark datasets. This leads to several possible extensions of this work. %Filtering-verification based algorithms could be tested with datasets that are good representatives of the real demand of Big Data in terms of size and complexity.
+One could develop new datasets that consist of harder subgraph isomorphism problem instances. Existing work shows how to generate ``really hard'' random instances for subgraph isomorphism problem \cite{patrick:2015}. A future project could focus on creating large datasets using this methodology and then conduct experimental evaluation of filtering-verification based algorithms (including Light Filters) with these datasets. This could give better understanding of the performance of subgraph query processing methods with datasets that are possibly better representatives of the real demand of Big Data in terms of size and complexity.
 
-Light Filters techniques were shown to be as good as, or outperform classical filtering-verification techniques in several aspects. Future extension of this work could investigate what makes the current filtering tests so effective and how to extend the filtering by adding more tests.
+Light Filters techniques were shown to outperform classical filtering-verification techniques in several aspects. Future extension of this work could investigate what makes the current filtering tests so effective and how to extend the filtering by adding more tests.
 
 The study of the hardness of SAT and UNSAT SIP instances can be extended to investigate whether filters manage to prune easy or hard instances. Future work in this direction might be able to come up with new heuristics for filtering hard UNSAT SIP instances cheaply.
 
-It was shown that the effectiveness of subgraph query processing algorithms depends on the nature of the datasets \cite{CP2015}. Future extension of this work could focus on creating a large framework that predicts the difficulty of an instance before solving it and depending on its difficulty, chooses an appropriate filtering and verification methods. There is an existing work that gives a formula how to calculate hard instances, given in \cite{Gent:1996}, and an existing work that investigates where the hard problems are \cite{Cheeseman:1991}.
-
+It was shown that the effectiveness of subgraph query processing algorithms depends on the nature of the datasets \cite{CP2015}. Future extension of this work could focus on creating a large framework that predicts the difficulty of an instance before solving it and depending on its difficulty, choose an appropriate filtering and verification methods. There is an existing work that gives a formula how to calculate hard instances, given in \cite{Gent:1996}, and an existing work that investigates where the hard problems are \cite{Cheeseman:1991}, which could be of use.
 
 %%%%%%%%%%%%%%%%%%%%
 %   BIBLIOGRAPHY   %
